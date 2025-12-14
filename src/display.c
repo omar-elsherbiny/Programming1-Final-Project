@@ -23,6 +23,8 @@ void display_init(void) {
     HEIGHT = info.srWindow.Bottom - info.srWindow.Top + 1;
     WIDTH = info.srWindow.Right - info.srWindow.Left + 1;
 
+    printf("\n%d %d\n", WIDTH, HEIGHT);
+
     printf(HIDE_CURSOR);
 }
 

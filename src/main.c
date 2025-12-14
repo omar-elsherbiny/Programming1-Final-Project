@@ -5,7 +5,7 @@
 int main(void) {
     int w, h;
 
-    printf(FG_CYAN "HelloWorld!" RESET);
+    printf(FG_CYAN BG_WHITE "HelloWorld!" RESET);
     scanf("%d %d", &w, &h);
 
     display_init();

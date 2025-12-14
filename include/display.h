@@ -19,11 +19,59 @@
 
 // Background
 #define BG_BLACK "\033[40m"
+#define BG_RED "\033[41m"
+#define BG_GREEN "\033[42m"
+#define BG_YELLOW "\033[43m"
+#define BG_BLUE "\033[44m"
+#define BG_MAGENTA "\033[45m"
+#define BG_CYAN "\033[46m"
 #define BG_WHITE "\033[47m"
 #define BG_RESET "\033[49m"
 
+#define FLIP "\033[7m"
+#define BLINK "\033[5m"
 #define BOLD "\033[1m"
 #define RESET "\033[0m"
+
+typedef enum {
+    DEFAULT,
+    TEXT,
+    DIALOGUE
+} LineType;
+
+typedef struct {
+    int maxLen;
+    _Bool hidden;
+} TextOptions;
+
+typedef struct {
+    char text[200];
+    _Bool selected;
+    LineType type;
+    union {
+        TextOptions options;
+        int value;
+    } data;
+} Line;
+
+typedef struct {
+    char title[200];
+    Line content[70];
+    char footer[200];
+} BoxContent;
+
+#define LINE_TEXT(str, maxlen, hidden)                                                \
+    {                                                                                 \
+        .text = str, .selected = 0, .type = TEXT, .data.options = {.maxLen = maxlen,  \
+                                                                   .hidden = hidden } \
+    }
+
+#define LINE_DIALOGUE(str, value) \
+    {.text = str, .selected = 0, .type = DIALOGUE, .data.value = value}
+
+// For DEFAULT lines
+#define LINE_DEFAULT(str) \
+    {.text = str, .selected = 0, .type = DEFAULT}
 
 void display_init(void);
 void display_print_box(int width, int height);
