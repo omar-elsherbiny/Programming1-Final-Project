@@ -1,12 +1,14 @@
+// functions.c
 #include "functions.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 status login(char *username,char* password){
     FILE *f=fopen("files/users.txt","r");
     status ret;
     if(f == NULL){
-        ret.status=-1;
+        ret.status=ERROR;
         strcpy(ret.message,"File users.txt not found!");
         return ret;
     }
@@ -14,12 +16,47 @@ status login(char *username,char* password){
     while(fscanf(f,"%s%s",user,pass)){
         if(!strcmp(user,username) && !strcmp(pass,password)){
             fclose(f);
-            ret.status=0;
+            ret.status=SUCCESS;
             strcpy(ret.message,"Login successful!");
             return ret;
         }
     }
-    ret.status=1;
+    ret.status=ERROR;
     strcpy(ret.message,"Username or password are incorrect!");
+    return ret;
+}
+
+account accounts[N];
+
+status load(){
+    FILE *f=fopen("files/accounts.txt","r");
+    status ret;
+    if(f == NULL){
+        ret.status=ERROR;
+        strcpy(ret.message,"File accounts.txt not found!");
+        return ret;
+    }
+    char line[7*N],ufid[N],ufname[N],ufemail[N],ufbalance[N],ufmobile[N],ufdate[N],ufstatus[N];
+    int i;
+    for(i=0;fgets(line,sizeof(line),f);i++){//copy file data into array
+        strcpy(ufid,strtok(line,","));
+        strcpy(ufname,strtok(NULL,","));
+        strcpy(ufemail,strtok(NULL,","));
+        strcpy(ufbalance,strtok(NULL,","));
+        strcpy(ufmobile,strtok(NULL,","));
+        strcpy(ufdate,strtok(NULL,","));
+        strcpy(ufstatus,strtok(NULL,","));
+        strcpy(accounts[i].name,ufid);
+        strcpy(accounts[i].name,ufname);
+        strcpy(accounts[i].mobile,ufmobile);
+        strcpy(accounts[i].email,ufemail);
+        accounts[i].balance=strtod(ufbalance,NULL);
+        accounts[i].status=(strcmp(strtok(ufstatus," "),"inactive")==0?0:1);
+        accounts[i].date_opened.month=atoi(strtok(ufdate,"-"));
+        accounts[i].date_opened.year=atoi(strtok(NULL,"-"));
+    }
+    ret.status=SUCCESS;
+    strcpy(ret.message,"Accounts loaded successfully!");
+    fclose(f);
     return ret;
 }
