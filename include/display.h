@@ -1,3 +1,4 @@
+// display.h
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
@@ -36,7 +37,8 @@
 typedef enum {
     DEFAULT,
     TEXT,
-    DIALOGUE
+    DIALOGUE,
+    INLINE
 } LineType;
 
 typedef struct {
@@ -44,9 +46,11 @@ typedef struct {
     _Bool hidden;
 } TextOptions;
 
+#define LINE_LENGTH 300
+#define LINE_COUNT 100
+
 typedef struct {
-    char text[200];
-    _Bool selected;
+    char text[LINE_LENGTH];
     LineType type;
     union {
         TextOptions options;
@@ -55,26 +59,34 @@ typedef struct {
 } Line;
 
 typedef struct {
-    char title[200];
-    Line content[70];
-    char footer[200];
+    char title[LINE_LENGTH];
+    Line content[LINE_COUNT];
+    char footer[LINE_LENGTH];
 } BoxContent;
 
-#define LINE_TEXT(str, mxln, h)                                                    \
-    {                                                                              \
-        .text = str, .selected = 0, .type = TEXT, .data.options = {.maxLen = mxln, \
-                                                                   .hidden = h }   \
+typedef struct {
+    int width, height;
+    char title[LINE_LENGTH];
+    char content[LINE_COUNT][LINE_LENGTH];
+    char footer[LINE_LENGTH];
+} DrawnBox;
+
+#define LINE_TEXT(str, mxln, h)                                     \
+    {                                                               \
+        .text = str, .type = TEXT, .data.options = {.maxLen = mxln, \
+                                                    .hidden = h }   \
     }
 
 #define LINE_DIALOGUE(str, val) \
-    {.text = str, .selected = 0, .type = DIALOGUE, .data.value = val}
+    {.text = str, .type = DIALOGUE, .data.value = val}
 
 // For DEFAULT lines
 #define LINE_DEFAULT(str) \
-    {.text = str, .selected = 0, .type = DEFAULT}
+    {.text = str, .type = DEFAULT}
 
 void display_init(void);
-void display_print_box(BoxContent *box);
+void display_draw_box(DrawnBox *box);
+void display_box_prompt(BoxContent *box);
 void display_cleanup(void);
 
 #endif
