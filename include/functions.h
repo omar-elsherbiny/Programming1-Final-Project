@@ -1,9 +1,15 @@
+// functions.h
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 #define N 200
 
+typedef enum{
+    SUCCESS,
+    ERROR
+} status_code;
+
 typedef struct{
-    int status;
+    status_code status;
     char message[N];
 } status;
 
