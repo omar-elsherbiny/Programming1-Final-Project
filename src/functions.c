@@ -10,9 +10,8 @@ status login(char *username,char* password){
         strcpy(ret.message,"File users.txt not found!");
         return ret;
     }
-    while(!feof(f)){
-        char user[N],pass[N];
-        fscanf(f,"%s%s",user,pass);
+    char user[N],pass[N];
+    while(fscanf(f,"%s%s",user,pass)){
         if(!strcmp(user,username) && !strcmp(pass,password)){
             fclose(f);
             ret.status=0;
