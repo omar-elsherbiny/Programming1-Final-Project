@@ -1,28 +1,33 @@
+This is the Layouts for the all the menus
 
 Login Menu
     ┌──────────── Login ─────────────┐
-    │                                │
     │ Username:                      │
     │ ┌────────────────────────────┐ │
     │ │ username                   │ │
     │ └────────────────────────────┘ │
-    │                                │
     │ Password:                      │
     │ ┌────────────────────────────┐ │
     │ │ ***█                       │ │
     │ └────────────────────────────┘ │
-    │                                │
-    │  Enter                         │
-    │  Quit                          │
-    │                                │
+    │ Enter                          │
+    │ Quit                           │
     └────────────────────────────────┘
 
+Error Message
+    ┌──────────── Error ─────────────┐
+    │ Invalid Username or Password   │
+    │                                │
+    │ Okay                           │
+    └────────────────────────────────┘
+____________________________________________________________________
+
 Commands Menu
-    ┌────────────────────────────────┐
-    │            Commands            │
+    ┌─────────── Commands ───────────┐
     │ Manage Accounts:               │
     │   Add a new Account            │
     │   Delete an Existing Account   │
+    │   Modify an Existing Account   │
     │   Search an Account            │
     │   Advanced Searching           │
     │   Change an Account Status     │
@@ -37,7 +42,159 @@ Commands Menu
     │    Print all Accounts          │
     │                                │
     │  Logout                        │
+    └────────────────────────────────┘
+____________________________________________________________________
+
+Add Accounts
+    ┌────────── Add Account ─────────┐
+    │ Account Number:                │
+    │ ┌────────────────────────────┐ │
+    │ │ 676767                     │ │
+    │ └────────────────────────────┘ │
+    │ Name:                          │
+    │ ┌────────────────────────────┐ │
+    │ │ Rick Astley                │ │
+    │ └────────────────────────────┘ │
+    │ E-mail:                        │
+    │ ┌────────────────────────────┐ │
+    │ │ rick.astley@email.com      │ │
+    │ └────────────────────────────┘ │
+    │ Balance:                       │
+    │ ┌────────────────────────────┐ │
+    │ │ 1,000,000,000          ($) │ │
+    │ └────────────────────────────┘ │
+    │ Mobile:                        │
+    │ ┌────────────────────────────┐ │
+    │ │ +67 6767 676767            │ │
+    │ └────────────────────────────┘ |
+    | Add                            |
+    | Discard                        |
+    └────────────────────────────────┘
+
+Confirm Message
+    ┌───────── Confirm Add ──────────┐
+    │ Are you sure you want to add   │
+    │ this account                   │
     │                                │
+    │ Yes                            │
+    │ No                             │
+    └────────────────────────────────┘
+
+Error Message
+    ┌──────────── Error ─────────────┐
+    │ Account Number is not Unique   │
+    │                                │
+    │ Okay                           │
+    └────────────────────────────────┘
+
+    ┌──────────── Error ─────────────┐
+    │ Invalid Phone Number           │
+    │                                │
+    │ Okay                           │
+    └────────────────────────────────┘
+
+Delete Accounts
+    ┌──────── Delete Account ────────┐
+    │ Account Number:                │
+    │ ┌────────────────────────────┐ │
+    │ │ 676767                     │ │
+    │ └────────────────────────────┘ │
+    | Delete                         |
+    | Discard                        |
     └────────────────────────────────┘
 
 
+Confirm Message
+    ┌──────── Confirm Delete ────────┐
+    │ Are you sure you want to       │
+    │ delete this account            │
+    │                                │
+    │ Yes                            │
+    │ No                             │
+    └────────────────────────────────┘
+
+Error Message
+    ┌──────────── Error ─────────────┐
+    │ Account is not Zeroed          │
+    │ You may only delete Accounts   |
+    │ whose balance is zero $        │
+    │                                │
+    │ Okay                           │
+    └────────────────────────────────┘
+
+    ┌──────────── Error ─────────────┐
+    │ Account does not Exist         │
+    │                                │
+    │ Okay                           │
+    └────────────────────────────────┘
+
+Modify Accounts
+    ┌──────── Modify Account ────────┐
+    │ Account Number:                │
+    │ ┌────────────────────────────┐ │
+    │ │ 676767                     │ │
+    │ └────────────────────────────┘ │
+    | Find                           |
+    | Back                           |
+    └────────────────────────────────┘
+
+    ┌──────── Modify Account ────────┐
+    │ Name:                          │
+    │ ┌────────────────────────────┐ │
+    │ │ Rick Astley                │ │
+    │ └────────────────────────────┘ │
+    │ E-mail:                        │
+    │ ┌────────────────────────────┐ │
+    │ │ rick.astley@email.com      │ │
+    │ └────────────────────────────┘ │
+    │ Mobile:                        │
+    │ ┌────────────────────────────┐ │
+    │ │ +67 6767 676767            │ │
+    │ └────────────────────────────┘ |
+    | Modify                         |
+    | Discard                        |
+    └────────────────────────────────┘
+
+Confirm Message
+    ┌──────── Confirm Modify ────────┐
+    │ Are you sure you want to       │
+    │ modify this account            │
+    │                                │
+    │ Yes                            │
+    │ No                             │
+    └────────────────────────────────┘
+
+Error Message
+    ┌──────────── Error ─────────────┐
+    │ Account does not Exist         │
+    │                                │
+    │ Okay                           │
+    └────────────────────────────────┘
+
+Search Accounts
+    ┌──────── Search Account ────────┐
+    │ Account Number:                │
+    │ ┌────────────────────────────┐ │
+    │ │ 676767                     │ │
+    │ └────────────────────────────┘ │
+    | Find                           |
+    | Discard                        |
+    └────────────────────────────────┘
+
+    ┌──────── Search Account ────────┐
+    │ Account #: 676767              │
+    │ Name: Rick Astley              │
+    │ E-mail: rick.astley@email.com  │
+    │ Mobile: +67 6767 676767        │
+    │ Date Opened: February 2007     │
+    │ Status: active                 │
+    │                                │
+    | Back                           |
+    └────────────────────────────────┘
+
+Error Message
+    ┌──────────── Error ─────────────┐
+    │ Account does not Exist         │
+    │                                │
+    │ Okay                           │
+    └────────────────────────────────┘
