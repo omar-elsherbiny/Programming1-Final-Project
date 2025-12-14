@@ -1,12 +1,13 @@
 // functions.c
 #include "functions.h"
+#include "helper.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
-status login(char *username,char* password){
+Status login(char *username,char* password){
     FILE *f=fopen("files/users.txt","r");
-    status ret;
+    Status ret;
     if(f == NULL){
         ret.status=ERROR;
         strcpy(ret.message,"File users.txt not found!");
@@ -26,11 +27,11 @@ status login(char *username,char* password){
     return ret;
 }
 
-account accounts[N];
+Account accounts[N];
 
-status load(){
+Status load(){
     FILE *f=fopen("files/accounts.txt","r");
-    status ret;
+    Status ret;
     if(f == NULL){
         ret.status=ERROR;
         strcpy(ret.message,"File accounts.txt not found!");
@@ -52,8 +53,8 @@ status load(){
         strcpy(accounts[i].email,ufemail);
         accounts[i].balance=strtod(ufbalance,NULL);
         accounts[i].status=(strcmp(strtok(ufstatus," "),"inactive")==0?0:1);
-        accounts[i].date_opened.month=atoi(strtok(ufdate,"-"));
-        accounts[i].date_opened.year=atoi(strtok(NULL,"-"));
+        accounts[i].date.month=atoi(strtok(ufdate,"-"));
+        accounts[i].date.year=atoi(strtok(NULL,"-"));
     }
     ret.status=SUCCESS;
     strcpy(ret.message,"Accounts loaded successfully!");
