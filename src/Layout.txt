@@ -90,6 +90,14 @@ Error Message
 
 Delete Accounts
     ┌──────── Delete Account ────────┐
+    │ ┌ Delete Option ─────────────┐ │
+    │ │ One with an Account number │ │
+    │ │ Multiple with a criteria   │ │
+    │ └────────────────────────────┘ │
+    |                                |
+    | Discard                        |
+    └────────────────────────────────┘
+    ┌──────── Delete Account ────────┐
     │ ┌ Account Number ────────────┐ │
     │ │ 6767676767                 │ │
     │ └────────────────────────────┘ │
@@ -97,12 +105,47 @@ Delete Accounts
     | Delete                         |
     | Discard                        |
     └────────────────────────────────┘
-
+    ┌──────── Delete Account ────────┐
+    │ ┌ Multiple criteria ─────────┐ │
+    │ │ Accounts created on a Date │ │
+    │ │ Accounts inactive 90 days  │ │
+    │ └────────────────────────────┘ │
+    │                                │
+    | Delete                         |
+    | Discard                        |
+    └────────────────────────────────┘
+    ┌──────── Delete Account ────────┐
+    │ Delete all accounts created on │
+    │ the given date below           │
+    │ ┌ Date ─────┐                  │
+    │ │ 14 / 2025 │                  │
+    │ └───────────┘                  │
+    │                                │
+    | Delete                         |
+    | Discard                        |
+    └────────────────────────────────┘
 
 Confirm Message
     ┌──────── Confirm Delete ────────┐
     │ Are you sure you want to       │
     │ delete this account?           │
+    │                                │
+    │ Yes                            │
+    │ No                             │
+    └────────────────────────────────┘
+    ┌──────── Confirm Delete ────────┐
+    │ Are you sure you want to       │
+    │ delete all accounts from       │
+    │ 12/2025?                       │
+    │                                │
+    │ Yes                            │
+    │ No                             │
+    └────────────────────────────────┘
+    ┌──────── Confirm Delete ────────┐
+    │ Are you sure you want to       │
+    │ delete all  accounts that were │
+    │ inactive for 90 days with a    │
+    │ balance of $0                  │
     │                                │
     │ Yes                            │
     │ No                             │
