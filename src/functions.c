@@ -4,9 +4,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-status login(char *username,char* password){
+Status login(char *username,char* password){
     FILE *f=fopen("files/users.txt","r");
-    status ret;
+    Status ret;
     if(f == NULL){
         ret.status=ERROR;
         strcpy(ret.message,"File users.txt not found!");
@@ -26,11 +26,11 @@ status login(char *username,char* password){
     return ret;
 }
 
-account accounts[N];
+Account accounts[N];
 
-status load(){
+Status load(){
     FILE *f=fopen("files/accounts.txt","r");
-    status ret;
+    Status ret;
     if(f == NULL){
         ret.status=ERROR;
         strcpy(ret.message,"File accounts.txt not found!");
