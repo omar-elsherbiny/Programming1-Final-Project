@@ -14,6 +14,14 @@ Login Menu
     │ Quit                           │
     └────────────────────────────────┘
 
+Quit Menu
+    ┌───────────── Quit ─────────────┐
+    │ Are you sure you want to quit? │
+    │                                │
+    │ Yes                            │
+    │ No                             │
+    └────────────────────────────────┘
+
 Error Message
     ┌──────────── Error ─────────────┐
     │ Invalid Username or Password   │
@@ -38,10 +46,10 @@ Commands Menu
     │   Transfer to an Account       │
     │                                │
     │ Others:                        │
-    │   Report last 5 transactions   │
+    │   Report last transactions     │
     │   Print all Accounts           │
     │                                │
-    │  Logout                        │
+    │ Logout                         │
     └────────────────────────────────┘
 ____________________________________________________________________
 
@@ -117,9 +125,9 @@ Delete Accounts
     ┌──────── Delete Account ────────┐
     │ Delete all accounts created on │
     │ the given date below           │
-    │ ┌ Date ─────┐                  │
-    │ │ 14 / 2025 │                  │
-    │ └───────────┘                  │
+    │       ┌ Month ┐ ┌ Year ┐       │
+    │       │  12   │ │ 2025 │       │
+    │       └───────┘ └──────┘       │
     │                                │
     | Delete                         |
     | Discard                        |
@@ -136,7 +144,7 @@ Confirm Message
     ┌──────── Confirm Delete ────────┐
     │ Are you sure you want to       │
     │ delete all accounts from       │
-    │ 12/2025?                       │
+    │ December 2025?                 │
     │                                │
     │ Yes                            │
     │ No                             │
@@ -318,7 +326,7 @@ Withdraw
     └────────────────────────────────┘
     ┌─────────── Withdraw ───────────┐
     │ ┌ Withdraw Amount: ──────────┐ │
-    │ │ 50,000                 ($) │ │
+    │ │ 10,000                 ($) │ │
     │ └────────────────────────────┘ │
     │ (Max $10,000 per transaction)  │
     │                                │
@@ -357,6 +365,12 @@ Error Message
     │                                │
     │ Okay                           │
     └────────────────────────────────┘
+    ┌──────────── Error ─────────────┐
+    │ Amount exceeds the account     │
+    │ balance ($52,314)              │
+    │                                │
+    │ Okay                           │
+    └────────────────────────────────┘
 
 Successes Message
     ┌────────── Successes ───────────┐
@@ -377,7 +391,7 @@ Deposit
     └────────────────────────────────┘
     ┌──────────── Deposit ───────────┐
     │ ┌ Deposit Amount: ───────────┐ │
-    │ │ 50,000                 ($) │ │
+    │ │ 9,000                  ($) │ │
     │ └────────────────────────────┘ │
     │ (Max $10,000 per transaction)  │
     │                                │
@@ -427,7 +441,7 @@ Transfer
     └────────────────────────────────┘
     ┌─────────── Transfer ───────────┐
     │ ┌ Transfer Amount ───────────┐ │
-    │ │ 50,000                 ($) │ │
+    │ │ 5,000                  ($) │ │
     │ └────────────────────────────┘ │
     │ (Max $10,000 per transaction)  │
     │                                │
@@ -485,4 +499,73 @@ Successes Message
     │ successfully                   │
     │                                │
     │ Okay                           │
+    └────────────────────────────────┘
+
+Report
+    ┌──────────── Report ────────────┐
+    │ ┌ Account Number ────────────┐ │
+    │ │ 6767676767                 │ │
+    │ └────────────────────────────┘ │
+    │                                │
+    | Find                           |
+    | Back                           |
+    └────────────────────────────────┘
+    ┌──────────── Report ────────────┐
+    │ ↑...                           |
+    │ Amount: -$10,000               │
+    │ Transaction type: Withdraw     │
+    │ Date: 12 / 12 / 2025           │
+    │                                │
+    │ Amount: +$9,000                │
+    │ Transaction type: Deposit      │
+    │ Date: 13 / 12 / 2025           │
+    │                                │
+    │ Amount: -$10,000               │
+    │ Transaction type: Transfer     │
+    │ Date: 15 / 12 / 2025           │
+    │                                │
+    │ Amount: +$2,000                │
+    │ Transaction type: Transfer     │
+    │ Date: 20 / 12 / 2025           │
+    │                                │
+    │ Amount: -$5,000                │
+    │ Transaction type: Withdraw     │
+    │ Date: 24 / 12 / 2025           │
+    │ ↓...                           │
+    │                                │
+    | Back       ← Previous | Next → |
+    └────────────────────────────────┘
+
+Printing 
+    ┌──────── Print Accounts ────────┐
+    │ Choose how you want the        │
+    │ printing be sorted by          │
+    │                                │
+    │ ┌ Sort by ───────────────────┐ │
+    │ │ ( ) Name                   │ │
+    │ │ (x) Balance                │ │
+    │ │ ( ) Date Opened            │ │
+    │ └────────────────────────────┘ |
+    │                                │
+    | Print                          |
+    | Back                           |
+    └────────────────────────────────┘
+    ┌──────────── Report ────────────┐
+    │ ↑...                           |
+    │ Account #: 6767676767          │
+    │ Name: Rick Astley              │
+    │ E-mail: rick.astley@email.com  │
+    │ Mobile: +67 6767 676767        │
+    │ Date Opened: February 2007     │
+    │ Status: active                 │
+    │                                │
+    │ Account #: 0101010101          │
+    │ Name: Hatsune Miku             │
+    │ E-mail: miku.uwu@gmail.com     │
+    │ Mobile: +01 01001 11001        │
+    │ Date Opened: August 2007       │
+    │ Status: active                 │
+    │ ↓...                           │
+    │                                │
+    | Back       ← Previous | Next → |
     └────────────────────────────────┘
