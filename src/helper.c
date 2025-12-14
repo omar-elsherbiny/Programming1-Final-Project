@@ -38,8 +38,8 @@ int cmp_accounts(Account a,Account b,Sort_method method){
 void account_merge_sort(Account accounts[],int l,int r,Sort_method method){
     if(l<r){
         int mid=l+(r-l)/2,i;
-        account_merge_sort(accounts,l,mid);
-        account_merge_sort(accounts,mid+1,r);
+        account_merge_sort(accounts,l,mid,method);
+        account_merge_sort(accounts,mid+1,r,method);
         Account la[mid-l+1],ra[r-mid];
         for(i=0;i<mid-l+1;i++){
             la[i]=accounts[l+i];

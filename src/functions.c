@@ -1,5 +1,6 @@
 // functions.c
 #include "functions.h"
+#include "helper.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -52,8 +53,8 @@ Status load(){
         strcpy(accounts[i].email,ufemail);
         accounts[i].balance=strtod(ufbalance,NULL);
         accounts[i].status=(strcmp(strtok(ufstatus," "),"inactive")==0?0:1);
-        accounts[i].date_opened.month=atoi(strtok(ufdate,"-"));
-        accounts[i].date_opened.year=atoi(strtok(NULL,"-"));
+        accounts[i].date.month=atoi(strtok(ufdate,"-"));
+        accounts[i].date.year=atoi(strtok(NULL,"-"));
     }
     ret.status=SUCCESS;
     strcpy(ret.message,"Accounts loaded successfully!");

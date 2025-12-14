@@ -25,8 +25,8 @@ typedef struct{
 } Date;
 
 typedef struct{
-    int id,status;
-    char name[N],mobile[15],email[N];
+    int status;
+    char id[20],name[N],mobile[15],email[N];
     double balance;
     Date date;
     
