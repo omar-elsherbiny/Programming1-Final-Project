@@ -250,7 +250,7 @@ Advanced Searching
     | Discard                        |
     └────────────────────────────────┘
     ┌──────── Search Account ────────┐
-    │ ↑...                           │
+    │ ↑ ...                          │
     │ Account #: 6767676767          │
     │ Name: Rick Astley              │
     │ E-mail: rick.astley@email.com  │
@@ -264,9 +264,9 @@ Advanced Searching
     │ Mobile: +01 01001 11001        │
     │ Date Opened: August 2007       │
     │ Status: active                 │
-    │ ↓...                           │
+    │ ↓ ...                          │
     │                                │
-    | Back       ← Previous | Next → |
+    | Back                           |
     └────────────────────────────────┘
 
 Error Message
@@ -511,7 +511,7 @@ Report
     | Back                           |
     └────────────────────────────────┘
     ┌──────────── Report ────────────┐
-    │ ↑...                           |
+    │ ↑ ...                          |
     │ Amount: -$10,000               │
     │ Transaction type: Withdraw     │
     │ Date: 12 / 12 / 2025           │
@@ -531,9 +531,9 @@ Report
     │ Amount: -$5,000                │
     │ Transaction type: Withdraw     │
     │ Date: 24 / 12 / 2025           │
-    │ ↓...                           │
+    │ ↓ ...                          │
     │                                │
-    | Back       ← Previous | Next → |
+    | Back                           |
     └────────────────────────────────┘
 
 Printing 
@@ -551,7 +551,7 @@ Printing
     | Back                           |
     └────────────────────────────────┘
     ┌──────────── Report ────────────┐
-    │ ↑...                           |
+    │ ↑ ...                          |
     │ Account #: 6767676767          │
     │ Name: Rick Astley              │
     │ E-mail: rick.astley@email.com  │
@@ -565,7 +565,7 @@ Printing
     │ Mobile: +01 01001 11001        │
     │ Date Opened: August 2007       │
     │ Status: active                 │
-    │ ↓...                           │
+    │ ↓ ...                          │
     │                                │
-    | Back       ← Previous | Next → |
+    | Back                           |
     └────────────────────────────────┘
