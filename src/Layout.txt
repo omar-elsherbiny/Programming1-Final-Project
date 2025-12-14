@@ -1,0 +1,43 @@
+
+Login Menu
+    ┌──────────── Login ─────────────┐
+    │                                │
+    │ Username:                      │
+    │ ┌────────────────────────────┐ │
+    │ │ username                   │ │
+    │ └────────────────────────────┘ │
+    │                                │
+    │ Password:                      │
+    │ ┌────────────────────────────┐ │
+    │ │ ***█                       │ │
+    │ └────────────────────────────┘ │
+    │                                │
+    │  Enter                         │
+    │  Quit                          │
+    │                                │
+    └────────────────────────────────┘
+
+Commands Menu
+    ┌────────────────────────────────┐
+    │            Commands            │
+    │ Manage Accounts:               │
+    │   Add a new Account            │
+    │   Delete an Existing Account   │
+    │   Search an Account            │
+    │   Advanced Searching           │
+    │   Change an Account Status     │
+    │                                │
+    │ Transactions:                  │
+    │   Withdraw from an Account     │
+    │   Deposit to an Account        │
+    │   Transfer to an Account       │
+    │                                │
+    │  Others:                       │
+    │    Report last 5 transactions  │
+    │    Print all Accounts          │
+    │                                │
+    │  Logout                        │
+    │                                │
+    └────────────────────────────────┘
+
+
