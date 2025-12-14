@@ -60,21 +60,21 @@ typedef struct {
     char footer[200];
 } BoxContent;
 
-#define LINE_TEXT(str, maxlen, hidden)                                                \
-    {                                                                                 \
-        .text = str, .selected = 0, .type = TEXT, .data.options = {.maxLen = maxlen,  \
-                                                                   .hidden = hidden } \
+#define LINE_TEXT(str, mxln, h)                                                    \
+    {                                                                              \
+        .text = str, .selected = 0, .type = TEXT, .data.options = {.maxLen = mxln, \
+                                                                   .hidden = h }   \
     }
 
-#define LINE_DIALOGUE(str, value) \
-    {.text = str, .selected = 0, .type = DIALOGUE, .data.value = value}
+#define LINE_DIALOGUE(str, val) \
+    {.text = str, .selected = 0, .type = DIALOGUE, .data.value = val}
 
 // For DEFAULT lines
 #define LINE_DEFAULT(str) \
     {.text = str, .selected = 0, .type = DEFAULT}
 
 void display_init(void);
-void display_print_box(int width, int height);
+void display_print_box(BoxContent *box);
 void display_cleanup(void);
 
 #endif
