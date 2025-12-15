@@ -450,10 +450,10 @@ Status transfer(char *idFrom,char *idTo,double amount){
     }
     fclose(accountToFile);
     accountFromFile=fopen(strcat(idFrom,".txt"),"a");
-    fprintf(accountFromFile,"%s,transfer,-%.2f,%d-%d-%d\n",idFrom,amount,get_today().day,get_today().month,get_today().year);
+    fprintf(accountFromFile,"%s,transfer,-%.2f,%d-%d-%d,%s\n",idFrom,amount,get_today().day,get_today().month,get_today().year,idTo);
     fclose(accountFromFile);
     accountToFile=fopen(strcat(idTo,".txt"),"a");
-    fprintf(accountToFile,"%s,transfer,%.2f,%d-%d-%d\n",idTo,amount,get_today().day,get_today().month,get_today().year);
+    fprintf(accountToFile,"%s,transfer,%.2f,%d-%d-%d,%s\n",idTo,amount,get_today().day,get_today().month,get_today().year,idFrom);
     fclose(accountToFile);
     accounts[idxTo].balance+=amount;
     accounts[idxFrom].balance-=amount;
