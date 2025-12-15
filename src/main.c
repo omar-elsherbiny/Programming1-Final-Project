@@ -6,7 +6,7 @@
 #include "menus.h"
 
 int main(void) {
-    printf(FG_CYAN BG_WHITE "HelloWorld!" RESET);
+    printf(FG_CYAN BG_WHITE "HelloWorld!\n" RESET);
 
     display_init();
 
@@ -22,12 +22,12 @@ int main(void) {
     BoxContent boxB = {
         .title = "Search Account",
         .content = {
-            LINE_DEFAULT(" Account Number: "),
-            LINE_DEFAULT(" ┌────────────────────────────┐ "),
-            LINE_TEXT(" │ %s │ ", 20, 0),
-            LINE_DEFAULT(" └────────────────────────────┘ "),
-            LINE_DIALOGUE(" Find", 0),
-            LINE_DIALOGUE(" Discard", 1)}};
+            LINE_DEFAULT("Account Number: "),
+            LINE_DEFAULT("┌────────────────────────────┐"),
+            LINE_TEXT("│ %s │ ", 20, 0),
+            LINE_DEFAULT("└────────────────────────────┘"),
+            LINE_DIALOGUE("Find", 0),
+            LINE_DIALOGUE("Discard", 1)}};
 
     DrawnBox boxC = {
         .width = 30,
@@ -45,9 +45,8 @@ int main(void) {
             FG_RED "Quit",
         }};
 
-    display_draw_box(&boxC);
-
-    getchar();
+    // display_draw_box(boxC);
+    display_box_prompt(&boxB);
 
     display_cleanup();
     return 0;

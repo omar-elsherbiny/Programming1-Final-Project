@@ -34,11 +34,15 @@
 #define BOLD "\033[1m"
 #define RESET "\033[0m"
 
+#define K_ESC 27
+#define K_UP 72
+#define K_DOWN 80
+#define K_ENTER 13
+
 typedef enum {
     DEFAULT,
     TEXT,
     DIALOGUE,
-    INLINE
 } LineType;
 
 typedef struct {
@@ -71,6 +75,12 @@ typedef struct {
     char footer[LINE_LENGTH];
 } DrawnBox;
 
+typedef struct {
+    int textInputCount;
+    char **textInputs;
+    int dialogueValue;
+} PromptInputs;
+
 #define LINE_TEXT(str, mxln, h)                                     \
     {                                                               \
         .text = str, .type = TEXT, .data.options = {.maxLen = mxln, \
@@ -86,7 +96,7 @@ typedef struct {
 
 void display_init(void);
 void display_draw_box(DrawnBox *box);
-void display_box_prompt(BoxContent *box);
+PromptInputs display_box_prompt(BoxContent *box);
 void display_cleanup(void);
 
 #endif
