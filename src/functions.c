@@ -28,7 +28,7 @@ Status login(char *username,char* password){
 }
 
 Account accounts[N];
-int account_cnt;
+int accountCnt;
 
 Status load(){
     FILE *f=fopen("files/accounts.txt","r");
@@ -40,7 +40,7 @@ Status load(){
     }
     char line[7*N],ufid[N],ufname[N],ufemail[N],ufbalance[N],ufmobile[N],ufdate[N],ufstatus[N];
     int i;
-    account_cnt=0;
+    accountCnt=0;
     for(i=0;fgets(line,sizeof(line),f);i++){//copy file data into array
         //splitting the line
         strcpy(ufid,strtok(line,","));
@@ -59,7 +59,16 @@ Status load(){
         accounts[i].status=(strcmp(strtok(ufstatus," "),"inactive")==0?0:1);
         accounts[i].date.month=atoi(strtok(ufdate,"-"));
         accounts[i].date.year=atoi(strtok(NULL,"-"));
-        account_cnt++;
+        accounts[i].inactivity.month=atoi(strtok(ufdate,"-"));
+        accounts[i].inactivity.year=atoi(strtok(NULL,"-"));
+        //check if account transaction file exists, if not creates it
+        FILE *accountFile=fopen(strcat(accounts[i].id,".txt"),"r");
+        if(accountFile==NULL){
+            FILE *createAccountFile=fopen(strcat(accounts[i].id,".txt"),"W");
+            fclose(createAccountFile);
+        }
+        fclose(accountFile);
+        accountCnt++;
     }
     ret.status=SUCCESS;
     strcpy(ret.message,"Accounts loaded successfully!");
@@ -69,8 +78,8 @@ Status load(){
 
 AccountResult query(char *id){
     AccountResult ret;
-    account_merge_sort(accounts,0,account_cnt,ID);
-    int s=0,e=account_cnt,mid;
+    account_merge_sort(accounts,0,accountCnt,ID);
+    int s=0,e=accountCnt,mid;
     // binary search for account
     while(s<e){
         mid=(s+e)/2;
@@ -98,7 +107,7 @@ AccountResult advanced_search(char *keyword){
     AccountResult ret;
     ret.n=0;
     int i;
-    for(i=0;i<account_cnt;i++){
+    for(i=0;i<accountCnt;i++){
         if(strstr(accounts[i].name,keyword)!=NULL){
             ret.status.status=SUCCESS;
             strcpy(ret.status.message,"Account(s) with keyword found successfully!");
@@ -114,7 +123,7 @@ AccountResult advanced_search(char *keyword){
 Status add(Account acc){
     int i;
     Status ret;
-    for(i=0;i<account_cnt;i++){
+    for(i=0;i<accountCnt;i++){
         if(!strcmp(acc.id,accounts[i].id)){
             ret.status=ERROR;
             strcpy(ret.message,"Account number is not unique!");
@@ -129,10 +138,10 @@ Status add(Account acc){
     }
     fclose(f);
     f=fopen("files/accounts.txt","a");
-    accounts[account_cnt]=acc;
+    accounts[accountCnt]=acc;
     fprintf(f,"%s,%s,%s,%.2f,%s,%d-%d, %s\n",acc.id,acc.name,acc.email,acc.balance,acc.mobile,acc.date.month,acc.date.year,(acc.status?"active":"inactive"));
     fclose(f);
-    account_cnt++;
+    accountCnt++;
     ret.status=SUCCESS;
     strcpy(ret.message,"Account added successfully!");
     return ret;
@@ -148,7 +157,7 @@ Status delete(char *id){
         return ret;
     }
     fclose(f);
-    for(i=0;i<account_cnt;i++){
+    for(i=0;i<accountCnt;i++){
         if(!strcmp(id,accounts[i].id)){
             found=1;
         }
@@ -160,7 +169,7 @@ Status delete(char *id){
     }
     //account found and file exists
     found=0;
-    for(i=0;i<account_cnt;i++){
+    for(i=0;i<accountCnt;i++){
         if(!found){
             if(!strcmp(id,accounts[i].id)){
                 found=1;
@@ -170,9 +179,9 @@ Status delete(char *id){
             accounts[i-1]=accounts[i];
         }
     }
-    account_cnt--;
+    accountCnt--;
     f=fopen("files/accounts.txt","w");
-    for(i=0;i<account_cnt;i++){
+    for(i=0;i<accountCnt;i++){
         fprintf(f,"%s,%s,%s,%.2f,%s,%d-%d, %s\n",accounts[i].id,accounts[i].name,accounts[i].email,accounts[i].balance,accounts[i].mobile,accounts[i].date.month,accounts[i].date.year,(accounts[i].status?"active":"inactive"));
     }
     fclose(f);
@@ -191,7 +200,7 @@ Status modify(char *id,char *name,char *mobile,char *email){
         return ret;
     }
     fclose(f);
-    for(i=0;i<account_cnt;i++){
+    for(i=0;i<accountCnt;i++){
         if(!strcmp(id,accounts[i].id)){
             found=1;
         }
@@ -202,7 +211,7 @@ Status modify(char *id,char *name,char *mobile,char *email){
         return ret;
     }
     //account found and file exists
-    for(i=0;i<account_cnt;i++){
+    for(i=0;i<accountCnt;i++){
         if(!strcmp(id,accounts[i].id)){
             strcpy(accounts[i].name,name);
             strcpy(accounts[i].mobile,mobile);
@@ -210,7 +219,7 @@ Status modify(char *id,char *name,char *mobile,char *email){
         }
     }
     f=fopen("files/accounts.txt","w");
-    for(i=0;i<account_cnt;i++){
+    for(i=0;i<accountCnt;i++){
         fprintf(f,"%s,%s,%s,%.2f,%s,%d-%d, %s\n",accounts[i].id,accounts[i].name,accounts[i].email,accounts[i].balance,accounts[i].mobile,accounts[i].date.month,accounts[i].date.year,(accounts[i].status?"active":"inactive"));
     }
     fclose(f);

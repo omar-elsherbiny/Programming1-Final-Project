@@ -29,7 +29,7 @@ typedef struct{
     char id[20],name[N],mobile[15],email[N];
     double balance;
     Date date;
-    
+    Date inactivity;
 } Account;
 
 //result of query, advanced search, print (account packaging)
