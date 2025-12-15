@@ -25,7 +25,7 @@ typedef struct{
 } Date;
 
 typedef struct{
-    int status;
+    int status;//inactive 0, active 1
     char id[20],name[N],mobile[15],email[N];
     double balance;
     Date date;
@@ -35,7 +35,10 @@ typedef struct{
 //result of query, advanced search, print (account packaging)
 typedef struct{
     Status status;
-    int n;
+    int n;//number of accounts in package
     Account accounts[N];
 } Account_result;
+
+int cmp_accounts(Account a,Account b,Sort_method method);
+void account_merge_sort(Account accounts[],int l,int r,Sort_method method);
 #endif
