@@ -314,6 +314,9 @@ Status withdraw(char *id,double amount){
             save();
         }
     }
+    ret.status=SUCCESS;
+    strcpy(ret.message,"Withdrawal completed successfully!");
+    return ret;
 }
 
 void save(){
