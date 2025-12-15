@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-int cmp_accounts(Account a,Account b,Sort_method method){
+int cmp_accounts(Account a,Account b,SortMethod method){
     if(method == ID){
         return strcmp(a.id,b.id);
     }
@@ -35,7 +35,7 @@ int cmp_accounts(Account a,Account b,Sort_method method){
     }
 }
 
-void account_merge_sort(Account accounts[],int l,int r,Sort_method method){
+void account_merge_sort(Account accounts[],int l,int r,SortMethod method){
     if(l<r){
         int mid=l+(r-l)/2,i;
         account_merge_sort(accounts,l,mid,method);
