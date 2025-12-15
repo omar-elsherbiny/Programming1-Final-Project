@@ -12,7 +12,8 @@ typedef enum{
     ID,
     NAME,
     BALANCE,
-    DATE
+    DATE,
+    STATUS
 } SortMethod;
 
 typedef struct{

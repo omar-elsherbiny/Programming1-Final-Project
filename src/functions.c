@@ -105,6 +105,7 @@ AccountResult query(char *id){
 
 AccountResult advanced_search(char *keyword){
     AccountResult ret;
+    account_merge_sort(accounts,0,accountCnt,ID);
     ret.n=0;
     int i;
     for(i=0;i<accountCnt;i++){
@@ -115,8 +116,10 @@ AccountResult advanced_search(char *keyword){
             ret.n++;
         }
     }
-    ret.status.status=ERROR;
-    strcpy(ret.status.message,"No account with keyword found!");
+    if(!ret.n){
+        ret.status.status=ERROR;
+        strcpy(ret.status.message,"No account with keyword found!");
+    }
     return ret;
 }
 
