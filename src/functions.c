@@ -526,3 +526,21 @@ ReportResult report(char *id){
     }
     return ret;
 }
+
+AccountResult print(SortMethod method){
+    AccountResult ret;
+    account_merge_sort(accounts,0,accountCnt,method);
+    int i;
+    ret.n=accountCnt;
+    if(!accountCnt){
+        ret.status.status=ERROR;
+        strcpy(ret.status.message,"No accounts found!");
+        return ret;
+    }
+    for(i=0;i<accountCnt;i++){
+        ret.accounts[i]=accounts[i];
+    }
+    ret.status.status=SUCCESS;
+    strcpy(ret.status.message,"Obtained all sorted accounts successfully!");
+    return ret;
+}

@@ -14,4 +14,6 @@ void save();
 Status withdraw(char *id,double amount);
 Status deposit(char *id,double amount);
 Status transfer(char *idFrom,char *idTo,double amount);
+ReportResult report(char *id);
+AccountResult print(SortMethod method);
 #endif
