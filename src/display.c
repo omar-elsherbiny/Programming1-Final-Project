@@ -81,8 +81,64 @@ static void get_box_dimensions(BoxContent *box, int *width, int *height) {
     *height = lineCount;
 }
 
-static void format_string(char template[],char str[], int width, int offset) {
-    
+void format_string(char template[], char str[], int width, int offset, char dest[]) {
+    const char *placeholder = strstr(template, "%s");
+    if (!placeholder) return;
+
+    int prefixLenB = placeholder - template;
+    int suffixLenB = strlen(template) - prefixLenB - 2;
+
+    int contentWidth = width - (utf8_strlen(template) - 2);
+    if (contentWidth < 0) return;
+
+    char result[LINE_LENGTH];
+
+    // put prefix
+    memcpy(result, template, prefixLenB);
+
+    // put formatted content
+    char *content = result + prefixLenB;
+    int contentLenB = 0;
+    int strLen = strlen(str);
+    if (strLen <= contentWidth) {
+        // pad with spaces
+        memcpy(content, str, strLen);
+        memset(content + strLen, ' ', contentWidth - strLen);
+        contentLenB += contentWidth;
+    } else {
+        // truncate and offset
+        if (offset > strLen - contentWidth) offset = strLen - contentWidth;
+        memcpy(content, str + offset, strLen - offset);
+        // leading elipses
+        if (offset > 0) {
+            memcpy(content, "…", 3);
+            memcpy(content + 3, str + offset, contentWidth - 1);
+            contentLenB += 2;
+        }
+        contentLenB += contentWidth;
+        // trailing elipses
+        if (offset < strLen - contentWidth) {
+            memcpy(content + contentLenB - 1, "…", 3);
+            contentLenB += 2;
+        }
+    }
+
+    // put suffix
+    memcpy(result + prefixLenB + contentLenB, placeholder + 2, suffixLenB);
+
+    *(result + prefixLenB + contentLenB + suffixLenB + 1) = '\0';
+    strcpy(dest, result);
+}
+
+void replace_wrap_string(char str[], char first[], char second[], char dest[]) {
+    int count = 0;
+    char *p = str;
+    while ((p = strstr(p, "%s")) != NULL) count++, p += 2;
+
+    if (count == 2)
+        sprintf(dest, str, first, second);
+    else
+        sprintf(dest, "%s%s%s", first, str, second);
 }
 
 void display_draw_box(DrawnBox *box) {
@@ -138,24 +194,24 @@ PromptInputs display_box_prompt(BoxContent *box) {
     int boxWidth, boxHeight;
     get_box_dimensions(box, &boxWidth, &boxHeight);
 
-    DrawnBox shellBox = {
+    DrawnBox resultBox = {
         .width = boxWidth,
         .height = boxHeight};
-    strcpy(shellBox.title, box->title);
-    strcpy(shellBox.footer, box->footer);
+    strcpy(resultBox.title, box->title);
+    strcpy(resultBox.footer, box->footer);
 
     int textInputCount = 0;
     int selectableCount = 0;
     for (int i = 0; i < LINE_COUNT; i++) {
         Line *line = &box->content[i];
         if (line->text[0] == '\0') break;
-        strcpy(shellBox.content[i], line->text);
+        strcpy(resultBox.content[i], line->text);
         if (line->type == TEXT) textInputCount++;
         if (line->type != DEFAULT) selectableCount++;
     }
 
     Line **selectableLines = malloc(selectableCount * sizeof(Line *));
-    int *lineIndexMap = malloc(selectableCount * sizeof(int *));
+    int *resultIndexMap = malloc(selectableCount * sizeof(int *));
     int *textIndexMap = malloc(selectableCount * sizeof(int *));
     int n = 0, t = 0;
     for (int i = 0; i < LINE_COUNT; i++) {
@@ -164,60 +220,72 @@ PromptInputs display_box_prompt(BoxContent *box) {
         if (line->type == TEXT) textIndexMap[n] = t, t++;
         if (line->type != DEFAULT) {
             selectableLines[n] = line;
-            lineIndexMap[n] = i;
+            resultIndexMap[n] = i;
             n++;
         }
     }
 
+    int curr = 0;
+    int prev = -1;
+    int ch;
     char **textInputs = malloc(textInputCount * sizeof(char *));
     int dialogueValue;
-    int currSelected = 0;
-    int ch;
+    Line *currLine = selectableLines[curr];
+    char *currResLine = resultBox.content[resultIndexMap[curr]];
 
     // temp
-    if ((selectableLines[0])->type == TEXT) {
-        memmove(shellBox.content[lineIndexMap[0]] + strlen(FLIP), shellBox.content[lineIndexMap[0]], strlen(shellBox.content[lineIndexMap[0]]) + 1);
+    /*if ((selectableLines[0])->type == TEXT) {
+        memmove(+strlen(FLIP), shellBox.content[lineIndexMap[0]], strlen(shellBox.content[lineIndexMap[0]]) + 1);
         memcpy(shellBox.content[lineIndexMap[0]], FLIP, strlen(FLIP));
     } else {
         memmove(shellBox.content[lineIndexMap[0]] + strlen(FLIP), shellBox.content[lineIndexMap[0]], strlen(shellBox.content[lineIndexMap[0]]) + 1);
         memcpy(shellBox.content[lineIndexMap[0]], FLIP, strlen(FLIP));
         dialogueValue = (selectableLines[0])->data.value;
-    }
+    }*/
 
     while (1) {
+        update_console_size();  // recenters
+        display_draw_box(&resultBox);
+
         ch = _getch();
 
-        update_console_size();  // recenters
-        display_draw_box(&shellBox);
-
-        // escape
-        if (ch == K_ESC) break;
-
-        if (ch == 0 || ch == 224) {
+        if (ch == K_ESC) {
+            exit(1);
+        } else if (ch == 0 || ch == 224) {
             int s = _getch();
             if (s == K_UP || s == K_DOWN) {
-                // temp
-                memmove(shellBox.content[lineIndexMap[currSelected]], shellBox.content[lineIndexMap[currSelected]] + strlen(FLIP), strlen(shellBox.content[lineIndexMap[currSelected]] + strlen(FLIP)) + 1);
-
+                prev = curr;
                 if (s == K_UP) {
-                    currSelected = (currSelected - 1 + selectableCount) % selectableCount;
+                    curr = (curr - 1 + selectableCount) % selectableCount;
                 } else if (s == K_DOWN) {
-                    currSelected = (currSelected + 1 + selectableCount) % selectableCount;
+                    curr = (curr + 1 + selectableCount) % selectableCount;
                 }
+                currLine = selectableLines[curr];
+                currResLine = resultBox.content[resultIndexMap[curr]];
 
-                memmove(shellBox.content[lineIndexMap[currSelected]] + strlen(FLIP), shellBox.content[lineIndexMap[currSelected]], strlen(shellBox.content[lineIndexMap[currSelected]]) + 1);
-                memcpy(shellBox.content[lineIndexMap[currSelected]], FLIP, strlen(FLIP));
-                printf("currSelected: %d\n", currSelected);
+                if (selectableLines[prev]->type == TEXT) {
+                }  // remove FLIP TEXT
+                else {
+                }  // remove FLIP DIALOGUE
 
-                update_console_size();
-                display_draw_box(&shellBox);
+                if (currLine->type == TEXT) {
+                    format_string(currLine->text, "Hello", boxWidth, 0, currResLine);
+                }  // add FLIP TEXT
+                else {
+                    replace_wrap_string(currLine->text, FLIP, FLIP_RESET, currResLine);
+                    // dialogueValue = selectableLines[currSelected]->data.value;
+                }  // add FLIP DIALOGUE
+            } else if (s == K_LEFT || s == K_RIGHT) {
+                // scroll TEXT
             }
-        } else if (ch == K_ENTER) {
-            printf("Enter key\n");
-        } else {
-            printf("Key pressed: %c (code %d)\n", ch, ch);
+        } else if (ch == K_ENTER && currLine->type == DIALOGUE) {
+            break;
+        } else if (currLine->type == TEXT) {
+            // write TEXT
         }
     }
+
+    // TODO: free stuff
 
     return (PromptInputs){textInputCount, textInputs, dialogueValue};
 }

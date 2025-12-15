@@ -30,6 +30,7 @@
 #define BG_RESET "\033[49m"
 
 #define FLIP "\033[7m"
+#define FLIP_RESET "\033[27m"
 #define BLINK "\033[5m"
 #define BOLD "\033[1m"
 #define RESET "\033[0m"
@@ -37,6 +38,8 @@
 #define K_ESC 27
 #define K_UP 72
 #define K_DOWN 80
+#define K_RIGHT 77
+#define K_LEFT 75
 #define K_ENTER 13
 
 typedef enum {
@@ -98,5 +101,8 @@ void display_init(void);
 void display_draw_box(DrawnBox *box);
 PromptInputs display_box_prompt(BoxContent *box);
 void display_cleanup(void);
+
+void format_string(char template[], char str[], int width, int offset, char dest[]);
+void replace_wrap_string(char str[], char first[], char second[], char dest[]);
 
 #endif
