@@ -373,3 +373,92 @@ Status deposit(char *id,double amount){
     strcpy(ret.message,"Deposit completed successfully!");
     return ret;
 }
+
+Status transfer(char *idFrom,char *idTo,double amount){
+    int i,foundFrom=0,foundTo=0,idxFrom,idxTo;
+    Status ret;
+    FILE *f=fopen("files/accounts.txt","r");
+    if(f == NULL){
+        ret.status=ERROR;
+        strcpy(ret.message,"File accounts.txt not found!");
+        return ret;
+    }
+    fclose(f);
+    for(i=0;i<accountCnt;i++){
+        if(!strcmp(idFrom,accounts[i].id)){
+            foundFrom=1;
+            idxFrom=i;
+        }
+        if(!strcmp(idTo,accounts[i].id)){
+            foundTo=1;
+            idxTo=i;
+        }
+    }
+    if(!foundFrom&&!foundTo){
+        ret.status=ERROR;
+        strcpy(ret.message,"Both accounts not found!");
+        return ret;
+    }
+    if(!foundFrom){
+        ret.status=ERROR;
+        strcpy(ret.message,"Sender account not found!");
+        return ret;
+    }
+    if(!foundTo){
+        ret.status=ERROR;
+        strcpy(ret.message,"Receiver account not found!");
+        return ret;
+    }
+    //account found and file exists
+    if(!accounts[idxFrom].status&&!accounts[idxTo].status){
+        ret.status=ERROR;
+        strcpy(ret.message,"Both accounts are inactive!");
+        return ret;
+    }
+    if(!accounts[idxTo].status){
+        ret.status=ERROR;
+        strcpy(ret.message,"Receiver account is inactive!");
+        return ret;
+    }
+    if(!accounts[idxFrom].status){
+        ret.status=ERROR;
+        strcpy(ret.message,"Sender account is inactive!");
+        return ret;
+    }
+    if(amount<=0){
+        ret.status=ERROR;
+        strcpy(ret.message,"Transfer amount must be positive!");
+        return ret;
+    }
+    if(amount>accounts[idxFrom].balance){
+        ret.status=ERROR;
+        strcpy(ret.message,"Transfer amount is greater than sender balance!");
+        return ret;
+    }
+    FILE *accountFromFile=fopen(strcat(idFrom,".txt"),"r");
+    FILE *accountToFile=fopen(strcat(idTo,".txt"),"r");
+    if(accountFromFile==NULL){
+        FILE *createAccountFile=fopen(strcat(idFrom,".txt"),"w");
+        fclose(createAccountFile);
+        accountFromFile=fopen(strcat(idFrom,".txt"),"r");
+    }
+    fclose(accountFromFile);
+    if(accountToFile==NULL){
+        FILE *createAccountFile=fopen(strcat(idTo,".txt"),"w");
+        fclose(createAccountFile);
+        accountToFile=fopen(strcat(idTo,".txt"),"r");
+    }
+    fclose(accountToFile);
+    accountFromFile=fopen(strcat(idFrom,".txt"),"a");
+    fprintf(accountFromFile,"%s,transfer,-%.2f,%d-%d-%d\n",idFrom,amount,get_today().day,get_today().month,get_today().year);
+    fclose(accountFromFile);
+    accountToFile=fopen(strcat(idTo,".txt"),"a");
+    fprintf(accountToFile,"%s,transfer,%.2f,%d-%d-%d\n",idTo,amount,get_today().day,get_today().month,get_today().year);
+    fclose(accountToFile);
+    accounts[idxTo].balance+=amount;
+    accounts[idxFrom].balance-=amount;
+    save();
+    ret.status=SUCCESS;
+    strcpy(ret.message,"Transfer completed successfully!");
+    return ret;
+}

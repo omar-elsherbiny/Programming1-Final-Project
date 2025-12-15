@@ -13,4 +13,5 @@ Status change_status(char *id);
 void save();
 Status withdraw(char *id,double amount);
 Status deposit(char *id,double amount);
+Status transfer(char *idFrom,char *idTo,double amount);
 #endif
