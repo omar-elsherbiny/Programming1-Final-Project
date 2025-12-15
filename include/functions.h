@@ -7,4 +7,5 @@ Status load();
 Account_result query(char *id);
 Account_result advanced_search(char *id);
 Status add(Account acc);
+Status delete(char *id);
 #endif

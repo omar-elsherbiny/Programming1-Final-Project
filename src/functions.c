@@ -130,10 +130,53 @@ Status add(Account acc){
     fclose(f);
     f=fopen("files/accounts.txt","a");
     accounts[account_cnt]=acc;
-    fprintf(f,"%s,%s,%s,%.2f,%s,%d-%d, %s",acc.id,acc.name,acc.email,acc.balance,acc.mobile,acc.date.month,acc.date.year,(acc.status?"active":"inactive"));
+    fprintf(f,"%s,%s,%s,%.2f,%s,%d-%d, %s\n",acc.id,acc.name,acc.email,acc.balance,acc.mobile,acc.date.month,acc.date.year,(acc.status?"active":"inactive"));
     fclose(f);
     account_cnt++;
     ret.status=SUCCESS;
     strcpy(ret.message,"Account added successfully!");
+    return ret;
+}
+
+Status delete(char *id){
+    int i,found=0;
+    Status ret;
+    FILE *f=fopen("files/accounts.txt","r");
+    if(f == NULL){
+        ret.status=ERROR;
+        strcpy(ret.message,"File accounts.txt not found!");
+        return ret;
+    }
+    fclose(f);
+    for(i=0;i<account_cnt;i++){
+        if(!strcmp(id,accounts[i].id)){
+            found=1;
+        }
+    }
+    if(!found){
+        ret.status=ERROR;
+        strcpy(ret.message,"Account not found!");
+        return ret;
+    }
+    //account found and file exists
+    found=0;
+    for(i=0;i<account_cnt;i++){
+        if(!found){
+            if(!strcmp(id,accounts[i].id)){
+                found=1;
+            }
+        }
+        else{
+            accounts[i-1]=accounts[i];
+        }
+    }
+    account_cnt--;
+    f=fopen("files/accounts.txt","w");
+    for(i=0;i<account_cnt;i++){
+        fprintf(f,"%s,%s,%s,%.2f,%s,%d-%d, %s\n",accounts[i].id,accounts[i].name,accounts[i].email,accounts[i].balance,accounts[i].mobile,accounts[i].date.month,accounts[i].date.year,(accounts[i].status?"active":"inactive"));
+    }
+    fclose(f);
+    ret.status=SUCCESS;
+    strcpy(ret.message,"Account deleted successfully!");
     return ret;
 }
