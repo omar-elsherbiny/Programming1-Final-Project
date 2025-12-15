@@ -180,3 +180,41 @@ Status delete(char *id){
     strcpy(ret.message,"Account deleted successfully!");
     return ret;
 }
+
+Status modify(char *id,char *name,char *mobile,char *email){
+    int i,found=0;
+    Status ret;
+    FILE *f=fopen("files/accounts.txt","r");
+    if(f == NULL){
+        ret.status=ERROR;
+        strcpy(ret.message,"File accounts.txt not found!");
+        return ret;
+    }
+    fclose(f);
+    for(i=0;i<account_cnt;i++){
+        if(!strcmp(id,accounts[i].id)){
+            found=1;
+        }
+    }
+    if(!found){
+        ret.status=ERROR;
+        strcpy(ret.message,"Account not found!");
+        return ret;
+    }
+    //account found and file exists
+    for(i=0;i<account_cnt;i++){
+        if(!strcmp(id,accounts[i].id)){
+            strcpy(accounts[i].name,name);
+            strcpy(accounts[i].mobile,mobile);
+            strcpy(accounts[i].email,email);
+        }
+    }
+    f=fopen("files/accounts.txt","w");
+    for(i=0;i<account_cnt;i++){
+        fprintf(f,"%s,%s,%s,%.2f,%s,%d-%d, %s\n",accounts[i].id,accounts[i].name,accounts[i].email,accounts[i].balance,accounts[i].mobile,accounts[i].date.month,accounts[i].date.year,(accounts[i].status?"active":"inactive"));
+    }
+    fclose(f);
+    ret.status=SUCCESS;
+    strcpy(ret.message,"Account modified successfully!");
+    return ret;
+}

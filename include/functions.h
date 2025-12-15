@@ -8,4 +8,5 @@ Account_result query(char *id);
 Account_result advanced_search(char *id);
 Status add(Account acc);
 Status delete(char *id);
+Status modify(char *id,char *name,char *mobile,char *email);
 #endif
