@@ -67,7 +67,7 @@ static void get_box_dimensions(BoxContent *box, int *width, int *height) {
         if (line->text[0] == '\0') break;
 
         int len = utf8_strlen(line->text);
-        if (line->type == TEXT) len = len - 2 + line->data.options.maxLen;
+        if (line->type == TEXT) len = len - 2;  // + line->data.options.maxLen;
 
         if (len > maxWidth) maxWidth = len;
         lineCount++;
@@ -79,6 +79,10 @@ static void get_box_dimensions(BoxContent *box, int *width, int *height) {
 
     *width = maxWidth;
     *height = lineCount;
+}
+
+static void format_string(char template[],char str[], int width, int offset) {
+    
 }
 
 void display_draw_box(DrawnBox *box) {
@@ -104,7 +108,8 @@ void display_draw_box(DrawnBox *box) {
     printf("┐\n");
 
     // middle - footer
-    for (int row = 0; row < boxHeight - 2 - 1; row++) {
+    _Bool isFooter = (box->footer)[0] != '\0';
+    for (int row = 0; row < boxHeight - 2 - isFooter; row++) {
         for (int i = 0; i < sidePadding; i++) putchar(' ');
         printf("│ ");
         printf("%s" RESET, box->content[row]);
@@ -113,13 +118,15 @@ void display_draw_box(DrawnBox *box) {
     }
 
     // footer
-    int footerPadding = boxWidth - 4 - utf8_strlen(box->footer);
-    for (int i = 0; i < sidePadding; i++) putchar(' ');
-    printf("│ ");
-    for (int i = 0; i < footerPadding / 2; i++) putchar(' ');
-    printf("%s" RESET, box->footer);
-    for (int i = 0; i < footerPadding - footerPadding / 2; i++) putchar(' ');
-    printf(" │\n");
+    if (isFooter) {
+        int footerPadding = boxWidth - 4 - utf8_strlen(box->footer);
+        for (int i = 0; i < sidePadding; i++) putchar(' ');
+        printf("│ ");
+        for (int i = 0; i < footerPadding / 2; i++) putchar(' ');
+        printf("%s" RESET, box->footer);
+        for (int i = 0; i < footerPadding - footerPadding / 2; i++) putchar(' ');
+        printf(" │\n");
+    }
 
     for (int i = 0; i < sidePadding; i++) putchar(' ');
     printf("└");
@@ -180,7 +187,7 @@ PromptInputs display_box_prompt(BoxContent *box) {
     while (1) {
         ch = _getch();
 
-        update_console_size();
+        update_console_size();  // recenters
         display_draw_box(&shellBox);
 
         // escape
