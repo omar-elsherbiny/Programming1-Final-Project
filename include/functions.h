@@ -6,4 +6,5 @@ Status login(char *username,char* password);
 Status load();
 Account_result query(char *id);
 Account_result advanced_search(char *id);
+Status add(Account acc);
 #endif

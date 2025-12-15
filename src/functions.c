@@ -110,3 +110,28 @@ Account_result advanced_search(char *keyword){
     strcpy(ret.status.message,"No account with keyword found!");
     return ret;
 }
+
+Status add(Account acc){
+    int i;
+    Status ret;
+    for(i=0;i<account_cnt;i++){
+        if(!strcmp(acc.id,accounts[i].id)){
+            ret.status=ERROR;
+            strcpy(ret.message,"Account number is not unique!");
+            return ret;
+        }
+    }
+    FILE *f=fopen("files/accounts.txt","a");
+    if(f == NULL){
+        ret.status=ERROR;
+        strcpy(ret.message,"File accounts.txt not found!");
+        return ret;
+    }
+    accounts[account_cnt]=acc;
+    fprintf(f,"%s,%s,%s,%.2f,%s,%d-%d, %s",acc.id,acc.name,acc.email,acc.balance,acc.mobile,acc.date.month,acc.date.year,(acc.status?"active":"inactive"));
+    fclose(f);
+    account_cnt++;
+    ret.status=SUCCESS;
+    strcpy(ret.message,"Account added successfully!");
+    return ret;
+}
