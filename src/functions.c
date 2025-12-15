@@ -244,6 +244,7 @@ Status change_status(char *id){
     for(i=0;i<accountCnt;i++){
         if(!strcmp(id,accounts[i].id)){
             accounts[i].status^=1; // toggles status
+            accounts[i].inactivity=get_month();
         }
     }
     save();

@@ -46,4 +46,5 @@ int cmp_accounts(Account a,Account b,SortMethod method);
 void account_merge_sort(Account accounts[],int l,int r,SortMethod method);
 double day_withdrawals(DateDay day,char *id);
 DateDay get_today();
+Date get_month();
 #endif

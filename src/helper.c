@@ -102,3 +102,12 @@ DateDay get_today(){
     ret.year=tm_info->tm_year+1900;
     return ret;
 }
+
+Date get_month(){
+    time_t t = time(NULL);
+    struct tm *tm_info=localtime(&t);
+    Date ret;
+    ret.month=tm_info->tm_mon+1;
+    ret.year=tm_info->tm_year+1900;
+    return ret;
+}
