@@ -172,3 +172,16 @@ void transaction_merge_sort(Transaction transactions[],int l,int r){
         }
     }
 }
+
+int month_diff(Date a,Date b){
+    int sm=0;
+    if(a.month>b.month){
+        sm+=a.month-b.month;
+        sm+=12*(a.year-b.year);
+    }
+    else{
+        sm+=b.month-a.month;
+        sm+=12*(a.year-b.year-1);
+    }
+    return sm;
+}

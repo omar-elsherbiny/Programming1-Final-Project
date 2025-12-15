@@ -16,4 +16,5 @@ Status deposit(char *id,double amount);
 Status transfer(char *idFrom,char *idTo,double amount);
 ReportResult report(char *id);
 AccountResult print(SortMethod method);
+Status delete_multiple(DeleteMethod method,Date date);
 #endif

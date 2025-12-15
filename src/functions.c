@@ -544,3 +544,69 @@ AccountResult print(SortMethod method){
     strcpy(ret.status.message,"Obtained all sorted accounts successfully!");
     return ret;
 }
+
+Status delete_multiple(DeleteMethod method,Date date){
+    int i,found=0;
+    Status ret;
+    FILE *f=fopen("files/accounts.txt","r");
+    if(f == NULL){
+        ret.status=ERROR;
+        strcpy(ret.message,"File accounts.txt not found!");
+        return ret;
+    }
+    fclose(f);
+    Account temp[accountCnt];
+    int idx=0;
+    if(method==MONTH){
+        for(i=0;i<accountCnt;i++){
+            if(accounts[i].date.month==date.month&&accounts[i].date.year==date.year){
+                found++;
+            }
+            else{
+                temp[idx]=accounts[i];
+                idx++;
+            }
+        }
+        if(!found){
+            ret.status=ERROR;
+            strcpy(ret.message,"No accounts created on that date!");
+            return ret;
+        }
+        accountCnt=idx;
+        for(i=0;i<accountCnt;i++){
+            accounts[i]=temp[i];
+        }
+        save();
+        ret.status=SUCCESS;
+        char buf[20];
+        snprintf(buf,sizeof(buf),"%d",found);
+        strcpy(ret.message,strcat(strcat("Successfully deleted ",buf)," account(s)!"));
+        return ret;
+    }
+    else{
+        for(i=0;i<accountCnt;i++){
+            if(month_diff(get_month(),accounts[i].inactivity)>3&&accounts[i].balance==0){
+                found++;
+            }
+            else{
+                temp[idx]=accounts[i];
+                idx++;
+            }
+        }
+        if(!found){
+            ret.status=ERROR;
+            strcpy(ret.message,"No accounts with 0 balance were inactive for over 3 months!");
+            return ret;
+        }
+        accountCnt=idx;
+        for(i=0;i<accountCnt;i++){
+            accounts[i]=temp[i];
+        }
+        save();
+        ret.status=SUCCESS;
+        char buf[20];
+        snprintf(buf,sizeof(buf),"%d",found);
+        strcpy(ret.message,strcat(strcat("Successfully deleted ",buf)," account(s)!"));
+        return ret;
+    }
+}

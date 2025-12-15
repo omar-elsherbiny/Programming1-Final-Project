@@ -16,6 +16,10 @@ typedef enum{
     STATUS
 } SortMethod;
 
+typedef enum{
+    MONTH,
+    INACTIVITY
+} DeleteMethod;
 typedef struct{
     StatusCode status;
     char message[N];
@@ -62,4 +66,5 @@ DateDay get_today();
 Date get_month();
 int cmp_transactions(Transaction a,Transaction b);
 void transaction_merge_sort(Transaction transactions[],int l,int r);
+int month_diff(Date a,Date b);
 #endif
