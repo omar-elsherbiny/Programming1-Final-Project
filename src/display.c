@@ -55,6 +55,47 @@ static int utf8_strlen(const char str[]) {
     return len;
 }
 
+static int utf8_strcnt(const char str[], int char_cnt) {
+    int bytes = 0;
+    const unsigned char *p = (const unsigned char *)str;
+
+    while (*p && char_cnt > 0) {
+        // skip ANSI
+        if (*p == 0x1B && p[1] == '[') {
+            p += 2;
+            bytes += 2;
+            while (*p && (*p < '@' || *p > '~')) {
+                p++;
+                bytes++;
+            }
+            if (*p) {
+                p++;
+                bytes++;
+            }
+            continue;
+        }
+
+        int len;
+
+        if ((*p & 0x80) == 0x00)
+            len = 1;  // ASCII
+        else if ((*p & 0xE0) == 0xC0)
+            len = 2;
+        else if ((*p & 0xF0) == 0xE0)
+            len = 3;
+        else if ((*p & 0xF8) == 0xF0)
+            len = 4;
+        else
+            break;  // invalid UTF-8
+
+        p += len;
+        bytes += len;
+        char_cnt--;
+    }
+
+    return bytes;
+}
+
 static void get_box_dimensions(BoxContent *box, int *width, int *height) {
     int maxWidth = 0;
     int lineCount = 0;
@@ -88,8 +129,9 @@ void format_string(char template[], char str[], int width, int offset, char dest
     int prefixLenB = placeholder - template;
     int suffixLenB = strlen(template) - prefixLenB - 2;
 
-    int contentWidth = width - (utf8_strlen(template) - 2);
-    if (contentWidth < 0) return;
+    int contentWidthB = 0;
+    int contentWidthC = width - (utf8_strlen(template) - 2);
+    if (contentWidthC < 0) return;
 
     char result[LINE_LENGTH];
 
@@ -98,35 +140,38 @@ void format_string(char template[], char str[], int width, int offset, char dest
 
     // put formatted content
     char *content = result + prefixLenB;
-    int contentLenB = 0;
-    int strLen = strlen(str);
-    if (strLen <= contentWidth) {
+    int strLenC = utf8_strlen(str);
+    int strLenB = strlen(str);
+    if (strLenC <= contentWidthC) {
         // pad with spaces
-        memcpy(content, str, strLen);
-        memset(content + strLen, ' ', contentWidth - strLen);
-        contentLenB += contentWidth;
+        memcpy(content, str, strLenB);
+        memset(content + strLenB, ' ', contentWidthC - strLenC);
+        contentWidthB += strLenB + contentWidthC - strLenC;
     } else {
         // truncate and offset
-        if (offset > strLen - contentWidth) offset = strLen - contentWidth;
-        memcpy(content, str + offset, strLen - offset);
+        if (offset > strLenC - contentWidthC) offset = strLenC - contentWidthC;
+        int offsetB = utf8_strcnt(str, offset);
+        contentWidthB = utf8_strcnt(str + offsetB, contentWidthC);
+        memcpy(content, str + offsetB, contentWidthB);
         // leading elipses
         if (offset > 0) {
+            contentWidthB = utf8_strcnt(str + offsetB, contentWidthC - 1);
             memcpy(content, "…", 3);
-            memcpy(content + 3, str + offset, contentWidth - 1);
-            contentLenB += 2;
+            memcpy(content + 3, str + offsetB, contentWidthB);
+            contentWidthB += 3;
         }
-        contentLenB += contentWidth;
         // trailing elipses
-        if (offset < strLen - contentWidth) {
-            memcpy(content + contentLenB - 1, "…", 3);
-            contentLenB += 2;
+        if (offset < strLenC - contentWidthC) {
+            contentWidthB -= strLenB - utf8_strcnt(str, strLenC - 1);
+            memcpy(content + contentWidthB, "…", 3);
+            contentWidthB += 3;
         }
     }
 
     // put suffix
-    memcpy(result + prefixLenB + contentLenB, placeholder + 2, suffixLenB);
+    memcpy(result + prefixLenB + contentWidthB, placeholder + 2, suffixLenB);
 
-    *(result + prefixLenB + contentLenB + suffixLenB + 1) = '\0';
+    result[prefixLenB + contentWidthB + suffixLenB] = '\0';
     strcpy(dest, result);
 }
 
@@ -206,7 +251,11 @@ PromptInputs display_box_prompt(BoxContent *box) {
         Line *line = &box->content[i];
         if (line->text[0] == '\0') break;
         strcpy(resultBox.content[i], line->text);
-        if (line->type == TEXT) textInputCount++;
+        if (line->type == TEXT) {
+            format_string(line->text, "", boxWidth, 0, resultBox.content[i]);
+            textInputCount++;
+        }
+        if (line->type == DIALOGUE) replace_wrap_string(line->text, "", "", resultBox.content[i]);
         if (line->type != DEFAULT) selectableCount++;
     }
 
@@ -233,15 +282,13 @@ PromptInputs display_box_prompt(BoxContent *box) {
     Line *currLine = selectableLines[curr];
     char *currResLine = resultBox.content[resultIndexMap[curr]];
 
-    // temp
-    /*if ((selectableLines[0])->type == TEXT) {
-        memmove(+strlen(FLIP), shellBox.content[lineIndexMap[0]], strlen(shellBox.content[lineIndexMap[0]]) + 1);
-        memcpy(shellBox.content[lineIndexMap[0]], FLIP, strlen(FLIP));
-    } else {
-        memmove(shellBox.content[lineIndexMap[0]] + strlen(FLIP), shellBox.content[lineIndexMap[0]], strlen(shellBox.content[lineIndexMap[0]]) + 1);
-        memcpy(shellBox.content[lineIndexMap[0]], FLIP, strlen(FLIP));
-        dialogueValue = (selectableLines[0])->data.value;
-    }*/
+    if (currLine->type == TEXT) {
+        format_string(currLine->text, "█", boxWidth, 0, currResLine);
+    }  // add initial FLIP TEXT
+    else {
+        replace_wrap_string(currLine->text, FLIP, FLIP_RESET, currResLine);
+        dialogueValue = currLine->data.value;
+    }  // add initial FLIP DIALOGUE
 
     while (1) {
         update_console_size();  // recenters
@@ -264,16 +311,18 @@ PromptInputs display_box_prompt(BoxContent *box) {
                 currResLine = resultBox.content[resultIndexMap[curr]];
 
                 if (selectableLines[prev]->type == TEXT) {
+                    format_string(selectableLines[prev]->text, "", boxWidth, 0, resultBox.content[resultIndexMap[prev]]);
                 }  // remove FLIP TEXT
                 else {
+                    replace_wrap_string(selectableLines[prev]->text, "", "", resultBox.content[resultIndexMap[prev]]);
                 }  // remove FLIP DIALOGUE
 
                 if (currLine->type == TEXT) {
-                    format_string(currLine->text, "Hello", boxWidth, 0, currResLine);
+                    format_string(currLine->text, "█", boxWidth, 0, currResLine);
                 }  // add FLIP TEXT
                 else {
                     replace_wrap_string(currLine->text, FLIP, FLIP_RESET, currResLine);
-                    // dialogueValue = selectableLines[currSelected]->data.value;
+                    dialogueValue = currLine->data.value;
                 }  // add FLIP DIALOGUE
             } else if (s == K_LEFT || s == K_RIGHT) {
                 // scroll TEXT
