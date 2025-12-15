@@ -121,12 +121,14 @@ Status add(Account acc){
             return ret;
         }
     }
-    FILE *f=fopen("files/accounts.txt","a");
+    FILE *f=fopen("files/accounts.txt","r");
     if(f == NULL){
         ret.status=ERROR;
         strcpy(ret.message,"File accounts.txt not found!");
         return ret;
     }
+    fclose(f);
+    f=fopen("files/accounts.txt","a");
     accounts[account_cnt]=acc;
     fprintf(f,"%s,%s,%s,%.2f,%s,%d-%d, %s",acc.id,acc.name,acc.email,acc.balance,acc.mobile,acc.date.month,acc.date.year,(acc.status?"active":"inactive"));
     fclose(f);
