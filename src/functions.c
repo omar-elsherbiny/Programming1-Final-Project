@@ -64,7 +64,7 @@ Status load(){
         //check if account transaction file exists, if not creates it
         FILE *accountFile=fopen(strcat(accounts[i].id,".txt"),"r");
         if(accountFile==NULL){
-            FILE *createAccountFile=fopen(strcat(accounts[i].id,".txt"),"W");
+            FILE *createAccountFile=fopen(strcat(accounts[i].id,".txt"),"w");
             fclose(createAccountFile);
         }
         fclose(accountFile);
@@ -225,5 +225,41 @@ Status modify(char *id,char *name,char *mobile,char *email){
     fclose(f);
     ret.status=SUCCESS;
     strcpy(ret.message,"Account modified successfully!");
+    return ret;
+}
+
+Status change_status(char *id){
+    int i,found=0;
+    Status ret;
+    FILE *f=fopen("files/accounts.txt","r");
+    if(f == NULL){
+        ret.status=ERROR;
+        strcpy(ret.message,"File accounts.txt not found!");
+        return ret;
+    }
+    fclose(f);
+    for(i=0;i<accountCnt;i++){
+        if(!strcmp(id,accounts[i].id)){
+            found=1;
+        }
+    }
+    if(!found){
+        ret.status=ERROR;
+        strcpy(ret.message,"Account not found!");
+        return ret;
+    }
+    //account found and file exists
+    for(i=0;i<accountCnt;i++){
+        if(!strcmp(id,accounts[i].id)){
+            accounts[i].status^=1; // toggles status
+        }
+    }
+    f=fopen("files/accounts.txt","w");
+    for(i=0;i<accountCnt;i++){
+        fprintf(f,"%s,%s,%s,%.2f,%s,%d-%d, %s\n",accounts[i].id,accounts[i].name,accounts[i].email,accounts[i].balance,accounts[i].mobile,accounts[i].date.month,accounts[i].date.year,(accounts[i].status?"active":"inactive"));
+    }
+    fclose(f);
+    ret.status=SUCCESS;
+    strcpy(ret.message,"Account status changed successfully!");
     return ret;
 }
