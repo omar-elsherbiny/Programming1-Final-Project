@@ -69,10 +69,10 @@ Add Accounts
     │ └────────────────────────────┘ │
     │ ┌ Mobile ────────────────────┐ │
     │ │ +67 6767 676767            │ │
-    │ └────────────────────────────┘ |
+    │ └────────────────────────────┘ │
     │                                │
-    | Add                            |
-    | Discard                        |
+    │ Add                            │
+    │ Discard                        │
     └────────────────────────────────┘
 
 Confirm Message
@@ -102,16 +102,16 @@ Delete Accounts
     │ │ One with an Account number │ │
     │ │ Multiple with a criteria   │ │
     │ └────────────────────────────┘ │
-    |                                |
-    | Discard                        |
+    │                                │
+    │ Discard                        │
     └────────────────────────────────┘
     ┌──────── Delete Account ────────┐
     │ ┌ Account Number ────────────┐ │
     │ │ 6767676767                 │ │
     │ └────────────────────────────┘ │
     │                                │
-    | Delete                         |
-    | Discard                        |
+    │ Delete                         │
+    │ Discard                        │
     └────────────────────────────────┘
     ┌──────── Delete Account ────────┐
     │ ┌ Multiple criteria ─────────┐ │
@@ -119,18 +119,21 @@ Delete Accounts
     │ │ Accounts inactive 90 days  │ │
     │ └────────────────────────────┘ │
     │                                │
-    | Delete                         |
-    | Discard                        |
+    │ Delete                         │
+    │ Discard                        │
     └────────────────────────────────┘
     ┌──────── Delete Account ────────┐
     │ Delete all accounts created on │
     │ the given date below           │
-    │       ┌ Month ┐ ┌ Year ┐       │
-    │       │  12   │ │ 2025 │       │
-    │       └───────┘ └──────┘       │
+    │           ┌ Month ┐            │
+    │           │ 12    │            │
+    │           └───────┘            │
+    │           ┌ Year ─┐            │
+    │           │ 2025  │            │
+    │           └───────┘            │
     │                                │
-    | Delete                         |
-    | Discard                        |
+    │ Delete                         │
+    │ Discard                        │
     └────────────────────────────────┘
 
 Confirm Message
@@ -162,7 +165,7 @@ Confirm Message
 Error Message
     ┌──────────── Error ─────────────┐
     │ Account is not Zeroed          │
-    │ You may only delete Accounts   |
+    │ You may only delete Accounts   │
     │ whose balance is zero $        │
     │                                │
     │ Okay                           │
@@ -179,8 +182,8 @@ Modify Accounts
     │ │ 6767676767                 │ │
     │ └────────────────────────────┘ │
     │                                │
-    | Find                           |
-    | Back                           |
+    │ Find                           │
+    │ Back                           │
     └────────────────────────────────┘
     ┌──────── Modify Account ────────┐
     │ ┌ Name ──────────────────────┐ │
@@ -191,10 +194,10 @@ Modify Accounts
     │ └────────────────────────────┘ │
     │ ┌ Mobile ────────────────────┐ │
     │ │ +67 6767 676767            │ │
-    │ └────────────────────────────┘ |
+    │ └────────────────────────────┘ │
     │                                │
-    | Modify                         |
-    | Discard                        |
+    │ Modify                         │
+    │ Discard                        │
     └────────────────────────────────┘
 
 Confirm Message
@@ -219,8 +222,8 @@ Search Accounts
     │ │ 6767676767                 │ │
     │ └────────────────────────────┘ │
     │                                │
-    | Find                           |
-    | Discard                        |
+    │ Find                           │
+    │ Discard                        │
     └────────────────────────────────┘
     ┌──────── Search Account ────────┐
     │ Account #: 6767676767          │
@@ -230,7 +233,7 @@ Search Accounts
     │ Date Opened: February 2007     │
     │ Status: active                 │
     │                                │
-    | Back                           |
+    │ Back                           │
     └────────────────────────────────┘
 
 Error Message
@@ -245,9 +248,9 @@ Advanced Searching
     │ ┌ Keyword ───────────────────┐ │
     │ │ a█                         │ │
     │ └────────────────────────────┘ │
-    |                                |
-    | Find                           |
-    | Discard                        |
+    │                                │
+    │ Find                           │
+    │ Discard                        │
     └────────────────────────────────┘
     ┌──────── Search Account ────────┐
     │ ↑ ...                          │
@@ -266,14 +269,14 @@ Advanced Searching
     │ Status: active                 │
     │ ↓ ...                          │
     │                                │
-    | Back                           |
+    │ Back                           │
     └────────────────────────────────┘
 
 Error Message
     ┌───────── Error Search  ────────┐
     │ No account was found           │
     │                                │
-    | Back                           |
+    │ Back                           │
     └────────────────────────────────┘
     
 Account Status
@@ -282,8 +285,8 @@ Account Status
     │ │ 6767676767                 │ │
     │ └────────────────────────────┘ │
     │                                │
-    | Find                           |
-    | Back                           |
+    │ Find                           │
+    │ Back                           │
     └────────────────────────────────┘
     ┌──────── Account Status ────────┐
     │ Account is currently active    │
@@ -291,10 +294,10 @@ Account Status
     │ ┌ Change account status ─────┐ │
     │ │ (x) Active                 │ │
     │ │ ( ) Inactive               │ │
-    │ └────────────────────────────┘ |
+    │ └────────────────────────────┘ │
     │                                │
-    | Change                         |
-    | Discard                        |
+    │ Change                         │
+    │ Discard                        │
     └────────────────────────────────┘
 
 Confirm Message
@@ -321,8 +324,8 @@ Withdraw
     │ │ 6767676767                 │ │
     │ └────────────────────────────┘ │
     │                                │
-    | Find                           |
-    | Back                           |
+    │ Find                           │
+    │ Back                           │
     └────────────────────────────────┘
     ┌─────────── Withdraw ───────────┐
     │ ┌ Withdraw Amount: ──────────┐ │
@@ -330,8 +333,8 @@ Withdraw
     │ └────────────────────────────┘ │
     │ (Max $10,000 per transaction)  │
     │                                │
-    | Proceed                        |
-    | Back                           |
+    │ Proceed                        │
+    │ Back                           │
     └────────────────────────────────┘
 
 Confirm Message
@@ -386,8 +389,8 @@ Deposit
     │ │ 6767676767                 │ │
     │ └────────────────────────────┘ │
     │                                │
-    | Find                           |
-    | Back                           |
+    │ Find                           │
+    │ Back                           │
     └────────────────────────────────┘
     ┌──────────── Deposit ───────────┐
     │ ┌ Deposit Amount: ───────────┐ │
@@ -395,8 +398,8 @@ Deposit
     │ └────────────────────────────┘ │
     │ (Max $10,000 per transaction)  │
     │                                │
-    | Proceed                        |
-    | Back                           |
+    │ Proceed                        │
+    │ Back                           │
     └────────────────────────────────┘
 
 Confirm Message
@@ -436,8 +439,8 @@ Transfer
     │ │ 6767676767                 │ │
     │ └────────────────────────────┘ │
     │                                │
-    | Find                           |
-    | Back                           |
+    │ Find                           │
+    │ Back                           │
     └────────────────────────────────┘
     ┌─────────── Transfer ───────────┐
     │ ┌ Transfer Amount ───────────┐ │
@@ -445,16 +448,16 @@ Transfer
     │ └────────────────────────────┘ │
     │ (Max $10,000 per transaction)  │
     │                                │
-    | Proceed                        |
-    | Back                           |
+    │ Proceed                        │
+    │ Back                           │
     └────────────────────────────────┘
     ┌─────────── Transfer ───────────┐
     │ ┌ Receiver Account Number ───┐ │
     │ │ 0101010101                 │ │
     │ └────────────────────────────┘ │
     │                                │
-    | Find                           |
-    | Back                           |
+    │ Find                           │
+    │ Back                           │
     └────────────────────────────────┘
 
 Confirm Message
@@ -507,11 +510,11 @@ Report
     │ │ 6767676767                 │ │
     │ └────────────────────────────┘ │
     │                                │
-    | Find                           |
-    | Back                           |
+    │ Find                           │
+    │ Back                           │
     └────────────────────────────────┘
     ┌──────────── Report ────────────┐
-    │ ↑ ...                          |
+    │ ↑ ...                          │
     │ Amount: -$10,000               │
     │ Transaction type: Withdraw     │
     │ Date: 12 / 12 / 2025           │
@@ -533,7 +536,7 @@ Report
     │ Date: 24 / 12 / 2025           │
     │ ↓ ...                          │
     │                                │
-    | Back                           |
+    │ Back                           │
     └────────────────────────────────┘
 
 Printing 
@@ -545,13 +548,13 @@ Printing
     │ │ ( ) Name                   │ │
     │ │ (x) Balance                │ │
     │ │ ( ) Date Opened            │ │
-    │ └────────────────────────────┘ |
+    │ └────────────────────────────┘ │
     │                                │
-    | Print                          |
-    | Back                           |
+    │ Print                          │
+    │ Back                           │
     └────────────────────────────────┘
     ┌──────────── Report ────────────┐
-    │ ↑ ...                          |
+    │ ↑ ...                          │
     │ Account #: 6767676767          │
     │ Name: Rick Astley              │
     │ E-mail: rick.astley@email.com  │
@@ -567,5 +570,5 @@ Printing
     │ Status: active                 │
     │ ↓ ...                          │
     │                                │
-    | Back                           |
+    │ Back                           │
     └────────────────────────────────┘
