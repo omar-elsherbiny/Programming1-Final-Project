@@ -93,3 +93,20 @@ Account_result query(char *id){
     ret.n=0;
     return ret;
 }
+
+Account_result advanced_search(char *keyword){
+    Account_result ret;
+    ret.n=0;
+    int i;
+    for(i=0;i<account_cnt;i++){
+        if(strstr(accounts[i].name,keyword)!=NULL){
+            ret.status.status=SUCCESS;
+            strcpy(ret.status.message,"Account(s) with keyword found successfully!");
+            ret.accounts[ret.n]=accounts[i];
+            ret.n++;
+        }
+    }
+    ret.status.status=ERROR;
+    strcpy(ret.status.message,"No account with keyword found!");
+    return ret;
+}
