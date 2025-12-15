@@ -60,4 +60,6 @@ void account_merge_sort(Account accounts[],int l,int r,SortMethod method);
 double day_withdrawals(DateDay day,char *id);
 DateDay get_today();
 Date get_month();
+int cmp_transactions(Transaction a,Transaction b);
+void transaction_merge_sort(Transaction transactions[],int l,int r);
 #endif

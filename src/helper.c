@@ -39,6 +39,34 @@ int cmp_accounts(Account a,Account b,SortMethod method){
     }
 }
 
+int cmp_transactions(Transaction a,Transaction b){
+    if(a.date.year<b.date.year){
+        return -1;
+    }
+    else if(a.date.year>b.date.year){
+        return 1;
+    }
+    else{
+        if(a.date.month<b.date.month){
+            return -1;
+        }
+        else if(a.date.month>b.date.month){
+            return 1;
+        }
+        else{
+            if(a.date.day<b.date.day){
+                return -1;
+            }
+            else if(a.date.day>b.date.day){
+                return 1;
+            }
+            else{
+                return 0;
+            }
+        }
+    }
+}
+
 void account_merge_sort(Account accounts[],int l,int r,SortMethod method){
     if(l<r){
         int mid=l+(r-l)/2,i;
@@ -53,7 +81,7 @@ void account_merge_sort(Account accounts[],int l,int r,SortMethod method){
         }
         int p1=0,p2=0,idx=0;
         while(p1<mid-l+1&&p2<r-mid){
-            if(cmp_accounts(la[p1],ra[p1],method)){
+            if(cmp_accounts(la[p1],ra[p1],method)<=0){
                 accounts[idx++]=la[p1++];
             }
             else{
@@ -113,4 +141,34 @@ Date get_month(){
     ret.month=tm_info->tm_mon+1;
     ret.year=tm_info->tm_year+1900;
     return ret;
+}
+
+void transaction_merge_sort(Transaction transactions[],int l,int r){
+    if(l<r){
+        int mid=l+(r-l)/2,i;
+        transaction_merge_sort(transactions,l,mid);
+        transaction_merge_sort(transactions,mid+1,r);
+        Transaction la[mid-l+1],ra[r-mid];
+        for(i=0;i<mid-l+1;i++){
+            la[i]=transactions[l+i];
+        }
+        for(i=0;i<r-mid;i++){
+            ra[i]=transactions[mid+1+i];
+        }
+        int p1=0,p2=0,idx=0;
+        while(p1<mid-l+1&&p2<r-mid){
+            if(cmp_transactions(la[p1],ra[p1])>=0){
+                transactions[idx++]=la[p1++];
+            }
+            else{
+                transactions[idx++]=ra[p2++];
+            }
+        }
+        while(p1<mid-l+1){
+            transactions[idx++]=la[p1++];
+        }
+        while(p2<r-mid){
+            transactions[idx++]=ra[p2++];
+        }
+    }
 }

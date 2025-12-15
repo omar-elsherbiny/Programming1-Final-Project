@@ -105,7 +105,6 @@ AccountResult query(char *id){
 
 AccountResult advanced_search(char *keyword){
     AccountResult ret;
-    account_merge_sort(accounts,0,accountCnt,ID);
     ret.n=0;
     int i;
     for(i=0;i<accountCnt;i++){
@@ -116,6 +115,7 @@ AccountResult advanced_search(char *keyword){
             ret.n++;
         }
     }
+    account_merge_sort(ret.accounts,0,ret.n,ID);
     if(!ret.n){
         ret.status.status=ERROR;
         strcpy(ret.status.message,"No account with keyword found!");
@@ -463,5 +463,66 @@ Status transfer(char *idFrom,char *idTo,double amount){
     save();
     ret.status=SUCCESS;
     strcpy(ret.message,"Transfer completed successfully!");
+    return ret;
+}
+
+ReportResult report(char *id){
+    ReportResult ret;
+    ret.n=0;
+    int i,found=0;
+    FILE *f=fopen("files/accounts.txt","r");
+    if(f == NULL){
+        ret.status.status=ERROR;
+        strcpy(ret.status.message,"File accounts.txt not found!");
+        return ret;
+    }
+    fclose(f);
+    for(i=0;i<accountCnt;i++){
+        if(!strcmp(id,accounts[i].id)){
+            found=1;
+            break;
+        }
+    }
+    if(!found){
+        ret.status.status=ERROR;
+        strcpy(ret.status.message,"Account not found!");
+        return ret;
+    }
+    FILE *accountFile=fopen(strcat(id,".txt"),"r");
+    if(accountFile==NULL){
+        FILE *createAccountFile=fopen(strcat(id,".txt"),"w");
+        fclose(createAccountFile);
+        accountFile=fopen(strcat(id,".txt"),"r");
+    }
+    char line[5*N],ufaccountId[N],ufpartyId[N],uftype[N],ufamount[N],ufdate[N];
+    for(i=0;fgets(line,sizeof(line),accountFile);i++){
+        strcpy(ufaccountId,strtok(line,","));
+        strcpy(ufpartyId,strtok(NULL,","));
+        strcpy(uftype,strtok(NULL,","));
+        strcpy(ufamount,strtok(NULL,","));
+        strcpy(ufdate,strtok(NULL,","));
+        Transaction trans;
+        strcpy(trans.accountId,ufaccountId);
+        strcpy(trans.partyId,ufpartyId);
+        strcpy(trans.type,uftype);
+        trans.amount=strtod(ufamount,NULL);
+        trans.date.day=atoi(strtok(ufdate,"-"));
+        trans.date.month=atoi(strtok(NULL,"-"));
+        trans.date.year=atoi(strtok(NULL,"-"));
+        ret.transactions[ret.n]=trans;
+        ret.n++;
+        if(ret.n==5){
+            break;
+        }
+    }
+    fclose(accountFile);
+    if(!ret.n){
+        ret.status.status=ERROR;
+        strcpy(ret.status.message,"No transactions by account found!");
+    }
+    else{
+        ret.status.status=SUCCESS;
+        strcpy(ret.status.message,"All recent transactions (up to 5) obtained!");
+    }
     return ret;
 }
