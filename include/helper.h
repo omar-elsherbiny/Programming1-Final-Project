@@ -42,6 +42,18 @@ typedef struct{
     Account accounts[N];
 } AccountResult;
 
+typedef struct{
+    char accountId[20],partyId[20],type[N];
+    double amount;
+    DateDay date;
+} Transaction;
+
+typedef struct{
+    Status status;
+    int n;//number of transactions in package
+    Transaction transactions[N];
+} ReportResult;
+
 int cmp_accounts(Account a,Account b,SortMethod method);
 void account_merge_sort(Account accounts[],int l,int r,SortMethod method);
 double day_withdrawals(DateDay day,char *id);
