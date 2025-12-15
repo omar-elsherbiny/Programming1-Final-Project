@@ -328,3 +328,60 @@ void save(){
     }
     fclose(f);
 }
+
+Status deposit(char *id,double amount){
+    int i,found=0;
+    Status ret;
+    FILE *f=fopen("files/accounts.txt","r");
+    if(f == NULL){
+        ret.status=ERROR;
+        strcpy(ret.message,"File accounts.txt not found!");
+        return ret;
+    }
+    fclose(f);
+    for(i=0;i<accountCnt;i++){
+        if(!strcmp(id,accounts[i].id)){
+            found=1;
+        }
+    }
+    if(!found){
+        ret.status=ERROR;
+        strcpy(ret.message,"Account not found!");
+        return ret;
+    }
+    //account found and file exists
+    for(i=0;i<accountCnt;i++){
+        if(!strcmp(id,accounts[i].id)){
+            if(!accounts[i].status){
+                ret.status=ERROR;
+                strcpy(ret.message,"Account is inactive!");
+                return ret;
+            }
+            if(amount>10000){
+                ret.status=ERROR;
+                strcpy(ret.message,"Deposit amount limit is $10,000!");
+                return ret;
+            }
+            if(amount<=0){
+                ret.status=ERROR;
+                strcpy(ret.message,"Deposit amount must be positive!");
+                return ret;
+            }
+            FILE *accountFile=fopen(strcat(id,".txt"),"r");
+            if(accountFile==NULL){
+                FILE *createAccountFile=fopen(strcat(id,".txt"),"w");
+                fclose(createAccountFile);
+                accountFile=fopen(strcat(id,".txt"),"r");
+            }
+            fclose(accountFile);
+            accountFile=fopen(strcat(id,".txt"),"a");
+            fprintf(accountFile,"%s,deposit,%.2f,%d-%d-%d\n",id,amount,get_today().day,get_today().month,get_today().year);
+            fclose(accountFile);
+            accounts[i].balance+=amount;
+            save();
+        }
+    }
+    ret.status=SUCCESS;
+    strcpy(ret.message,"Deposit completed successfully!");
+    return ret;
+}
