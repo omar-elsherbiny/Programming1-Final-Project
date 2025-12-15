@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 
 int cmp_accounts(Account a,Account b,SortMethod method){
     if(method == ID){
@@ -63,4 +64,41 @@ void account_merge_sort(Account accounts[],int l,int r,SortMethod method){
             accounts[idx++]=ra[p2++];
         }
     }
+}
+
+double day_withdrawals(DateDay day,char *id){
+    FILE *accountFile=fopen(strcat(id,".txt"),"r");
+    if(accountFile==NULL){
+        FILE *createAccountFile=fopen(strcat(id,".txt"),"w");
+        fclose(createAccountFile);
+        accountFile=fopen(strcat(id,".txt"),"r");
+    }
+    char line[4*N],ufid[N],uftype[N],ufamount[N],ufdaydate[N];
+    int i;
+    double sm=0;
+    for(i=0;fgets(line,sizeof(line),accountFile);i++){
+        strcpy(ufid,strtok(line,","));
+        strcpy(uftype,strtok(NULL,","));
+        strcpy(ufamount,strtok(NULL,","));
+        strcpy(ufdaydate,strtok(NULL,","));
+        DateDay cur;
+        cur.day=atoi(strtok(ufdaydate,"-"));
+        cur.month=atoi(strtok(NULL,"-"));
+        cur.year=atoi(strtok(NULL,"-"));
+        if(cur.day==day.day&&cur.month==day.month&&cur.year==day.year&&!strcmp(uftype,"withdraw")){
+            sm+=strtod(ufamount,NULL);
+        }
+    }
+    fclose(accountFile);
+    return sm;
+}
+
+DateDay get_today(){
+    time_t t = time(NULL);
+    struct tm *tm_info=localtime(&t);
+    DateDay ret;
+    ret.day=tm_info->tm_mday;
+    ret.month=tm_info->tm_mon+1;
+    ret.year=tm_info->tm_year+1900;
+    return ret;
 }

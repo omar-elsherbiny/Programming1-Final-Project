@@ -25,6 +25,9 @@ typedef struct{
 } Date;
 
 typedef struct{
+    int day,month,year;
+} DateDay;
+typedef struct{
     int status;//inactive 0, active 1
     char id[20],name[N],mobile[15],email[N];
     double balance;
@@ -41,4 +44,6 @@ typedef struct{
 
 int cmp_accounts(Account a,Account b,SortMethod method);
 void account_merge_sort(Account accounts[],int l,int r,SortMethod method);
+double day_withdrawals(DateDay day,char *id);
+DateDay get_today();
 #endif

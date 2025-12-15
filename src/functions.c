@@ -180,11 +180,7 @@ Status delete(char *id){
         }
     }
     accountCnt--;
-    f=fopen("files/accounts.txt","w");
-    for(i=0;i<accountCnt;i++){
-        fprintf(f,"%s,%s,%s,%.2f,%s,%d-%d, %s\n",accounts[i].id,accounts[i].name,accounts[i].email,accounts[i].balance,accounts[i].mobile,accounts[i].date.month,accounts[i].date.year,(accounts[i].status?"active":"inactive"));
-    }
-    fclose(f);
+    save();
     ret.status=SUCCESS;
     strcpy(ret.message,"Account deleted successfully!");
     return ret;
@@ -218,11 +214,7 @@ Status modify(char *id,char *name,char *mobile,char *email){
             strcpy(accounts[i].email,email);
         }
     }
-    f=fopen("files/accounts.txt","w");
-    for(i=0;i<accountCnt;i++){
-        fprintf(f,"%s,%s,%s,%.2f,%s,%d-%d, %s\n",accounts[i].id,accounts[i].name,accounts[i].email,accounts[i].balance,accounts[i].mobile,accounts[i].date.month,accounts[i].date.year,(accounts[i].status?"active":"inactive"));
-    }
-    fclose(f);
+    save();
     ret.status=SUCCESS;
     strcpy(ret.message,"Account modified successfully!");
     return ret;
@@ -254,12 +246,81 @@ Status change_status(char *id){
             accounts[i].status^=1; // toggles status
         }
     }
-    f=fopen("files/accounts.txt","w");
+    save();
+    ret.status=SUCCESS;
+    strcpy(ret.message,"Account status changed successfully!");
+    return ret;
+}
+
+Status withdraw(char *id,double amount){
+    int i,found=0;
+    Status ret;
+    FILE *f=fopen("files/accounts.txt","r");
+    if(f == NULL){
+        ret.status=ERROR;
+        strcpy(ret.message,"File accounts.txt not found!");
+        return ret;
+    }
+    fclose(f);
+    for(i=0;i<accountCnt;i++){
+        if(!strcmp(id,accounts[i].id)){
+            found=1;
+        }
+    }
+    if(!found){
+        ret.status=ERROR;
+        strcpy(ret.message,"Account not found!");
+        return ret;
+    }
+    //account found and file exists
+    for(i=0;i<accountCnt;i++){
+        if(!strcmp(id,accounts[i].id)){
+            if(!accounts[i].status){
+                ret.status=ERROR;
+                strcpy(ret.message,"Account is inactive!");
+                return ret;
+            }
+            if(amount>10000){
+                ret.status=ERROR;
+                strcpy(ret.message,"Withdrawal amount limit is $10,000!");
+                return ret;
+            }
+            if(amount<=0){
+                ret.status=ERROR;
+                strcpy(ret.message,"Withdrawal amount must be positive!");
+                return ret;
+            }
+            if(amount+day_withdrawals(get_today(),id)>50000){
+                ret.status=ERROR;
+                strcpy(ret.message,"Daily withdrawal limit is $50,000!");
+                return ret;
+            }
+            if(accounts[i].balance<amount){
+                ret.status=ERROR;
+                strcpy(ret.message,"Not enough balance for withdrawal!");
+                return ret;
+            }
+            FILE *accountFile=fopen(strcat(id,".txt"),"r");
+            if(accountFile==NULL){
+                FILE *createAccountFile=fopen(strcat(id,".txt"),"w");
+                fclose(createAccountFile);
+                accountFile=fopen(strcat(id,".txt"),"r");
+            }
+            fclose(accountFile);
+            accountFile=fopen(strcat(id,".txt"),"a");
+            fprintf(accountFile,"%s,withdraw,%.2f,%d-%d-%d\n",id,amount,get_today().day,get_today().month,get_today().year);
+            fclose(accountFile);
+            accounts[i].balance-=amount;
+            save();
+        }
+    }
+}
+
+void save(){
+    FILE *f=fopen("files/accounts.txt","w");
+    int i;
     for(i=0;i<accountCnt;i++){
         fprintf(f,"%s,%s,%s,%.2f,%s,%d-%d, %s\n",accounts[i].id,accounts[i].name,accounts[i].email,accounts[i].balance,accounts[i].mobile,accounts[i].date.month,accounts[i].date.year,(accounts[i].status?"active":"inactive"));
     }
     fclose(f);
-    ret.status=SUCCESS;
-    strcpy(ret.message,"Account status changed successfully!");
-    return ret;
 }

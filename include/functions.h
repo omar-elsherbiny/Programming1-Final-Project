@@ -10,4 +10,6 @@ Status add(Account acc);
 Status delete(char *id);
 Status modify(char *id,char *name,char *mobile,char *email);
 Status change_status(char *id);
+void save();
+Status withdraw(char *id,double amount);
 #endif
