@@ -4,8 +4,8 @@
 #include "helper.h"
 Status login(char *username,char* password);
 Status load();
-Account_result query(char *id);
-Account_result advanced_search(char *id);
+AccountResult query(char *id);
+AccountResult advanced_search(char *id);
 Status add(Account acc);
 Status delete(char *id);
 Status modify(char *id,char *name,char *mobile,char *email);

@@ -6,17 +6,17 @@
 typedef enum{
     SUCCESS,
     ERROR
-} Status_code;
+} StatusCode;
 
 typedef enum{
     ID,
     NAME,
     BALANCE,
     DATE
-} Sort_method;
+} SortMethod;
 
 typedef struct{
-    Status_code status;
+    StatusCode status;
     char message[N];
 } Status;
 
@@ -37,8 +37,8 @@ typedef struct{
     Status status;
     int n;//number of accounts in package
     Account accounts[N];
-} Account_result;
+} AccountResult;
 
-int cmp_accounts(Account a,Account b,Sort_method method);
-void account_merge_sort(Account accounts[],int l,int r,Sort_method method);
+int cmp_accounts(Account a,Account b,SortMethod method);
+void account_merge_sort(Account accounts[],int l,int r,SortMethod method);
 #endif

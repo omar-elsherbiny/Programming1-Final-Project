@@ -67,8 +67,8 @@ Status load(){
     return ret;
 }
 
-Account_result query(char *id){
-    Account_result ret;
+AccountResult query(char *id){
+    AccountResult ret;
     account_merge_sort(accounts,0,account_cnt,ID);
     int s=0,e=account_cnt,mid;
     // binary search for account
@@ -94,8 +94,8 @@ Account_result query(char *id){
     return ret;
 }
 
-Account_result advanced_search(char *keyword){
-    Account_result ret;
+AccountResult advanced_search(char *keyword){
+    AccountResult ret;
     ret.n=0;
     int i;
     for(i=0;i<account_cnt;i++){
