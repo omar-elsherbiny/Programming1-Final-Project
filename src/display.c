@@ -111,6 +111,12 @@ static int utf8_strcnt(const char str[], int char_cnt, _Bool extend) {
     return bytes;
 }
 
+static int calc_max_offset(const char template[], const char str[], int width) {
+    int contentWidthC = width - (utf8_strlen(template) - 2);
+    int strLenC = utf8_strlen(str);
+    return strLenC - contentWidthC;
+}
+
 void format_string(const char template[], const char str[], int width, int offset, char dest[]) {
     const char *placeholder = strstr(template, "%s");
     if (!placeholder) return;
@@ -140,12 +146,12 @@ void format_string(const char template[], const char str[], int width, int offse
         // truncate and offset
         if (offset > strLenC - contentWidthC) offset = strLenC - contentWidthC;
         int offsetB = utf8_strcnt(str, offset, 0);
-        int lastWidth = contentWidthC;
+        int leading = 0;
         contentWidthB = utf8_strcnt(str + offsetB, contentWidthC, 1);
         memcpy(content, str + offsetB, contentWidthB);
         // leading elipses
         if (offset > 0) {
-            lastWidth = lastWidth - 1;
+            leading = 1;
             contentWidthB = utf8_strcnt(str + offsetB + 1, contentWidthC - 1, 1);
             memcpy(content, "…", 3);
             memcpy(content + 3, str + offsetB + 1, contentWidthB);
@@ -153,7 +159,9 @@ void format_string(const char template[], const char str[], int width, int offse
         }
         // trailing elipses
         if (offset < strLenC - contentWidthC) {
-            contentWidthB -= utf8_strcnt(str + offsetB, lastWidth, 1) - utf8_strcnt(str + offsetB, lastWidth - 1, 1);  // subtract last char bytes
+            contentWidthB -= (utf8_strcnt(str + offsetB + leading, contentWidthC - leading, 1) -
+                              utf8_strcnt(str + offsetB + leading, contentWidthC - leading - 1, 1));
+            // subtract last char bytes
             memcpy(content + contentWidthB, "…", 3);
             contentWidthB += 3;
         }
@@ -303,6 +311,7 @@ PromptInputs display_box_prompt(BoxContent *box) {
     }
 
     char **textInputs = malloc(textInputCount * sizeof(char *));
+    int *textOffsets = calloc(textInputCount, sizeof(int));
     for (int i = 0; i < textInputCount; i++) {
         textInputs[i] = calloc(LINE_LENGTH + 1, sizeof(char));
     }
@@ -349,7 +358,12 @@ PromptInputs display_box_prompt(BoxContent *box) {
                 currResLine = resultBox.content[resultIndexMap[curr]];
 
                 if (selectableLines[prev]->type == TEXT) {
-                    format_string(selectableLines[prev]->text, textInputs[textIndexMap[prev]], boxWidth, 0, resultBox.content[resultIndexMap[prev]]);
+                    format_string(
+                        selectableLines[prev]->text,
+                        textInputs[textIndexMap[prev]],
+                        boxWidth,
+                        0,
+                        resultBox.content[resultIndexMap[prev]]);
                 }  // remove FLIP TEXT
                 else {
                     replace_wrap_string(selectableLines[prev]->text, "", "", resultBox.content[resultIndexMap[prev]]);
@@ -357,17 +371,28 @@ PromptInputs display_box_prompt(BoxContent *box) {
 
                 if (currLine->type == TEXT) {
                     textInput = textInputs[textIndexMap[curr]];
+                    textOffsets[textIndexMap[curr]] = LINE_LENGTH;
                     sprintf(tempTextInput, "%s" BLINK "█" BLINK_RESET, textInput);
-                    format_string(currLine->text, tempTextInput, boxWidth, 0, currResLine);
+                    format_string(currLine->text, tempTextInput, boxWidth, LINE_LENGTH, currResLine);
                 }  // add FLIP TEXT
                 else {
                     replace_wrap_string(currLine->text, FLIP, FLIP_RESET, currResLine);
                     dialogueValue = currLine->data.value;
                 }  // add FLIP DIALOGUE
-            } else if (s == K_LEFT || s == K_RIGHT) {
-                // TODO:
-                // scroll TEXT
-            }
+            } else if ((s == K_LEFT || s == K_RIGHT) && currLine->type == TEXT) {
+                sprintf(tempTextInput, "%s" BLINK "█" BLINK_RESET, textInput);
+                int textOffset = textOffsets[textIndexMap[curr]];
+                int maxTextOffset = calc_max_offset(currLine->text, tempTextInput, boxWidth);
+
+                if (textOffset < 0) textOffset = 0;
+                if (textOffset > maxTextOffset) textOffset = maxTextOffset;
+
+                if (textOffset > 0 && s == K_LEFT) textOffset--;
+                if (textOffset < maxTextOffset && s == K_RIGHT) textOffset++;
+
+                textOffsets[textIndexMap[curr]] = textOffset;
+                format_string(currLine->text, tempTextInput, boxWidth, textOffset, currResLine);
+            }  // scroll TEXT
         } else if (ch == K_ENTER && currLine->type == DIALOGUE) {
             break;
         } else if (currLine->type == TEXT) {
@@ -382,14 +407,16 @@ PromptInputs display_box_prompt(BoxContent *box) {
                 textInput[len + 1] = '\0';
             }
 
+            textOffsets[textIndexMap[curr]] = LINE_LENGTH;
             sprintf(tempTextInput, "%s" BLINK "█" BLINK_RESET, textInput);
-            format_string(currLine->text, tempTextInput, boxWidth, 0, currResLine);
+            format_string(currLine->text, tempTextInput, boxWidth, LINE_LENGTH, currResLine);
         }
     }
 
     free(selectableLines);
     free(resultIndexMap);
     free(textIndexMap);
+    free(textOffsets);
 
     return (PromptInputs){textInputCount, textInputs, dialogueValue};
 }
