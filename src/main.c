@@ -6,9 +6,29 @@
 #include "menus.h"
 
 int main(void) {
-    printf(FG_CYAN BG_WHITE "HelloWorld!\n" RESET);
-
     display_init();
+
+    BoxContent addAccountPage = {
+        .title = "Add Account" ,
+        .content = {
+            LINE_DEFAULT("┌ Account Number ────────────┐"),
+            LINE_TEXT("│ %s │", 10,    0),
+            LINE_DEFAULT("└────────────────────────────┘"),
+            LINE_DEFAULT("┌ Name ──────────────────────┐"),
+            LINE_TEXT("│ %s │", 50,    0),
+            LINE_DEFAULT("└────────────────────────────┘"),
+            LINE_DEFAULT("┌ E-mail ────────────────────┐"),
+            LINE_TEXT("│ %s │", 25,    0),
+            LINE_DEFAULT("└────────────────────────────┘"),
+            LINE_DEFAULT("┌ Balance ───────────────────┐"),
+            LINE_TEXT("│ %s ($) │", 15,    0),
+            LINE_DEFAULT("└────────────────────────────┘"),
+            LINE_DEFAULT("┌ Mobile ────────────────────┐"),
+            LINE_TEXT("│ + %s │", 15,    0),
+            LINE_DEFAULT("└────────────────────────────┘"),
+
+            LINE_DIALOGUE("Add", 0),
+            LINE_DIALOGUE("Back", 1)}};
 
     BoxContent searchPage = {
         .title = FG_RED "Delete Account",
@@ -20,9 +40,9 @@ int main(void) {
             LINE_DEFAULT(" "),
             LINE_DIALOGUE("Discard", 0)}};
 
-    display_box_prompt(&searchPage);
+    //display_box_prompt(&searchPage);
+    display_box_prompt(&addAccountPage);
 
     display_cleanup();
     return 0;
-
 }

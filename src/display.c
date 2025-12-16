@@ -96,6 +96,72 @@ static int utf8_strcnt(const char str[], int char_cnt) {
     return bytes;
 }
 
+void format_string(char template[], char str[], int width, int offset, char dest[]) {
+    const char *placeholder = strstr(template, "%s");
+    if (!placeholder) return;
+
+    int prefixLenB = placeholder - template;
+    int suffixLenB = strlen(template) - prefixLenB - 2;
+
+    int contentWidthB = 0;
+    int contentWidthC = width - (utf8_strlen(template) - 2);
+    if (contentWidthC < 0) return;
+
+    char result[LINE_LENGTH];
+
+    // put prefix
+    memcpy(result, template, prefixLenB);
+
+    // put formatted content
+    char *content = result + prefixLenB;
+    int strLenC = utf8_strlen(str);
+    int strLenB = strlen(str);
+    if (strLenC <= contentWidthC) {
+        // pad with spaces
+        memcpy(content, str, strLenB);
+        memset(content + strLenB, ' ', contentWidthC - strLenC);
+        contentWidthB += strLenB + contentWidthC - strLenC;
+    } else {
+        // truncate and offset
+        if (offset > strLenC - contentWidthC) offset = strLenC - contentWidthC;
+        int offsetB = utf8_strcnt(str, offset);
+        int lastWidth = contentWidthC;
+        contentWidthB = utf8_strcnt(str + offsetB, contentWidthC);
+        memcpy(content, str + offsetB, contentWidthB);
+        // leading elipses
+        if (offset > 0) {
+            lastWidth = lastWidth - 1;
+            contentWidthB = utf8_strcnt(str + offsetB, contentWidthC - 1);
+            memcpy(content, "…", 3);
+            memcpy(content + 3, str + offsetB, contentWidthB);
+            contentWidthB += 3;
+        }
+        // trailing elipses
+        if (offset < strLenC - contentWidthC) {
+            contentWidthB -= utf8_strcnt(str + offsetB, lastWidth) - utf8_strcnt(str + offsetB, lastWidth - 1);  // subtract last char bytes
+            memcpy(content + contentWidthB, "…", 3);
+            contentWidthB += 3;
+        }
+    }
+
+    // put suffix
+    memcpy(result + prefixLenB + contentWidthB, placeholder + 2, suffixLenB);
+
+    result[prefixLenB + contentWidthB + suffixLenB] = '\0';
+    strcpy(dest, result);
+}
+
+void replace_wrap_string(char str[], char first[], char second[], char dest[]) {
+    int count = 0;
+    char *p = str;
+    while ((p = strstr(p, "%s")) != NULL) count++, p += 2;
+
+    if (count == 2)
+        sprintf(dest, str, first, second);
+    else
+        sprintf(dest, "%s%s%s", first, str, second);
+}
+
 static void get_box_dimensions(BoxContent *box, int *width, int *height) {
     int maxWidth = 0;
     int lineCount = 0;
@@ -126,70 +192,6 @@ static void get_box_dimensions(BoxContent *box, int *width, int *height) {
 
     *width = maxWidth;
     *height = lineCount;
-}
-
-void format_string(char template[], char str[], int width, int offset, char dest[]) {
-    const char *placeholder = strstr(template, "%s");
-    if (!placeholder) return;
-
-    int prefixLenB = placeholder - template;
-    int suffixLenB = strlen(template) - prefixLenB - 2;
-
-    int contentWidthB = 0;
-    int contentWidthC = width - (utf8_strlen(template) - 2);
-    if (contentWidthC < 0) return;
-
-    char result[LINE_LENGTH];
-
-    // put prefix
-    memcpy(result, template, prefixLenB);
-
-    // put formatted content
-    char *content = result + prefixLenB;
-    int strLenC = utf8_strlen(str);
-    int strLenB = strlen(str);
-    if (strLenC <= contentWidthC) {
-        // pad with spaces
-        memcpy(content, str, strLenB);
-        memset(content + strLenB, ' ', contentWidthC - strLenC);
-        contentWidthB += strLenB + contentWidthC - strLenC;
-    } else {
-        // truncate and offset
-        if (offset > strLenC - contentWidthC) offset = strLenC - contentWidthC;
-        int offsetB = utf8_strcnt(str, offset);
-        contentWidthB = utf8_strcnt(str + offsetB, contentWidthC);
-        memcpy(content, str + offsetB, contentWidthB);
-        // leading elipses
-        if (offset > 0) {
-            contentWidthB = utf8_strcnt(str + offsetB, contentWidthC - 1);
-            memcpy(content, "…", 3);
-            memcpy(content + 3, str + offsetB, contentWidthB);
-            contentWidthB += 3;
-        }
-        // trailing elipses
-        if (offset < strLenC - contentWidthC) {
-            contentWidthB -= strLenB - utf8_strcnt(str, strLenC - 1);
-            memcpy(content + contentWidthB, "…", 3);
-            contentWidthB += 3;
-        }
-    }
-
-    // put suffix
-    memcpy(result + prefixLenB + contentWidthB, placeholder + 2, suffixLenB);
-
-    result[prefixLenB + contentWidthB + suffixLenB] = '\0';
-    strcpy(dest, result);
-}
-
-void replace_wrap_string(char str[], char first[], char second[], char dest[]) {
-    int count = 0;
-    char *p = str;
-    while ((p = strstr(p, "%s")) != NULL) count++, p += 2;
-
-    if (count == 2)
-        sprintf(dest, str, first, second);
-    else
-        sprintf(dest, "%s%s%s", first, str, second);
 }
 
 void display_draw_box(DrawnBox *box) {
@@ -345,6 +347,7 @@ PromptInputs display_box_prompt(BoxContent *box) {
                     dialogueValue = currLine->data.value;
                 }  // add FLIP DIALOGUE
             } else if (s == K_LEFT || s == K_RIGHT) {
+                // TODO:
                 // scroll TEXT
             }
         } else if (ch == K_ENTER && currLine->type == DIALOGUE) {
