@@ -251,6 +251,7 @@ PromptInputs display_box_prompt(BoxContent *box) {
     strcpy(resultBox.title, box->title);
     strcpy(resultBox.footer, box->footer);
 
+    // count
     int textInputCount = 0;
     int selectableCount = 0;
     for (int i = 0; i < LINE_COUNT; i++) {
@@ -265,9 +266,10 @@ PromptInputs display_box_prompt(BoxContent *box) {
         if (line->type != DEFAULT) selectableCount++;
     }
 
+    // initialize arrays
     Line **selectableLines = malloc(selectableCount * sizeof(Line *));
-    int *resultIndexMap = malloc(selectableCount * sizeof(int *));
-    int *textIndexMap = malloc(selectableCount * sizeof(int *));
+    int *resultIndexMap = malloc(selectableCount * sizeof(int));
+    int *textIndexMap = malloc(selectableCount * sizeof(int));
     int n = 0, t = 0;
     for (int i = 0; i < LINE_COUNT; i++) {
         Line *line = &box->content[i];
@@ -280,16 +282,25 @@ PromptInputs display_box_prompt(BoxContent *box) {
         }
     }
 
+    char **textInputs = malloc(textInputCount * sizeof(char *));
+    for (int i = 0; i < textInputCount; i++) {
+        textInputs[i] = calloc(LINE_LENGTH + 1, sizeof(char));
+    }
+
     int curr = 0;
     int prev = -1;
     int ch;
-    char **textInputs = malloc(textInputCount * sizeof(char *));
+
     int dialogueValue;
+    char *textInput;
+    char tempTextInput[LINE_LENGTH];
+
     Line *currLine = selectableLines[curr];
     char *currResLine = resultBox.content[resultIndexMap[curr]];
 
     if (currLine->type == TEXT) {
-        format_string(currLine->text, "█", boxWidth, 0, currResLine);
+        format_string(currLine->text, BLINK "█" BLINK_RESET, boxWidth, 0, currResLine);
+        textInput = textInputs[textIndexMap[curr]];
     }  // add initial FLIP TEXT
     else {
         replace_wrap_string(currLine->text, FLIP, FLIP_RESET, currResLine);
@@ -303,6 +314,7 @@ PromptInputs display_box_prompt(BoxContent *box) {
         ch = _getch();
 
         if (ch == K_ESC) {
+            printf("%s\n%s\n", textInputs[1], tempTextInput);
             exit(1);
         } else if (ch == 0 || ch == 224) {
             int s = _getch();
@@ -317,14 +329,16 @@ PromptInputs display_box_prompt(BoxContent *box) {
                 currResLine = resultBox.content[resultIndexMap[curr]];
 
                 if (selectableLines[prev]->type == TEXT) {
-                    format_string(selectableLines[prev]->text, "", boxWidth, 0, resultBox.content[resultIndexMap[prev]]);
+                    format_string(selectableLines[prev]->text, textInputs[textIndexMap[prev]], boxWidth, 0, resultBox.content[resultIndexMap[prev]]);
                 }  // remove FLIP TEXT
                 else {
                     replace_wrap_string(selectableLines[prev]->text, "", "", resultBox.content[resultIndexMap[prev]]);
                 }  // remove FLIP DIALOGUE
 
                 if (currLine->type == TEXT) {
-                    format_string(currLine->text, "█", boxWidth, 0, currResLine);
+                    textInput = textInputs[textIndexMap[curr]];
+                    sprintf(tempTextInput, "%s" BLINK "█" BLINK_RESET, textInput);
+                    format_string(currLine->text, tempTextInput, boxWidth, 0, currResLine);
                 }  // add FLIP TEXT
                 else {
                     replace_wrap_string(currLine->text, FLIP, FLIP_RESET, currResLine);
@@ -337,10 +351,24 @@ PromptInputs display_box_prompt(BoxContent *box) {
             break;
         } else if (currLine->type == TEXT) {
             // write TEXT
+            int len = strlen(textInput);
+            int maxLen = currLine->data.options.maxLen;
+
+            if (ch == K_BACKSPACE && len > 0) {
+                textInput[len - 1] = '\0';
+            } else if (ch >= 32 && ch <= 126 && len < maxLen) {
+                textInput[len] = (char)ch;
+                textInput[len + 1] = '\0';
+            }
+
+            sprintf(tempTextInput, "%s" BLINK "█" BLINK_RESET, textInput);
+            format_string(currLine->text, tempTextInput, boxWidth, 0, currResLine);
         }
     }
 
-    // TODO: free stuff
+    free(selectableLines);
+    free(resultIndexMap);
+    free(textIndexMap);
 
     return (PromptInputs){textInputCount, textInputs, dialogueValue};
 }

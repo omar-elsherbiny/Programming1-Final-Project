@@ -32,15 +32,17 @@
 #define FLIP "\033[7m"
 #define FLIP_RESET "\033[27m"
 #define BLINK "\033[5m"
+#define BLINK_RESET "\033[25m"
 #define BOLD "\033[1m"
 #define RESET "\033[0m"
 
 #define K_ESC 27
+#define K_ENTER 13
+#define K_BACKSPACE 8
 #define K_UP 72
 #define K_DOWN 80
 #define K_RIGHT 77
 #define K_LEFT 75
-#define K_ENTER 13
 
 typedef enum {
     DEFAULT,
