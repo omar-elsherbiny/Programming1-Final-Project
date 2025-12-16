@@ -59,8 +59,6 @@ Status load(){
         accounts[i].status=(strcmp(strtok(ufstatus," "),"inactive")==0?0:1);
         accounts[i].date.month=atoi(strtok(ufdate,"-"));
         accounts[i].date.year=atoi(strtok(NULL,"-"));
-        accounts[i].inactivity.month=atoi(strtok(ufdate,"-"));
-        accounts[i].inactivity.year=atoi(strtok(NULL,"-"));
         //check if account transaction file exists, if not creates it
         FILE *accountFile=fopen(strcat(accounts[i].id,".txt"),"r");
         if(accountFile==NULL){
@@ -243,7 +241,6 @@ Status change_status(char *id){
     }
     //account found and file exists
     accounts[i].status^=1; // toggles status
-    accounts[i].inactivity=get_month();
     save();
     ret.status=SUCCESS;
     strcpy(ret.message,"Account status changed successfully!");
@@ -585,7 +582,7 @@ Status delete_multiple(DeleteMethod method,Date date){
     }
     else{
         for(i=0;i<accountCnt;i++){
-            if(month_diff(get_month(),accounts[i].inactivity)>3&&accounts[i].balance==0){
+            if(month_diff(get_month(),accounts[i].date)>3&&accounts[i].balance==0){
                 found++;
             }
             else{
