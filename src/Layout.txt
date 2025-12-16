@@ -119,18 +119,17 @@ Delete Accounts
     │ │ Accounts inactive 90 days  │ │
     │ └────────────────────────────┘ │
     │                                │
-    │ Delete                         │
     │ Discard                        │
     └────────────────────────────────┘
     ┌──────── Delete Account ────────┐
     │ Delete all accounts created on │
     │ the given date below           │
-    │           ┌ Month ┐            │
-    │           │ 12    │            │
-    │           └───────┘            │
-    │           ┌ Year ─┐            │
-    │           │ 2025  │            │
-    │           └───────┘            │
+    │           ┌ Month ─┐           │
+    │           │ 12     │           │
+    │           └────────┘           │
+    │           ┌ Year ──┐           │
+    │           │ 2025   │           │
+    │           └────────┘           │
     │                                │
     │ Delete                         │
     │ Discard                        │
@@ -244,7 +243,7 @@ Error Message
     └────────────────────────────────┘
 
 Advanced Searching
-    ┌──────── Search Account ────────┐
+    ┌─────── Search Accounts ────────┐
     │ ┌ Keyword ───────────────────┐ │
     │ │ a█                         │ │
     │ └────────────────────────────┘ │
@@ -252,7 +251,7 @@ Advanced Searching
     │ Find                           │
     │ Discard                        │
     └────────────────────────────────┘
-    ┌──────── Search Account ────────┐
+    ┌─────── Search Accounts ────────┐
     │ ↑ ...                          │
     │ Account #: 6767676767          │
     │ Name: Rick Astley              │

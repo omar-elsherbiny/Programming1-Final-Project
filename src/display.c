@@ -109,6 +109,12 @@ static void get_box_dimensions(BoxContent *box, int *width, int *height) {
 
         int len = utf8_strlen(line->text);
         if (line->type == TEXT) len = len - 2;  // + line->data.options.maxLen;
+        if (line->type == DIALOGUE) {
+            int count = 0;
+            char *p = line->text;
+            while ((p = strstr(p, "%s")) != NULL) count++, p += 2;
+            len = len - 2 * count;
+        }
 
         if (len > maxWidth) maxWidth = len;
         lineCount++;
