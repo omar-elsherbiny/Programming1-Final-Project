@@ -55,7 +55,7 @@ static int utf8_strlen(const char str[]) {
     return len;
 }
 
-static int utf8_strcnt(const char str[], int char_cnt) {
+static int utf8_strcnt(const char str[], int char_cnt, _Bool extend) {
     int bytes = 0;
     const unsigned char *p = (const unsigned char *)str;
 
@@ -93,10 +93,25 @@ static int utf8_strcnt(const char str[], int char_cnt) {
         char_cnt--;
     }
 
+    if (extend && *p) {
+        if (*p == 0x1B && p[1] == '[') {
+            p += 2;
+            bytes += 2;
+            while (*p && (*p < '@' || *p > '~')) {
+                p++;
+                bytes++;
+            }
+            if (*p) {
+                p++;
+                bytes++;
+            }
+        }
+    }
+
     return bytes;
 }
 
-void format_string(char template[], char str[], int width, int offset, char dest[]) {
+void format_string(const char template[], const char str[], int width, int offset, char dest[]) {
     const char *placeholder = strstr(template, "%s");
     if (!placeholder) return;
 
@@ -124,21 +139,21 @@ void format_string(char template[], char str[], int width, int offset, char dest
     } else {
         // truncate and offset
         if (offset > strLenC - contentWidthC) offset = strLenC - contentWidthC;
-        int offsetB = utf8_strcnt(str, offset);
+        int offsetB = utf8_strcnt(str, offset, 0);
         int lastWidth = contentWidthC;
-        contentWidthB = utf8_strcnt(str + offsetB, contentWidthC);
+        contentWidthB = utf8_strcnt(str + offsetB, contentWidthC, 1);
         memcpy(content, str + offsetB, contentWidthB);
         // leading elipses
         if (offset > 0) {
             lastWidth = lastWidth - 1;
-            contentWidthB = utf8_strcnt(str + offsetB, contentWidthC - 1);
+            contentWidthB = utf8_strcnt(str + offsetB + 1, contentWidthC - 1, 1);
             memcpy(content, "…", 3);
-            memcpy(content + 3, str + offsetB, contentWidthB);
+            memcpy(content + 3, str + offsetB + 1, contentWidthB);
             contentWidthB += 3;
         }
         // trailing elipses
         if (offset < strLenC - contentWidthC) {
-            contentWidthB -= utf8_strcnt(str + offsetB, lastWidth) - utf8_strcnt(str + offsetB, lastWidth - 1);  // subtract last char bytes
+            contentWidthB -= utf8_strcnt(str + offsetB, lastWidth, 1) - utf8_strcnt(str + offsetB, lastWidth - 1, 1);  // subtract last char bytes
             memcpy(content + contentWidthB, "…", 3);
             contentWidthB += 3;
         }
@@ -151,9 +166,9 @@ void format_string(char template[], char str[], int width, int offset, char dest
     strcpy(dest, result);
 }
 
-void replace_wrap_string(char str[], char first[], char second[], char dest[]) {
+void replace_wrap_string(const char str[], const char first[], const char second[], char dest[]) {
     int count = 0;
-    char *p = str;
+    const char *p = str;
     while ((p = strstr(p, "%s")) != NULL) count++, p += 2;
 
     if (count == 2)
@@ -195,6 +210,7 @@ static void get_box_dimensions(BoxContent *box, int *width, int *height) {
 }
 
 void display_draw_box(DrawnBox *box) {
+    setvbuf(stdout, NULL, _IOFBF, 0);
     printf(CLEAR);
 
     int boxWidth = (box->width) + 4, boxHeight = (box->height) + 2;
@@ -241,6 +257,8 @@ void display_draw_box(DrawnBox *box) {
     printf("└");
     for (int i = 0; i < boxWidth - 2; i++) printf("─");
     printf("┘\n");
+
+    fflush(stdout);
 }
 
 PromptInputs display_box_prompt(BoxContent *box) {

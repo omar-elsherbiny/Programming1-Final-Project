@@ -104,7 +104,7 @@ void display_draw_box(DrawnBox *box);
 PromptInputs display_box_prompt(BoxContent *box);
 void display_cleanup(void);
 
-void format_string(char template[], char str[], int width, int offset, char dest[]);
-void replace_wrap_string(char str[], char first[], char second[], char dest[]);
+void format_string(const char template[], const char str[], int width, int offset, char dest[]);
+void replace_wrap_string(const char str[], const char first[], const char second[], char dest[]);
 
 #endif
