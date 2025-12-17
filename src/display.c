@@ -310,8 +310,8 @@ PromptInputs display_box_prompt(BoxContent *box) {
         }
     }
 
-    char **textInputs = malloc(textInputCount * sizeof(char *));
     int *textOffsets = calloc(textInputCount, sizeof(int));
+    char **textInputs = malloc(textInputCount * sizeof(char *));
     for (int i = 0; i < textInputCount; i++) {
         textInputs[i] = calloc(LINE_LENGTH + 1, sizeof(char));
     }
@@ -415,7 +415,10 @@ PromptInputs display_box_prompt(BoxContent *box) {
             }  // scroll TEXT
         } else if (ch == K_ENTER && currLine->type == DIALOGUE) {
             break;
-        } else if (currLine->type == TEXT && strchr(currLine->data.options.validChars, (char)ch)) {
+        } else if (currLine->type == TEXT && 
+            (currLine->data.options.validChars[0] == '\0' ||
+            strchr(currLine->data.options.validChars, (char)ch))) {
+                
             // write TEXT
             int len = utf8_strlen(textInput);
             int maxLen = currLine->data.options.maxLen;

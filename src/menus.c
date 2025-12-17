@@ -1,4 +1,6 @@
 // menus.c
+#include <stdio.h>
+#include <stdlib.h>
 #include "menus.h"
 #include "display.h"
 #include "functions.h"
@@ -12,6 +14,14 @@ typedef enum {
 
 static MenuIndex (*menuFunctions[100])();
 
+void free_result(PromptInputs results) {
+    for (int i = 0; i < results.textInputCount; i++){
+        free(results.textInputs[i]);
+    }    
+
+    free(results.textInputs);
+}
+
 // prototype example ↓
 // MenuIndex entry_func(params)
 // menuFunctions[ENTRY] = entry_func
@@ -21,25 +31,65 @@ static MenuIndex entry_func() {
 }
 
 MenuIndex login_func() {
+    enum DialogOptions {
+        DIALOG_LOGIN,
+        DIALOG_QUIT
+    } dialogOptions;
+
     BoxContent loginPage = {
         .title = "Login",
         .content = {
             LINE_DEFAULT("┌ Username ──────────────────┐"),
-            LINE_TEXT("│ %s │ ", 25,    0),
+            LINE_TEXT("│ %s │", 25, 0, ""),
             LINE_DEFAULT("└────────────────────────────┘"),
             LINE_DEFAULT("┌ Password ──────────────────┐"),
-            LINE_TEXT("│ %s │ ", 50,    1),
+            LINE_TEXT("│ %s │", 50, 1, ""),
             LINE_DEFAULT("└────────────────────────────┘"),
             LINE_DEFAULT(" "),
-            LINE_DIALOGUE("Login", 0),
-            LINE_DIALOGUE(FG_RED "Quit", 1)}};
+            LINE_DIALOGUE("Login", DIALOG_LOGIN),
+            LINE_DIALOGUE(FG_RED "Quit", DIALOG_QUIT)}};
     
-    display_box_prompt(&loginPage);
+    PromptInputs results = display_box_prompt(&loginPage);
     
-    return LOGIN;
+    printf("%s", results.textInputs[1]);
+    free_result(results);
+    if (results.dialogueValue == DIALOG_LOGIN) {
+        return RETURN;
+    } else if (results.dialogueValue == DIALOG_QUIT) {
+        return QUIT;
+    }
+}
+
+MenuIndex quit_func() {
+    enum DialogOptions {
+        DIALOG_YES,
+        DIALOG_NO
+    } dialogOptions;
+
+    BoxContent quitPage = {
+        .title = "Quit",
+        .content = {
+            LINE_DEFAULT("Are you sure you want to quit?"),
+            LINE_DEFAULT(" "),
+            LINE_DIALOGUE(FG_RED "Yes", DIALOG_YES),
+            LINE_DIALOGUE("No", DIALOG_NO)}};
+    
+    PromptInputs results = display_box_prompt(&quitPage);
+    
+    if (results.dialogueValue == DIALOG_YES) {
+        return RETURN;
+    } else if (results.dialogueValue == DIALOG_NO) {
+        return LOGIN;
+    }
 }
 
 void mainloop() {
+    // Put functions in the menuFunctions Array
+    menuFunctions[ENTRY] = entry_func;
+    menuFunctions[LOGIN] = login_func;
+    menuFunctions[QUIT] = quit_func;
+
+    // Runs the main looping
     MenuIndex currentIndex = ENTRY;
     while (currentIndex != RETURN) {
         currentIndex = menuFunctions[currentIndex]();
@@ -89,19 +139,19 @@ void temp () {
         .title = "Add Account" ,
         .content = {
             LINE_DEFAULT("┌ Account Number ────────────┐"),
-            LINE_TEXT("│ %s │", 10,    0),
+            LINE_TEXT("│ %s │", 10,    0, ""),
             LINE_DEFAULT("└────────────────────────────┘"),
             LINE_DEFAULT("┌ Name ──────────────────────┐"),
-            LINE_TEXT("│ %s │", 25,    0),
+            LINE_TEXT("│ %s │", 25,    0, ""),
             LINE_DEFAULT("└────────────────────────────┘"),
             LINE_DEFAULT("┌ E-mail ────────────────────┐"),
-            LINE_TEXT("│ %s │", 25,    0),
+            LINE_TEXT("│ %s │", 25,    0, ""),
             LINE_DEFAULT("└────────────────────────────┘"),
             LINE_DEFAULT("┌ Balance ───────────────────┐"),
-            LINE_TEXT("│ %s ($) │", 15,    0),
+            LINE_TEXT("│ %s ($) │", 15,    0, ""),
             LINE_DEFAULT("└────────────────────────────┘"),
             LINE_DEFAULT("┌ Mobile ────────────────────┐"),
-            LINE_TEXT("│ + %s │", 15,    0),
+            LINE_TEXT("│ + %s │", 15,    0, ""),
             LINE_DEFAULT("└────────────────────────────┘"),
 
             LINE_DIALOGUE("Add", 0),
@@ -138,7 +188,7 @@ void temp () {
         .title = FG_RED "Delete Account",
         .content = {
             LINE_DEFAULT(FG_RED "┌ Account Number ────────────┐"),
-            LINE_TEXT(FG_RED "│ %s │ ", 10,    0),
+            LINE_TEXT(FG_RED "│ %s │ ", 10,    0, ""),
             LINE_DEFAULT(FG_RED  "└────────────────────────────┘"),
             LINE_DEFAULT(" "),
             LINE_DIALOGUE(FG_RED "DELETE", 0),
@@ -150,10 +200,10 @@ void temp () {
             LINE_DEFAULT(FG_RED "Delete all accounts created on"),
             LINE_DEFAULT(FG_RED "the given date below"),
             LINE_DEFAULT( "          ┌ Month ─┐          "),
-            LINE_TEXT( "          │ %s │          ", 25,    0),
+            LINE_TEXT( "          │ %s │          ", 25,    0, ""),
             LINE_DEFAULT( "          └────────┘          "),
             LINE_DEFAULT( "          ┌ Year ──┐          "),
-            LINE_TEXT( "          │ %s │          ", 25,    0),
+            LINE_TEXT( "          │ %s │          ", 25,    0, ""),
             LINE_DEFAULT( "          └────────┘          "),
             LINE_DEFAULT(" "),
             LINE_DIALOGUE(FG_RED "DELETE", 0),
@@ -209,7 +259,7 @@ void temp () {
         .title = "Search Account",
         .content = {
             LINE_DEFAULT("┌ Account Number ────────────┐"),
-            LINE_TEXT("│ %s │ ", 10,    0),
+            LINE_TEXT("│ %s │ ", 10,    0, ""),
             LINE_DEFAULT("└────────────────────────────┘"),
             LINE_DEFAULT(" "),
             LINE_DIALOGUE("Find", 0),
@@ -238,7 +288,7 @@ void temp () {
         .title = "Search Accounts",
         .content = {
             LINE_DEFAULT("┌ Keyword ───────────────────┐"),
-            LINE_TEXT("│ %s │ ", 25,    0),
+            LINE_TEXT("│ %s │ ", 25,    0, ""),
             LINE_DEFAULT("└────────────────────────────┘"),
             LINE_DEFAULT(" "),
             LINE_DIALOGUE("Find", 0),
