@@ -53,6 +53,7 @@ typedef enum {
 typedef struct {
     int maxLen;
     _Bool hidden;
+    char validChars[256];
 } TextOptions;
 
 #define LINE_LENGTH 300
@@ -86,10 +87,11 @@ typedef struct {
     int dialogueValue;
 } PromptInputs;
 
-#define LINE_TEXT(str, mxln, h)                                     \
-    {                                                               \
-        .text = str, .type = TEXT, .data.options = {.maxLen = mxln, \
-                                                    .hidden = h }   \
+#define LINE_TEXT(str, mxln, h, vchrs)                                    \
+    {                                                                     \
+        .text = str, .type = TEXT, .data.options = {.maxLen = mxln,       \
+                                                    .hidden = h,          \
+                                                    .validChars = vchrs } \
     }
 
 #define LINE_DIALOGUE(str, val) \

@@ -415,7 +415,7 @@ PromptInputs display_box_prompt(BoxContent *box) {
             }  // scroll TEXT
         } else if (ch == K_ENTER && currLine->type == DIALOGUE) {
             break;
-        } else if (currLine->type == TEXT) {
+        } else if (currLine->type == TEXT && strchr(currLine->data.options.validChars, (char)ch)) {
             // write TEXT
             int len = utf8_strlen(textInput);
             int maxLen = currLine->data.options.maxLen;
