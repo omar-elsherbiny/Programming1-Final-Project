@@ -343,8 +343,7 @@ PromptInputs display_box_prompt(BoxContent *box) {
         ch = _getch();
 
         if (ch == K_ESC) {
-            printf("%s\n%s\n", textInputs[1], tempTextInput);
-            exit(1);
+            exit(1);  // TODO: remove before prod
         } else if (ch == 0 || ch == 224) {
             int s = _getch();
             if (s == K_UP || s == K_DOWN) {
@@ -358,9 +357,16 @@ PromptInputs display_box_prompt(BoxContent *box) {
                 currResLine = resultBox.content[resultIndexMap[curr]];
 
                 if (selectableLines[prev]->type == TEXT) {
+                    if (selectableLines[prev]->data.options.hidden) {
+                        int len = utf8_strlen(textInputs[textIndexMap[prev]]);
+                        memset(tempTextInput, '*', len);
+                        tempTextInput[len] = '\0';
+                    } else {
+                        strcpy(tempTextInput, textInputs[textIndexMap[prev]]);
+                    }  // format string buffer for text field
                     format_string(
                         selectableLines[prev]->text,
-                        textInputs[textIndexMap[prev]],
+                        tempTextInput,
                         boxWidth,
                         0,
                         resultBox.content[resultIndexMap[prev]]);
@@ -372,7 +378,14 @@ PromptInputs display_box_prompt(BoxContent *box) {
                 if (currLine->type == TEXT) {
                     textInput = textInputs[textIndexMap[curr]];
                     textOffsets[textIndexMap[curr]] = LINE_LENGTH;
-                    sprintf(tempTextInput, "%s" BLINK "█" BLINK_RESET, textInput);
+                    if (currLine->data.options.hidden) {
+                        int len = utf8_strlen(textInput);
+                        memset(tempTextInput, '*', len);
+                        tempTextInput[len] = '\0';
+                        strcat(tempTextInput, BLINK "█" BLINK_RESET);
+                    } else {
+                        sprintf(tempTextInput, "%s" BLINK "█" BLINK_RESET, textInput);
+                    }  // format string buffer for text field
                     format_string(currLine->text, tempTextInput, boxWidth, LINE_LENGTH, currResLine);
                 }  // add FLIP TEXT
                 else {
@@ -380,7 +393,14 @@ PromptInputs display_box_prompt(BoxContent *box) {
                     dialogueValue = currLine->data.value;
                 }  // add FLIP DIALOGUE
             } else if ((s == K_LEFT || s == K_RIGHT) && currLine->type == TEXT) {
-                sprintf(tempTextInput, "%s" BLINK "█" BLINK_RESET, textInput);
+                if (currLine->data.options.hidden) {
+                    int len = utf8_strlen(textInput);
+                    memset(tempTextInput, '*', len);
+                    tempTextInput[len] = '\0';
+                    strcat(tempTextInput, BLINK "█" BLINK_RESET);
+                } else {
+                    sprintf(tempTextInput, "%s" BLINK "█" BLINK_RESET, textInput);
+                }  // format string buffer for text field
                 int textOffset = textOffsets[textIndexMap[curr]];
                 int maxTextOffset = calc_max_offset(currLine->text, tempTextInput, boxWidth);
 
@@ -397,18 +417,24 @@ PromptInputs display_box_prompt(BoxContent *box) {
             break;
         } else if (currLine->type == TEXT) {
             // write TEXT
-            int len = strlen(textInput);
+            int len = utf8_strlen(textInput);
             int maxLen = currLine->data.options.maxLen;
 
             if (ch == K_BACKSPACE && len > 0) {
-                textInput[len - 1] = '\0';
+                textInput[--len] = '\0';
             } else if (ch >= 32 && ch <= 126 && len < maxLen) {
                 textInput[len] = (char)ch;
-                textInput[len + 1] = '\0';
+                textInput[++len] = '\0';
             }
 
             textOffsets[textIndexMap[curr]] = LINE_LENGTH;
-            sprintf(tempTextInput, "%s" BLINK "█" BLINK_RESET, textInput);
+            if (currLine->data.options.hidden) {
+                memset(tempTextInput, '*', len);
+                tempTextInput[len] = '\0';
+                strcat(tempTextInput, BLINK "█" BLINK_RESET);
+            } else {
+                sprintf(tempTextInput, "%s" BLINK "█" BLINK_RESET, textInput);
+            }  // format string buffer for text field
             format_string(currLine->text, tempTextInput, boxWidth, LINE_LENGTH, currResLine);
         }
     }
@@ -420,3 +446,7 @@ PromptInputs display_box_prompt(BoxContent *box) {
 
     return (PromptInputs){textInputCount, textInputs, dialogueValue};
 }
+/*
+TODO:  change sprintf to snprintf and memory safe functions
+TODO:  validate input characters
+*/
