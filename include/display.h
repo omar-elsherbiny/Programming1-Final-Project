@@ -90,6 +90,7 @@ typedef struct {
 Line LINE_DEFAULT(const char text[]);
 Line LINE_DIALOGUE(const char text[], int value);
 Line LINE_TEXT(const char str[], int maxLen, _Bool hidden, const char validChars[]);
+Line *MULTI_LINE_DEFAULT(const char text[], int width, int *lineCnt);
 
 void display_init(void);
 void display_draw_box(DrawnBox *box);

@@ -59,6 +59,44 @@ Line LINE_TEXT(const char text[], int maxLen, _Bool hidden, const char validChar
     return res;
 }
 
+Line *MULTI_LINE_DEFAULT(const char text[], int width, int *lineCnt) {
+    Line *multiLines = malloc(LINE_COUNT * sizeof(Line));
+    int curLen = 0;
+    int lines = 0;
+
+    char textCpy[LINE_LENGTH];
+    strncpy(textCpy, text, LINE_LENGTH - 1);
+    textCpy[LINE_LENGTH - 1] = '\0';
+
+    char *word = strtok(textCpy, " ");
+    multiLines[lines].text[0] = '\0';
+    multiLines[lines].type = DEFAULT;
+
+    while (word) {
+        int wlen = strlen(word);
+        if (curLen + (curLen > 0) + wlen > width) {
+            lines++;
+            curLen = 0;
+            multiLines[lines].text[0] = '\0';
+            multiLines[lines].type = DEFAULT;
+        }
+
+        if (curLen > 0) {
+            strcat(multiLines[lines].text, " ");
+            curLen++;
+        }
+
+        strcat(multiLines[lines].text, word);
+        curLen += wlen;
+
+        word = strtok(NULL, " ");
+    }
+
+    *lineCnt = lines + 1;
+    return multiLines;
+}
+
+
 // -
 
 static int utf8_strlen(const char str[]) {
