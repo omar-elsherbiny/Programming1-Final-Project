@@ -35,6 +35,32 @@ void display_cleanup(void) {
 
 // -
 
+Line LINE_DEFAULT(const char text[]) {
+    Line res = {
+        .type = DEFAULT};
+    strcpy(res.text, text);
+    return res;
+}
+
+Line LINE_DIALOGUE(const char text[], int value) {
+    Line res = {
+        .type = DIALOGUE,
+        .data.value = value};
+    strcpy(res.text, text);
+    return res;
+}
+
+Line LINE_TEXT(const char text[], int maxLen, _Bool hidden, const char validChars[]) {
+    Line res = {
+        .type = TEXT,
+        .data.options = {.maxLen = maxLen, .hidden = hidden}};
+    strcpy(res.text, text);
+    strcpy(res.data.options.validChars, validChars);
+    return res;
+}
+
+// -
+
 static int utf8_strlen(const char str[]) {
     int len = 0;
     while (*str != '\0') {
@@ -184,6 +210,8 @@ void replace_wrap_string(const char str[], const char first[], const char second
     else
         sprintf(dest, "%s%s%s", first, str, second);
 }
+
+// -
 
 static void get_box_dimensions(BoxContent *box, int *width, int *height) {
     int maxWidth = 0;
@@ -415,10 +443,9 @@ PromptInputs display_box_prompt(BoxContent *box) {
             }  // scroll TEXT
         } else if (ch == K_ENTER && currLine->type == DIALOGUE) {
             break;
-        } else if (currLine->type == TEXT && 
-            (currLine->data.options.validChars[0] == '\0' ||
-            strchr(currLine->data.options.validChars, (char)ch))) {
-                
+        } else if (currLine->type == TEXT &&
+                   (currLine->data.options.validChars[0] == '\0' ||
+                    strchr(currLine->data.options.validChars, (char)ch))) {
             // write TEXT
             int len = utf8_strlen(textInput);
             int maxLen = currLine->data.options.maxLen;
@@ -449,7 +476,3 @@ PromptInputs display_box_prompt(BoxContent *box) {
 
     return (PromptInputs){textInputCount, textInputs, dialogueValue};
 }
-/*
-TODO:  change sprintf to snprintf and memory safe functions
-TODO:  validate input characters
-*/

@@ -87,19 +87,9 @@ typedef struct {
     int dialogueValue;
 } PromptInputs;
 
-#define LINE_TEXT(str, mxln, h, vchrs)                                    \
-    {                                                                     \
-        .text = str, .type = TEXT, .data.options = {.maxLen = mxln,       \
-                                                    .hidden = h,          \
-                                                    .validChars = vchrs } \
-    }
-
-#define LINE_DIALOGUE(str, val) \
-    {.text = str, .type = DIALOGUE, .data.value = val}
-
-// For DEFAULT lines
-#define LINE_DEFAULT(str) \
-    {.text = str, .type = DEFAULT}
+Line LINE_DEFAULT(const char text[]);
+Line LINE_DIALOGUE(const char text[], int value);
+Line LINE_TEXT(const char str[], int maxLen, _Bool hidden, const char validChars[]);
 
 void display_init(void);
 void display_draw_box(DrawnBox *box);
