@@ -55,14 +55,18 @@ Status load(){
         strcpy(accounts[i].name,ufname);
         strcpy(accounts[i].mobile,ufmobile);
         strcpy(accounts[i].email,ufemail);
+        char fileName[N];
+        strcpy(fileName,"files/accounts/");
+        strcat(fileName,ufid);
+        strcat(fileName,".txt");
         accounts[i].balance=strtod(ufbalance,NULL);
         accounts[i].status=(strcmp(strtok(ufstatus," "),"inactive")==0?0:1);
         accounts[i].date.month=atoi(strtok(ufdate,"-"));
         accounts[i].date.year=atoi(strtok(NULL,"-"));
         //check if account transaction file exists, if not creates it
-        FILE *accountFile=fopen(strcat("files/accounts/",strcat(accounts[i].id,".txt")),"r");
+        FILE *accountFile=fopen(fileName,"r");
         if(accountFile==NULL){
-            FILE *createAccountFile=fopen(strcat("files/accounts/",strcat(accounts[i].id,".txt")),"w");
+            FILE *createAccountFile=fopen(fileName,"w");
             fclose(createAccountFile);
         }
         fclose(accountFile);
