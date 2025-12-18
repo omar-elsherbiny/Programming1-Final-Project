@@ -90,7 +90,7 @@ static MenuIndex login_func() {
     }
 
     status = load();
-        if (status.status == ERROR) {
+    if (status.status == ERROR) {
         char errorMsg[LINE_LENGTH];
         sprintf(errorMsg, "%s", status.message);
         int lineCount;
@@ -117,7 +117,7 @@ static MenuIndex login_func() {
             return LOGIN;
         }
     }
-    
+
     free_result(results);
     return COMMANDS;
 }
@@ -160,19 +160,24 @@ static MenuIndex commands_func() {
         .title = "Commands",
         .content = {
             LINE_DEFAULT("Manage Accounts:              "),
-            LINE_DIALOGUE("  Add a new Account", DIALOG_ACC_NEW),
-            LINE_DIALOGUE("  Delete an Existing Account", DIALOG_ACC_DELETE),
-            LINE_DIALOGUE("  Modify an Existing Account", DIALOG_ACC_MODIFY),
-            LINE_DIALOGUE("  Search an Account", DIALOG_ACC_SEARCH),
-            LINE_DIALOGUE("  Advanced Searching", DIALOG_ACC_ADVANCESEARCH),
-            LINE_DIALOGUE("  Change an Account Status", DIALOG_ACC_STATUS),
+            LINE_DIALOGUE("  %sAdd a new Account%s", DIALOG_ACC_NEW),
+            LINE_DIALOGUE("  %sDelete an Existing Account%s",
+                          DIALOG_ACC_DELETE),
+            LINE_DIALOGUE("  %sModify an Existing Account%s",
+                          DIALOG_ACC_MODIFY),
+            LINE_DIALOGUE("  %sSearch an Account%s", DIALOG_ACC_SEARCH),
+            LINE_DIALOGUE("  %sAdvanced Searching%s", DIALOG_ACC_ADVANCESEARCH),
+            LINE_DIALOGUE("  %sChange an Account Status%s", DIALOG_ACC_STATUS),
             LINE_DEFAULT(" "), LINE_DEFAULT("Transactions:"),
-            LINE_DIALOGUE("  Withdraw from an Account", DIALOG_TRANS_WITHDRAW),
-            LINE_DIALOGUE("  Deposit to an Account", DIALOG_TRANS_DEPOSIT),
-            LINE_DIALOGUE("  Transfer to an Account", DIALOG_TRANS_TRANSFER),
+            LINE_DIALOGUE("  %sWithdraw from an Account%s",
+                          DIALOG_TRANS_WITHDRAW),
+            LINE_DIALOGUE("  %sDeposit to an Account%s", DIALOG_TRANS_DEPOSIT),
+            LINE_DIALOGUE("  %sTransfer to an Account%s",
+                          DIALOG_TRANS_TRANSFER),
             LINE_DEFAULT(" "), LINE_DEFAULT("Others:"),
-            LINE_DIALOGUE("  Report last transactions", DIALOG_OTHER_REPORT),
-            LINE_DIALOGUE("  Print all Accounts", DIALOG_OTHER_PRINT),
+            LINE_DIALOGUE("  %sReport last transactions%s",
+                          DIALOG_OTHER_REPORT),
+            LINE_DIALOGUE("  %sPrint all Accounts%s", DIALOG_OTHER_PRINT),
             LINE_DEFAULT(" "), LINE_DIALOGUE(FG_RED "Logout", DIALOG_LOGOUT)}};
 
     PromptInputs results = display_box_prompt(&commandsPage);
@@ -228,7 +233,7 @@ static MenuIndex acc_new_func() {
                     LINE_TEXT("│ %s ($) │", 15, 0, ".0123456789\b"),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT("┌ Mobile ────────────────────┐"),
-                    LINE_TEXT("│ + 2%s │", 11, 0, "0123456789\b"),
+                    LINE_TEXT("│ + 20 %s │", 10, 0, "0123456789\b"),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT(" "), LINE_DIALOGUE("Add", DIALOG_ADD),
                     LINE_DIALOGUE("Discard", DIALOG_DISCARD)}};
@@ -329,8 +334,7 @@ static MenuIndex acc_new_func() {
                 return ACC_NEW;
             }
         }
-        
-        
+
         // Check if balance has only 2 decimal places
         char temp[LINE_LENGTH];
         strcpy(temp, results.textInputs[3]);
@@ -343,14 +347,15 @@ static MenuIndex acc_new_func() {
                     .content = {
                         LINE_DEFAULT(FG_RED "The balance should only be max"),
                         LINE_DEFAULT(FG_RED "of 2 decimal places"),
-                        LINE_DEFAULT(" "), LINE_DIALOGUE("Okay", DIALOG_PROCEED)}};
-                        
-                        PromptInputs errorResult = display_box_prompt(&errorPage);
-                        
-                        if (errorResult.dialogueValue == DIALOG_PROCEED) {
-                            free_result(results);
-                            return ACC_NEW;
-                        }
+                        LINE_DEFAULT(" "),
+                        LINE_DIALOGUE("Okay", DIALOG_PROCEED)}};
+
+                PromptInputs errorResult = display_box_prompt(&errorPage);
+
+                if (errorResult.dialogueValue == DIALOG_PROCEED) {
+                    free_result(results);
+                    return ACC_NEW;
+                }
             }
         }
 
@@ -360,35 +365,45 @@ static MenuIndex acc_new_func() {
         strcpy(account.name, results.textInputs[1]);
         strcpy(account.email, results.textInputs[2]);
         account.balance = strtod(results.textInputs[3], NULL);
-        strcpy(account.mobile, results.textInputs[4]);
-        
+        sprintf(account.mobile, "0%s", results.textInputs[4]);
+
         Status status = add(account);
         char statusMsg[LINE_LENGTH];
         sprintf(statusMsg, "%s", status.message);
         int lineCount;
         Line *statusMsgLines = MULTI_LINE_DEFAULT(statusMsg, 30, &lineCount);
-        
-        BoxContent statusPage = {.title = FG_RED "ERROR"};
+
+        BoxContent statusPage;
+        if (status.status == ERROR) {
+            strcpy(statusPage.title, FG_RED "ERROR");
+        } else {
+            strcpy(statusPage.title, FG_GREEN "SUCCESS");
+        }
+
         for (int i = 0; i < lineCount; i++) {
             // this is to append the red color to the string
             char temp[LINE_LENGTH];
             strcpy(temp, statusMsgLines[i].text);
-            sprintf(statusMsgLines[i].text, FG_RED "%s", temp);
-            
+            sprintf(statusMsgLines[i].text,
+                    (status.status == ERROR ? FG_RED "%s" : FG_GREEN "%s"),
+                    temp);
+
             statusPage.content[i] = statusMsgLines[i];
         }
         statusPage.content[lineCount] = LINE_DEFAULT(" ");
         statusPage.content[lineCount + 1] =
-        LINE_DIALOGUE("Okay", DIALOG_PROCEED);
+            LINE_DIALOGUE("Okay", DIALOG_PROCEED);
         free(statusMsgLines);
-        
+
         PromptInputs statusResult = display_box_prompt(&statusPage);
-        
+
         if (statusResult.dialogueValue == DIALOG_PROCEED) {
             free_result(results);
-            
-            if (status.status == ERROR) return ACC_NEW;
-            if (status.status == SUCCESS) return COMMANDS;
+
+            if (status.status == ERROR)
+                return ACC_NEW;
+            if (status.status == SUCCESS)
+                return COMMANDS;
         }
     }
 
