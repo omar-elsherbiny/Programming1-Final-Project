@@ -1,6 +1,7 @@
 // menus.c
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "menus.h"
 #include "display.h"
 #include "functions.h"
@@ -10,11 +11,23 @@ typedef enum {
     ENTRY = 0,
     LOGIN,
     QUIT,
+    COMMANDS,
+    ACC_NEW,
+    ACC_DELETE,
+    ACC_MODIFY,
+    ACC_SEARCH,
+    ACC_ADVANCESEARCH,
+    ACC_STATUS,
+    TRANS_WITHDRAW,
+    TRANS_DEPOSIT,
+    TRANS_TRANSFER,
+    OTHER_REPORT,
+    OTHER_PRINT,
 } MenuIndex;
 
 static MenuIndex (*menuFunctions[100])();
 
-void free_result(PromptInputs results) {
+static void free_result(PromptInputs results) {
     for (int i = 0; i < results.textInputCount; i++){
         free(results.textInputs[i]);
     }    
@@ -22,18 +35,16 @@ void free_result(PromptInputs results) {
     free(results.textInputs);
 }
 
-// prototype example ↓
-// MenuIndex entry_func(params)
-// menuFunctions[ENTRY] = entry_func
-
+// Functions definitions
 static MenuIndex entry_func() {
     return LOGIN;
 }
 
-MenuIndex login_func() {
+static MenuIndex login_func() {
     enum DialogOptions {
         DIALOG_LOGIN,
-        DIALOG_QUIT
+        DIALOG_QUIT,
+        DIALOG_PROCEED
     } dialogOptions;
 
     BoxContent loginPage = {
@@ -51,16 +62,44 @@ MenuIndex login_func() {
     
     PromptInputs results = display_box_prompt(&loginPage);
     
-    printf("%s", results.textInputs[1]);
-    free_result(results);
-    if (results.dialogueValue == DIALOG_LOGIN) {
-        return RETURN;
-    } else if (results.dialogueValue == DIALOG_QUIT) {
+    if (results.dialogueValue == DIALOG_QUIT) {
+        free_result(results);
         return QUIT;
     }
+    
+    Status status = login(results.textInputs[0], results.textInputs[1]);
+        
+    if (status.status == ERROR) {
+        char errorMsg[LINE_LENGTH];
+        sprintf(errorMsg, "%s", status.message);
+        int lineCount;
+        Line *errorMsgLines = MULTI_LINE_DEFAULT(errorMsg, 30, &lineCount);
+        
+        BoxContent errorPage = {.title = FG_RED "ERROR"};
+        for (int i = 0; i < lineCount; i++) {
+            // this is to append the red color to the string
+            char temp[LINE_LENGTH];
+            strcpy(temp, errorMsgLines[i].text);
+            sprintf(errorMsgLines[i].text, FG_RED "%s", temp );
+
+            errorPage.content[i] = errorMsgLines[i];
+        }
+        errorPage.content[lineCount] = LINE_DEFAULT(" ");
+        errorPage.content[lineCount + 1] = LINE_DIALOGUE("Okay", DIALOG_PROCEED);
+        free(errorMsgLines);
+        
+        PromptInputs errorResult = display_box_prompt(&errorPage);
+
+        if (errorResult.dialogueValue == DIALOG_PROCEED) {
+            return LOGIN;
+        }
+    }
+
+    free_result(results);
+    return COMMANDS;
 }
 
-MenuIndex quit_func() {
+static MenuIndex quit_func() {
     enum DialogOptions {
         DIALOG_YES,
         DIALOG_NO
@@ -78,9 +117,142 @@ MenuIndex quit_func() {
     
     if (results.dialogueValue == DIALOG_YES) {
         return RETURN;
-    } else if (results.dialogueValue == DIALOG_NO) {
-        return LOGIN;
     }
+
+    return LOGIN;
+}
+
+static MenuIndex commands_func() {
+    enum DialogOptions {
+        DIALOG_ACC_NEW,
+        DIALOG_ACC_DELETE,
+        DIALOG_ACC_MODIFY,
+        DIALOG_ACC_SEARCH,
+        DIALOG_ACC_ADVANCESEARCH,
+        DIALOG_ACC_STATUS,
+        DIALOG_TRANS_WITHDRAW,
+        DIALOG_TRANS_DEPOSIT,
+        DIALOG_TRANS_TRANSFER,
+        DIALOG_OTHER_REPORT,
+        DIALOG_OTHER_PRINT,
+        DIALOG_LOGOUT
+    } dialogOptions;
+
+    BoxContent commandsPage = {
+        .title = "Commands" ,
+        .content = {
+            LINE_DEFAULT("Manage Accounts:              "),
+            LINE_DIALOGUE("  Add a new Account", DIALOG_ACC_NEW),
+            LINE_DIALOGUE("  Delete an Existing Account", DIALOG_ACC_DELETE),
+            LINE_DIALOGUE("  Modify an Existing Account", DIALOG_ACC_MODIFY),
+            LINE_DIALOGUE("  Search an Account", DIALOG_ACC_SEARCH),
+            LINE_DIALOGUE("  Advanced Searching", DIALOG_ACC_ADVANCESEARCH),
+            LINE_DIALOGUE("  Change an Account Status", DIALOG_ACC_STATUS),
+            LINE_DEFAULT(" "),
+            LINE_DEFAULT("Transactions:"),
+            LINE_DIALOGUE("  Withdraw from an Account", DIALOG_TRANS_WITHDRAW),
+            LINE_DIALOGUE("  Deposit to an Account", DIALOG_TRANS_DEPOSIT),
+            LINE_DIALOGUE("  Transfer to an Account", DIALOG_TRANS_TRANSFER),
+            LINE_DEFAULT(" "),
+            LINE_DEFAULT("Others:"),
+            LINE_DIALOGUE("  Report last transactions", DIALOG_OTHER_REPORT),
+            LINE_DIALOGUE("  Print all Accounts", DIALOG_OTHER_PRINT),
+            LINE_DEFAULT(" "),
+            LINE_DIALOGUE(FG_RED "Logout", DIALOG_LOGOUT)}};
+    
+    PromptInputs results = display_box_prompt(&commandsPage);
+    
+    if (results.dialogueValue == DIALOG_LOGOUT) return LOGIN;
+    
+    if (results.dialogueValue == DIALOG_ACC_NEW) return ACC_NEW;
+    if (results.dialogueValue == DIALOG_ACC_DELETE) return ACC_DELETE;
+    if (results.dialogueValue == DIALOG_ACC_MODIFY) return ACC_MODIFY;
+    if (results.dialogueValue == DIALOG_ACC_SEARCH) return ACC_SEARCH;
+    if (results.dialogueValue == DIALOG_ACC_ADVANCESEARCH) return ACC_ADVANCESEARCH;
+    if (results.dialogueValue == DIALOG_ACC_STATUS) return ACC_STATUS;
+    if (results.dialogueValue == DIALOG_TRANS_WITHDRAW) return TRANS_WITHDRAW;
+    if (results.dialogueValue == DIALOG_TRANS_DEPOSIT) return TRANS_DEPOSIT;
+    if (results.dialogueValue == DIALOG_TRANS_TRANSFER) return TRANS_TRANSFER;
+    if (results.dialogueValue == DIALOG_OTHER_REPORT) return OTHER_REPORT;
+    if (results.dialogueValue == DIALOG_OTHER_PRINT) return OTHER_PRINT;
+}
+
+static MenuIndex acc_new_func() {
+    enum DialogOptions {
+        DIALOG_ADD,
+        DIALOG_DISCARD,
+        DIALOG_YES,
+        DIALOG_NO,
+        DIALOG_PROCEED
+    } dialogOptions;
+
+    BoxContent addAccountPage = {
+        .title = "Add Account" ,
+        .content = {
+            LINE_DEFAULT("┌ Account Number ────────────┐"),
+            LINE_TEXT("│ %s │", 10,    0, "0123456789"),
+            LINE_DEFAULT("└────────────────────────────┘"),
+            LINE_DEFAULT("┌ Name ──────────────────────┐"),
+            LINE_TEXT("│ %s │", 25,    0, ""),
+            LINE_DEFAULT("└────────────────────────────┘"),
+            LINE_DEFAULT("┌ E-mail ────────────────────┐"),
+            LINE_TEXT("│ %s │", 25,    0, ""),
+            LINE_DEFAULT("└────────────────────────────┘"),
+            LINE_DEFAULT("┌ Balance ───────────────────┐"),
+            LINE_TEXT("│ %s ($) │", 15,    0, "0123456789"),
+            LINE_DEFAULT("└────────────────────────────┘"),
+            LINE_DEFAULT("┌ Mobile ────────────────────┐"),
+            LINE_TEXT("│ + %s │", 15,    0, "0123456789"),
+            LINE_DEFAULT("└────────────────────────────┘"),
+            LINE_DEFAULT(" "),
+            LINE_DIALOGUE("Add", DIALOG_ADD),
+            LINE_DIALOGUE("Discard", DIALOG_DISCARD)}};
+    
+    PromptInputs results = display_box_prompt(&addAccountPage);
+    
+    if (results.dialogueValue == DIALOG_DISCARD) {
+        free_result(results);
+        return COMMANDS;
+    }
+    
+    BoxContent confirmAddAccountPage = {
+    .title = "Confirm Add" ,
+    .content = {
+        LINE_DEFAULT("Are you sure you want to add  "),
+        LINE_DEFAULT("this account?"),
+        LINE_DEFAULT(" "),
+        LINE_DIALOGUE("Yes", DIALOG_YES),
+        LINE_DIALOGUE("No", DIALOG_NO)}};
+
+    PromptInputs confirmResults = display_box_prompt(&confirmAddAccountPage);
+    
+    if (confirmResults.dialogueValue == DIALOG_NO) {
+        free_result(results);
+        return ACC_NEW; 
+    }
+
+    // Acc number number 10 characters
+    if (confirmResults.dialogueValue == DIALOG_YES) {
+        if (strlen(confirmResults.textInputs[0]) != 10) {
+          BoxContent errorPage = {
+          .title = FG_RED "ERROR",
+          .content = {
+                LINE_DEFAULT(FG_RED "Account Number is not 10      "),
+                LINE_DEFAULT(FG_RED "characters"),
+                LINE_DEFAULT(" "),
+                LINE_DIALOGUE("Okay", DIALOG_PROCEED)}};
+
+          PromptInputs errorResult = display_box_prompt(&errorPage);
+
+          if (errorResult.dialogueValue == DIALOG_PROCEED) {
+                free_result(results);
+                return ACC_NEW;
+          }
+        }
+    }
+
+    free_result(results);
+    return COMMANDS;
 }
 
 void mainloop() {
@@ -88,6 +260,8 @@ void mainloop() {
     menuFunctions[ENTRY] = entry_func;
     menuFunctions[LOGIN] = login_func;
     menuFunctions[QUIT] = quit_func;
+    menuFunctions[COMMANDS] = commands_func;
+    menuFunctions[ACC_NEW] = acc_new_func;
 
     // Runs the main looping
     MenuIndex currentIndex = ENTRY;
@@ -96,8 +270,8 @@ void mainloop() {
     }
 }
 
-// temp container
-void temp () {
+/* temp container
+static void temp () {
     BoxContent quitPage = {
         .title = FG_RED "Quit",
         .content = {
@@ -352,3 +526,4 @@ void temp () {
             LINE_DEFAULT(" "),
             LINE_DIALOGUE("Okay", 0)}};  
 }
+*/

@@ -91,6 +91,12 @@ Error Message
     │ Okay                           │
     └────────────────────────────────┘
     ┌──────────── Error ─────────────┐
+    │ Account Number is not 10       │
+    │ characters                     │
+    │                                │
+    │ Okay                           │
+    └────────────────────────────────┘
+    ┌──────────── Error ─────────────┐
     │ Invalid Phone Number           │
     │                                │
     │ Okay                           │
