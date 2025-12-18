@@ -13,7 +13,7 @@ Status login(char *username,char* password){
         return ret;
     }
     char user[N],pass[N];
-    while(fscanf(f,"%s%s",user,pass)){
+    while(fscanf(f,"%s%s",user,pass)==2){
         if(!strcmp(user,username) && !strcmp(pass,password)){
             fclose(f);
             ret.status=SUCCESS;
