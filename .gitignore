@@ -2,3 +2,4 @@ app.exe
 src/*.o
 .vscode
 files/*.txt
+files/accounts/*.txt
