@@ -91,6 +91,24 @@ Error Message
     │ Okay                           │
     └────────────────────────────────┘
     ┌──────────── Error ─────────────┐
+    │ Balance should only have 1     │
+    │ decimal point                  │
+    │                                │
+    │ Okay                           │
+    └────────────────────────────────┘
+    ┌──────────── Error ─────────────┐
+    │ Balance should start with a    │
+    │ number                         │
+    │                                │
+    │ Okay                           │
+    └────────────────────────────────┘
+    ┌──────────── Error ─────────────┐
+    │ The balance should only be max │
+    │ of 2 decimal places            │
+    │                                │
+    │ Okay                           │
+    └────────────────────────────────┘
+    ┌──────────── Error ─────────────┐
     │ Account Number is not 10       │
     │ characters                     │
     │                                │
