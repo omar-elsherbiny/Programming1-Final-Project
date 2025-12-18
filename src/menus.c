@@ -35,7 +35,7 @@ static void free_result(PromptInputs results) {
     free(results.textInputs);
 }
 
-static void remove_all_chars(char* str, char c) {
+static void remove_all_chars(char *str, char c) {
     char *pRead = str, *pWrite = str;
     while (*pRead) {
         *pWrite = *pRead++;
@@ -271,7 +271,7 @@ static MenuIndex acc_new_func() {
 
     if (confirmResults.dialogueValue == DIALOG_YES) {
         // removing all commas from balance input field
-        remove_all_chars(results.textInputs[3],',');
+        remove_all_chars(results.textInputs[3], ',');
 
         // Check if any field is empty
         if ((strlen(results.textInputs[0]) == 0) ||
@@ -429,7 +429,6 @@ static MenuIndex acc_new_func() {
         }
 
         Account account;
-        account.status = 1;
         strcpy(account.id, results.textInputs[0]);
         strcpy(account.name, results.textInputs[1]);
         strcpy(account.email, results.textInputs[2]);
@@ -480,6 +479,53 @@ static MenuIndex acc_new_func() {
     return COMMANDS;
 }
 
+static MenuIndex acc_delete_func() {
+    enum DialogOptions {
+        DIALOG_DEL_ONE,
+        DIALOG_DEL_MULTI,
+        DIALOG_DISCARD,
+        DIALOG_YES,
+        DIALOG_NO
+    };
+
+    BoxContent deletePage = {
+        .title = "Delete Account",
+        .content = {LINE_DEFAULT("┌ Delete Option ─────────────┐"),
+                    LINE_DIALOGUE("│ %sOne with an Account number%s │", DIALOG_DEL_ONE),
+                    LINE_DIALOGUE("│ %sMultiple with a criteria%s   │", DIALOG_DEL_MULTI),
+                    LINE_DEFAULT("└────────────────────────────┘"),
+                    LINE_DEFAULT(" "),
+                    LINE_DIALOGUE("Discard", DIALOG_DISCARD)}};
+
+    PromptInputs results = display_box_prompt(&deletePage);
+
+    if (results.dialogueValue == DIALOG_DISCARD) {
+        free_result(results);
+        return LOGIN;
+    }
+
+    if (results.dialogueValue == DIALOG_DEL_ONE) {
+        BoxContent deleteOnePage = {
+        .title = "Delete Account",
+        .content = {LINE_DEFAULT("┌ Account Number ────────────┐"),
+                    LINE_TEXT("│ %s │", 10, 0, "1234567890\b"),
+                    LINE_DEFAULT("└────────────────────────────┘"),
+                    LINE_DEFAULT(" "),
+                    LINE_DIALOGUE(FG_RED "Delete", DIALOG_YES),
+                    LINE_DIALOGUE("Discard", DIALOG_NO)}};
+
+        PromptInputs delOneResults = display_box_prompt(&deleteOnePage);
+        
+        if (delOneResults.dialogueValue == DIALOG_NO) {
+            free_result(results);
+            return ACC_DELETE;
+        }
+    }
+
+    free_result(results);
+    return COMMANDS;
+}
+
 void mainloop() {
     // Put functions in the menuFunctions Array
     menuFunctions[ENTRY] = entry_func;
@@ -487,6 +533,7 @@ void mainloop() {
     menuFunctions[QUIT] = quit_func;
     menuFunctions[COMMANDS] = commands_func;
     menuFunctions[ACC_NEW] = acc_new_func;
+    menuFunctions[ACC_DELETE] = acc_delete_func;
 
     // Runs the main looping
     MenuIndex currentIndex = ENTRY;
