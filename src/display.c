@@ -12,7 +12,7 @@
 static int HEIGHT;
 static int WIDTH;
 
-static void update_console_size(void) {
+static void update_console_size(void) {     //initializes and updates console dimensions
     CONSOLE_SCREEN_BUFFER_INFO info;
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &info);
 
@@ -20,7 +20,7 @@ static void update_console_size(void) {
     WIDTH = info.srWindow.Right - info.srWindow.Left + 1;
 }
 
-void display_init(void) {
+void display_init(void) {   //initialize the terminal to use ANSI codes and UTF-8
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     DWORD mode = 0;
 
@@ -33,7 +33,7 @@ void display_init(void) {
     printf(HIDE_CURSOR);
 }
 
-void display_cleanup(void) {
+void display_cleanup(void) {    
     printf(SHOW_CURSOR);
 }
 
