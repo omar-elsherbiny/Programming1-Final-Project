@@ -422,10 +422,15 @@ PromptInputs display_box_prompt(BoxContent *box) {
 
         ch = _getch();
 
+        _Bool goToNext = ch == K_TAB || (ch == K_ENTER && currLine->type == TEXT);
+        _Bool writeText = currLine->type == TEXT &&
+                          (currLine->data.options.validChars[0] == '\0' ||
+                           strchr(currLine->data.options.validChars, (char)ch));
+
         if (ch == K_ESC) {
             exit(1);  // TODO: remove before prod
-        } else if (ch == 0 || ch == 224) {
-            int s = _getch();
+        } else if (goToNext || ch == 0 || ch == 224) {
+            int s = (goToNext ? K_DOWN : _getch());
             if (s == K_UP || s == K_DOWN) {
                 prev = curr;
                 if (s == K_UP) {
@@ -495,9 +500,7 @@ PromptInputs display_box_prompt(BoxContent *box) {
             }  // scroll TEXT
         } else if (ch == K_ENTER && currLine->type == DIALOGUE) {
             break;
-        } else if (currLine->type == TEXT &&
-                   (currLine->data.options.validChars[0] == '\0' ||
-                    strchr(currLine->data.options.validChars, (char)ch))) {
+        } else if (writeText) {
             // write TEXT
             int len = utf8_strlen(textInput);
             int maxLen = currLine->data.options.maxLen;
