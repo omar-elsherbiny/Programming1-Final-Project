@@ -34,9 +34,9 @@ Status load(){
     FILE *f=fopen("files/accounts.txt","r");
     Status ret;
     if(f == NULL){
-        ret.status=ERROR;
-        strcpy(ret.message,"File accounts.txt not found!");
-        return ret;
+        f=fopen("files/accounts.txt","w");
+        fclose(f);
+        f=fopen("files/accounts.txt","r");
     }
     char line[7*N],ufid[N],ufname[N],ufemail[N],ufbalance[N],ufmobile[N],ufdate[N],ufstatus[N];
     int i;
@@ -133,12 +133,16 @@ Status add(Account acc){
     }
     FILE *f=fopen("files/accounts.txt","r");
     if(f == NULL){
-        ret.status=ERROR;
-        strcpy(ret.message,"File accounts.txt not found!");
-        return ret;
+        f=fopen("files/accounts.txt","w");
+        fclose(f);
+        f=fopen("files/accounts.txt","r");
     }
     fclose(f);
-    f=fopen("files/accounts.txt","a");
+    f=fopen("files/accounts.txt","a+");
+    if(fseek(f,-1,SEEK_END)==0&&fgetc(f)!='\n'){
+        fseek(f,0,SEEK_END);
+        fprintf(f,"\n");
+    }
     accounts[accountCnt]=acc;
     fprintf(f,"%s,%s,%s,%.2f,%s,%d-%d, %s\n",acc.id,acc.name,acc.email,acc.balance,acc.mobile,acc.date.month,acc.date.year,(acc.status?"active":"inactive"));
     fclose(f);
@@ -153,9 +157,9 @@ Status delete(char *id){
     Status ret;
     FILE *f=fopen("files/accounts.txt","r");
     if(f == NULL){
-        ret.status=ERROR;
-        strcpy(ret.message,"File accounts.txt not found!");
-        return ret;
+        f=fopen("files/accounts.txt","w");
+        fclose(f);
+        f=fopen("files/accounts.txt","r");
     }
     fclose(f);
     for(i=0;i<accountCnt;i++){
@@ -192,9 +196,9 @@ Status modify(char *id,char *name,char *mobile,char *email){
     Status ret;
     FILE *f=fopen("files/accounts.txt","r");
     if(f == NULL){
-        ret.status=ERROR;
-        strcpy(ret.message,"File accounts.txt not found!");
-        return ret;
+        f=fopen("files/accounts.txt","w");
+        fclose(f);
+        f=fopen("files/accounts.txt","r");
     }
     fclose(f);
     for(i=0;i<accountCnt;i++){
@@ -223,9 +227,9 @@ Status change_status(char *id){
     Status ret;
     FILE *f=fopen("files/accounts.txt","r");
     if(f == NULL){
-        ret.status=ERROR;
-        strcpy(ret.message,"File accounts.txt not found!");
-        return ret;
+        f=fopen("files/accounts.txt","w");
+        fclose(f);
+        f=fopen("files/accounts.txt","r");
     }
     fclose(f);
     for(i=0;i<accountCnt;i++){
@@ -252,9 +256,9 @@ Status withdraw(char *id,double amount){
     Status ret;
     FILE *f=fopen("files/accounts.txt","r");
     if(f == NULL){
-        ret.status=ERROR;
-        strcpy(ret.message,"File accounts.txt not found!");
-        return ret;
+        f=fopen("files/accounts.txt","w");
+        fclose(f);
+        f=fopen("files/accounts.txt","r");
     }
     fclose(f);
     for(i=0;i<accountCnt;i++){
@@ -325,9 +329,9 @@ Status deposit(char *id,double amount){
     Status ret;
     FILE *f=fopen("files/accounts.txt","r");
     if(f == NULL){
-        ret.status=ERROR;
-        strcpy(ret.message,"File accounts.txt not found!");
-        return ret;
+        f=fopen("files/accounts.txt","w");
+        fclose(f);
+        f=fopen("files/accounts.txt","r");
     }
     fclose(f);
     for(i=0;i<accountCnt;i++){
@@ -379,9 +383,9 @@ Status transfer(char *idFrom,char *idTo,double amount){
     Status ret;
     FILE *f=fopen("files/accounts.txt","r");
     if(f == NULL){
-        ret.status=ERROR;
-        strcpy(ret.message,"File accounts.txt not found!");
-        return ret;
+        f=fopen("files/accounts.txt","w");
+        fclose(f);
+        f=fopen("files/accounts.txt","r");
     }
     fclose(f);
     for(i=0;i<accountCnt;i++){
@@ -547,9 +551,9 @@ Status delete_multiple(DeleteMethod method,Date date){
     Status ret;
     FILE *f=fopen("files/accounts.txt","r");
     if(f == NULL){
-        ret.status=ERROR;
-        strcpy(ret.message,"File accounts.txt not found!");
-        return ret;
+        f=fopen("files/accounts.txt","w");
+        fclose(f);
+        f=fopen("files/accounts.txt","r");
     }
     fclose(f);
     Account temp[accountCnt];
