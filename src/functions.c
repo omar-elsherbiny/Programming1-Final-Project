@@ -147,6 +147,8 @@ Status add(Account acc){
         fseek(f,0,SEEK_END);
         fprintf(f,"\n");
     }
+    acc.status=1;
+    acc.date=get_month();
     accounts[accountCnt]=acc;
     fprintf(f,"%s,%s,%s,%.2f,%s,%d-%d, %s\n",acc.id,acc.name,acc.email,acc.balance,acc.mobile,acc.date.month,acc.date.year,(acc.status?"active":"inactive"));
     fclose(f);
