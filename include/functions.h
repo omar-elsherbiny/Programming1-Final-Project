@@ -1,7 +1,7 @@
 // functions.h
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
-#include "helper.h"
+#include "helpers.h"
 Status login(char *username,char* password);
 Status load();
 AccountResult query(char *id);

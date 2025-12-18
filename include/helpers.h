@@ -1,6 +1,6 @@
-// helper.h
-#ifndef HELPER_H
-#define HELPER_H
+// helpers.h
+#ifndef HELPERS_H
+#define HELPERS_H
 #define N 200
 
 typedef enum{
@@ -66,4 +66,5 @@ Date get_month();
 int cmp_transactions(Transaction a,Transaction b);
 void transaction_merge_sort(Transaction transactions[],int l,int r);
 int month_diff(Date a,Date b);
+void debug(char *str);
 #endif

@@ -1,5 +1,5 @@
-// helper.c
-#include "helper.h"
+// helpers.c
+#include "helpers.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -184,4 +184,11 @@ int month_diff(Date a,Date b){
         sm+=12*(a.year-b.year-1);
     }
     return sm;
+}
+
+void debug(char *str){
+    FILE *f=fopen("files/debug.txt","a");
+    fprintf(f,"%s\n",str);
+    fclose(f);
+    return;
 }
