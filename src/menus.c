@@ -44,6 +44,37 @@ static void remove_all_chars(char *str, char c) {
     *pWrite = '\0';
 }
 
+static void print_status(Status status) {
+    char statusMsg[LINE_LENGTH];
+    sprintf(statusMsg, "%s", status.message);
+    int lineCount;
+    Line *statusMsgLines = MULTI_LINE_DEFAULT(statusMsg, 30, &lineCount);
+
+    BoxContent statusPage;
+    if (status.status == ERROR) {
+        strcpy(statusPage.title, FG_RED "ERROR");
+    } else {
+        strcpy(statusPage.title, FG_GREEN "SUCCESS");
+    }
+
+    for (int i = 0; i < lineCount; i++) {
+        // this is to append the red color to the string
+        char temp[LINE_LENGTH];
+        strcpy(temp, statusMsgLines[i].text);
+        sprintf(statusMsgLines[i].text,
+                (status.status == ERROR ? FG_RED "%s" : FG_GREEN "%s"),
+                temp);
+
+        statusPage.content[i] = statusMsgLines[i];
+    }
+    statusPage.content[lineCount] = LINE_DEFAULT(" ");
+    statusPage.content[lineCount + 1] =
+    LINE_DIALOGUE("Okay", 0);
+    free(statusMsgLines);
+
+    display_box_prompt(&statusPage);
+}
+
 // Functions definitions
 static MenuIndex entry_func() { return LOGIN; }
 
@@ -436,43 +467,13 @@ static MenuIndex acc_new_func() {
         sprintf(account.mobile, "0%s", results.textInputs[4]);
 
         Status status = add(account);
-        char statusMsg[LINE_LENGTH];
-        sprintf(statusMsg, "%s", status.message);
-        int lineCount;
-        Line *statusMsgLines = MULTI_LINE_DEFAULT(statusMsg, 30, &lineCount);
+        print_status(status);
 
-        BoxContent statusPage;
-        if (status.status == ERROR) {
-            strcpy(statusPage.title, FG_RED "ERROR");
-        } else {
-            strcpy(statusPage.title, FG_GREEN "SUCCESS");
-        }
-
-        for (int i = 0; i < lineCount; i++) {
-            // this is to append the red color to the string
-            char temp[LINE_LENGTH];
-            strcpy(temp, statusMsgLines[i].text);
-            sprintf(statusMsgLines[i].text,
-                    (status.status == ERROR ? FG_RED "%s" : FG_GREEN "%s"),
-                    temp);
-
-            statusPage.content[i] = statusMsgLines[i];
-        }
-        statusPage.content[lineCount] = LINE_DEFAULT(" ");
-        statusPage.content[lineCount + 1] =
-            LINE_DIALOGUE("Okay", DIALOG_PROCEED);
-        free(statusMsgLines);
-
-        PromptInputs statusResult = display_box_prompt(&statusPage);
-
-        if (statusResult.dialogueValue == DIALOG_PROCEED) {
-            free_result(results);
-
-            if (status.status == ERROR)
-                return ACC_NEW;
-            if (status.status == SUCCESS)
-                return COMMANDS;
-        }
+        free_result(results);
+        if (status.status == ERROR)
+            return ACC_NEW;
+        if (status.status == SUCCESS)
+            return COMMANDS;
     }
 
     free_result(results);
@@ -526,6 +527,10 @@ static MenuIndex acc_delete_func() {
     return COMMANDS;
 }
 
+static MenuIndex acc_modify_func() {
+
+}
+
 void mainloop() {
     // Put functions in the menuFunctions Array
     menuFunctions[ENTRY] = entry_func;
@@ -534,6 +539,7 @@ void mainloop() {
     menuFunctions[COMMANDS] = commands_func;
     menuFunctions[ACC_NEW] = acc_new_func;
     menuFunctions[ACC_DELETE] = acc_delete_func;
+    menuFunctions[ACC_MODIFY] = acc_modify_func;
 
     // Runs the main looping
     MenuIndex currentIndex = ENTRY;
