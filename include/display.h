@@ -91,7 +91,7 @@ typedef struct {
 Line LINE_DEFAULT(const char text[]);   //constructs a line of DEFAULT type 
 Line LINE_DIALOGUE(const char text[], int value);   //constructs a line of DIALOGUE type
 Line LINE_TEXT(const char str[], int maxLen, _Bool hidden, const char validChars[]);    //constructs a line of TEXT type
-Line *MULTI_LINE_DEFAULT(const char text[], int width, int *lineCnt);   //constructs multiple DEFAULT lines given some large text
+Line *MULTI_LINE_DEFAULT(const char text[], const char linePrefix[], int width, int *lineCnt);   //constructs multiple DEFAULT lines given some large text
 
 void display_init(void);  //initialize the terminal to use ANSI codes and UTF-8
 void display_draw_box(DrawnBox *box);   //renders a processed box on screen
