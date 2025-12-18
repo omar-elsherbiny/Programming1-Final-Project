@@ -330,25 +330,27 @@ static MenuIndex acc_new_func() {
             }
         }
         
+        
         // Check if balance has only 2 decimal places
         char temp[LINE_LENGTH];
         strcpy(temp, results.textInputs[3]);
         token = strtok(temp, ".");
         token = strtok(NULL, ".");
-
-        if (strlen(token) > 2) {
-            BoxContent errorPage = {
-                .title = FG_RED "ERROR",
-                .content = {
-                    LINE_DEFAULT(FG_RED "The balance should only be max"),
-                    LINE_DEFAULT(FG_RED "of 2 decimal places"),
-                    LINE_DEFAULT(" "), LINE_DIALOGUE("Okay", DIALOG_PROCEED)}};
-
-            PromptInputs errorResult = display_box_prompt(&errorPage);
-
-            if (errorResult.dialogueValue == DIALOG_PROCEED) {
-                free_result(results);
-                return ACC_NEW;
+        if (token != NULL) {
+            if (strlen(token) > 2) {
+                BoxContent errorPage = {
+                    .title = FG_RED "ERROR",
+                    .content = {
+                        LINE_DEFAULT(FG_RED "The balance should only be max"),
+                        LINE_DEFAULT(FG_RED "of 2 decimal places"),
+                        LINE_DEFAULT(" "), LINE_DIALOGUE("Okay", DIALOG_PROCEED)}};
+                        
+                        PromptInputs errorResult = display_box_prompt(&errorPage);
+                        
+                        if (errorResult.dialogueValue == DIALOG_PROCEED) {
+                            free_result(results);
+                            return ACC_NEW;
+                        }
             }
         }
 
