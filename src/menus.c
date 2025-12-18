@@ -35,6 +35,15 @@ static void free_result(PromptInputs results) {
     free(results.textInputs);
 }
 
+static void remove_all_chars(char* str, char c) {
+    char *pRead = str, *pWrite = str;
+    while (*pRead) {
+        *pWrite = *pRead++;
+        pWrite += (*pWrite != c);
+    }
+    *pWrite = '\0';
+}
+
 // Functions definitions
 static MenuIndex entry_func() { return LOGIN; }
 
@@ -230,7 +239,7 @@ static MenuIndex acc_new_func() {
                     LINE_TEXT("│ %s │", 25, 0, ""),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT("┌ Balance ───────────────────┐"),
-                    LINE_TEXT("│ %s ($) │", 15, 0, ".0123456789\b"),
+                    LINE_TEXT("│ %s ($) │", 20, 0, ",.0123456789\b"),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT("┌ Mobile ────────────────────┐"),
                     LINE_TEXT("│ + 20 %s │", 10, 0, "0123456789\b"),
@@ -261,6 +270,9 @@ static MenuIndex acc_new_func() {
     }
 
     if (confirmResults.dialogueValue == DIALOG_YES) {
+        // removing all commas from balance input field
+        remove_all_chars(results.textInputs[3],',');
+
         // Check if any field is empty
         if ((strlen(results.textInputs[0]) == 0) ||
             (strlen(results.textInputs[1]) == 0) ||
