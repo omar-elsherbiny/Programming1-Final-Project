@@ -92,10 +92,11 @@ Line *MULTI_LINE_DEFAULT(const char text[], int width, int *lineCnt) {
         word = strtok(NULL, " ");
     }
 
+    if (curLen == 0 && lines > 0) lines--;
+
     *lineCnt = lines + 1;
     return multiLines;
 }
-
 
 // -
 
@@ -360,6 +361,16 @@ PromptInputs display_box_prompt(BoxContent *box) {
         if (line->type != DEFAULT) selectableCount++;
     }
 
+    // handle no selectables
+    int ch;
+    if (selectableCount == 0) {
+        ch = _getch();
+        if (ch == K_ESC)
+            exit(1);
+        else if (ch == K_ENTER)
+            return (PromptInputs){0};
+    }
+
     // initialize arrays
     Line **selectableLines = malloc(selectableCount * sizeof(Line *));
     int *resultIndexMap = malloc(selectableCount * sizeof(int));
@@ -384,7 +395,6 @@ PromptInputs display_box_prompt(BoxContent *box) {
 
     int curr = 0;
     int prev = -1;
-    int ch;
 
     int dialogueValue;
     char *textInput;
