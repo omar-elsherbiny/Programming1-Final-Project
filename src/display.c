@@ -364,11 +364,15 @@ PromptInputs display_box_prompt(BoxContent *box) {
     // handle no selectables
     int ch;
     if (selectableCount == 0) {
-        ch = _getch();
-        if (ch == K_ESC)
-            exit(1);
-        else if (ch == K_ENTER)
-            return (PromptInputs){0};
+        update_console_size();  // recenters
+        display_draw_box(&resultBox);
+        while (1) {
+            ch = _getch();
+            if (ch == K_ESC)
+                exit(1);
+            else if (ch == K_ENTER)
+                return (PromptInputs){0};
+        }
     }
 
     // initialize arrays
