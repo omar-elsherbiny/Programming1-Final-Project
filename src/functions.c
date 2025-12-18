@@ -51,7 +51,7 @@ Status load(){
         strcpy(ufdate,strtok(NULL,","));
         strcpy(ufstatus,strtok(NULL,","));
         //copying data into array
-        strcpy(accounts[i].name,ufid);
+        strcpy(accounts[i].id,ufid);
         strcpy(accounts[i].name,ufname);
         strcpy(accounts[i].mobile,ufmobile);
         strcpy(accounts[i].email,ufemail);
@@ -60,9 +60,9 @@ Status load(){
         accounts[i].date.month=atoi(strtok(ufdate,"-"));
         accounts[i].date.year=atoi(strtok(NULL,"-"));
         //check if account transaction file exists, if not creates it
-        FILE *accountFile=fopen(strcat(accounts[i].id,".txt"),"r");
+        FILE *accountFile=fopen(strcat("files/accounts/",strcat(accounts[i].id,".txt")),"r");
         if(accountFile==NULL){
-            FILE *createAccountFile=fopen(strcat(accounts[i].id,".txt"),"w");
+            FILE *createAccountFile=fopen(strcat("files/accounts/",strcat(accounts[i].id,".txt")),"w");
             fclose(createAccountFile);
         }
         fclose(accountFile);
