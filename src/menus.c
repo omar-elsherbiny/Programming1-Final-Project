@@ -1,10 +1,12 @@
 // menus.c
 #include "menus.h"
-#include "display.h"
-#include "functions.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "display.h"
+#include "functions.h"
 
 typedef enum {
     RETURN = -1,
@@ -47,7 +49,7 @@ static void remove_all_chars(char *str, char c) {
 static void print_status(Status status) {
     int lineCount;
     Line *statusMsgLines = MULTI_LINE_DEFAULT(status.message, (status.status == ERROR ? FG_RED : FG_GREEN), 30, &lineCount);
-    
+
     BoxContent statusPage = {0};
     strcpy(statusPage.title, (status.status == ERROR ? FG_RED "ERROR" : FG_GREEN "SUCCESS"));
 
@@ -65,7 +67,9 @@ static void print_status(Status status) {
 static MenuIndex entry_func() { return LOGIN; }
 
 static MenuIndex login_func() {
-    enum DialogOptions { DIALOG_LOGIN, DIALOG_QUIT, DIALOG_PROCEED };
+    enum DialogOptions { DIALOG_LOGIN,
+                         DIALOG_QUIT,
+                         DIALOG_PROCEED };
 
     BoxContent loginPage = {
         .title = "Login",
@@ -90,11 +94,11 @@ static MenuIndex login_func() {
     // Checking if login fails
     if (status.status == ERROR) {
         print_status(status);
-        
+
         free_result(results);
         return LOGIN;
     }
-    
+
     status = load();
     // Checking if Loading accounts fails
     if (status.status == ERROR) {
@@ -109,7 +113,8 @@ static MenuIndex login_func() {
 }
 
 static MenuIndex quit_func() {
-    enum DialogOptions { DIALOG_YES, DIALOG_NO };
+    enum DialogOptions { DIALOG_YES,
+                         DIALOG_NO };
 
     BoxContent quitPage = {
         .title = "Quit",
@@ -453,16 +458,16 @@ static MenuIndex acc_delete_func() {
 
     if (results.dialogueValue == DIALOG_DEL_ONE) {
         BoxContent deleteOnePage = {
-        .title = "Delete Account",
-        .content = {LINE_DEFAULT("┌ Account Number ────────────┐"),
-                    LINE_TEXT("│ %s │", 10, 0, "1234567890\b"),
-                    LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT(" "),
-                    LINE_DIALOGUE(FG_RED "Delete", DIALOG_YES),
-                    LINE_DIALOGUE("Discard", DIALOG_NO)}};
+            .title = "Delete Account",
+            .content = {LINE_DEFAULT("┌ Account Number ────────────┐"),
+                        LINE_TEXT("│ %s │", 10, 0, "1234567890\b"),
+                        LINE_DEFAULT("└────────────────────────────┘"),
+                        LINE_DEFAULT(" "),
+                        LINE_DIALOGUE(FG_RED "Delete", DIALOG_YES),
+                        LINE_DIALOGUE("Discard", DIALOG_NO)}};
 
         PromptInputs delOneResults = display_box_prompt(&deleteOnePage);
-        
+
         if (delOneResults.dialogueValue == DIALOG_NO) {
             free_result(results);
             return ACC_DELETE;
@@ -474,7 +479,6 @@ static MenuIndex acc_delete_func() {
 }
 
 static MenuIndex acc_modify_func() {
-
 }
 
 void mainloop() {

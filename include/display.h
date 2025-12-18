@@ -45,13 +45,13 @@
 #define K_RIGHT 77
 #define K_LEFT 75
 
-typedef enum {  //defines each line type
+typedef enum {  // defines each line type
     DEFAULT,
     TEXT,
     DIALOGUE,
 } LineType;
 
-typedef struct {    //defines the properties of an input text field
+typedef struct {  // defines the properties of an input text field
     int maxLen;
     _Bool hidden;
     char validChars[256];
@@ -60,7 +60,7 @@ typedef struct {    //defines the properties of an input text field
 #define LINE_LENGTH 300
 #define LINE_COUNT 100
 
-typedef struct {    
+typedef struct {
     char text[LINE_LENGTH];
     LineType type;
     union {
@@ -69,13 +69,13 @@ typedef struct {
     } data;
 } Line;
 
-typedef struct {    //the box to be processed
+typedef struct {  // the box to be processed
     char title[LINE_LENGTH];
-    Line content[LINE_COUNT];   //array of lines
+    Line content[LINE_COUNT];  // array of lines
     char footer[LINE_LENGTH];
 } BoxContent;
 
-typedef struct {    //the processed box to be printed 
+typedef struct {  // the processed box to be printed
     int width, height;
     char title[LINE_LENGTH];
     char content[LINE_COUNT][LINE_LENGTH];
@@ -83,24 +83,23 @@ typedef struct {    //the processed box to be printed
 } DrawnBox;
 
 typedef struct {
-    int textInputCount; //contains the number of input fields
-    char **textInputs;  //array of strings, contains the text the user entered
-    int dialogueValue;  //contains the choice of the user
+    int textInputCount;  // contains the number of input fields
+    char **textInputs;   // array of strings, contains the text the user entered
+    int dialogueValue;   // contains the choice of the user
 } PromptInputs;
 
-Line LINE_DEFAULT(const char text[]);   //constructs a line of DEFAULT type 
-Line LINE_DIALOGUE(const char text[], int value);   //constructs a line of DIALOGUE type
-Line LINE_TEXT(const char str[], int maxLen, _Bool hidden, const char validChars[]);    //constructs a line of TEXT type
-Line *MULTI_LINE_DEFAULT(const char text[], const char linePrefix[], int width, int *lineCnt);   //constructs multiple DEFAULT lines given some large text
+Line LINE_DEFAULT(const char text[]);                                                           // constructs a line of DEFAULT type
+Line LINE_DIALOGUE(const char text[], int value);                                               // constructs a line of DIALOGUE type
+Line LINE_TEXT(const char str[], int maxLen, _Bool hidden, const char validChars[]);            // constructs a line of TEXT type
+Line *MULTI_LINE_DEFAULT(const char text[], const char linePrefix[], int width, int *lineCnt);  // constructs multiple DEFAULT lines given some large text
 
-void display_init(void);  //initialize the terminal to use ANSI codes and UTF-8
-void display_draw_box(DrawnBox *box);   //renders a processed box on screen
-PromptInputs display_box_prompt(BoxContent *box);   //displays an interactive box that takes prompt from the user and returns it to the program
-void display_cleanup(void);   //resets the terminal to normal state
+void display_init(void);                           // initialize the terminal to use ANSI codes and UTF-8
+void display_draw_box(DrawnBox *box);              // renders a processed box on screen
+PromptInputs display_box_prompt(BoxContent *box);  // displays an interactive box that takes prompt from the user and returns it to the program
+void display_cleanup(void);                        // resets the terminal to normal state
 
-void format_string(const char template[], const char str[], int width, int offset, char dest[]);    //takes a template with some %s ,and replaces %s with str width that describes target width of the output string, the offset that describes where to begin printing the str from, and puts the formatted output in dest 
+void format_string(const char template[], const char str[], int width, int offset, char dest[]);  // takes a template with some %s ,and replaces %s with str width that describes target width of the output string, the offset that describes where to begin printing the str from, and puts the formatted output in dest
 
-void replace_wrap_string(const char str[], const char first[], const char second[], char dest[]);   //puts first as a prefix and second as a suffix if no %s is present or only one is present, if more than two %s are present, put first instead of the first one , and second instead of the second one 
-
+void replace_wrap_string(const char str[], const char first[], const char second[], char dest[]);  // puts first as a prefix and second as a suffix if no %s is present or only one is present, if more than two %s are present, put first instead of the first one , and second instead of the second one
 
 #endif

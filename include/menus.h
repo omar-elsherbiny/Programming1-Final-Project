@@ -3,6 +3,5 @@
 #define MENUS_H
 
 void mainloop();
-// MenuIndex login_func();
 
 #endif
