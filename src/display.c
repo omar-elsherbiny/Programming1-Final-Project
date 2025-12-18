@@ -1,6 +1,10 @@
 // display.c
 #include "display.h"
 
+#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+#endif
+
 #include <conio.h>
 #include <stdio.h>
 #include <windows.h>

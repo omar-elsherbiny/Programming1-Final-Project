@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Iinclude
+CFLAGS = -Wall -Wextra -Iinclude -DWINVER=0x0A00 -D_WIN32_WINNT=0x0A00
 
 SRC = $(wildcard src/*.c)
 OBJ = $(SRC:.c=.o)
