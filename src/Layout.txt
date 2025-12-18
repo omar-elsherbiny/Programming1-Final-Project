@@ -86,6 +86,12 @@ Confirm Message
 
 Error Message
     ┌──────────── Error ─────────────┐
+    │ You should fill out all the    │
+    │ input fields                   │
+    │                                │
+    │ Okay                           │
+    └────────────────────────────────┘
+    ┌──────────── Error ─────────────┐
     │ Account Number is not Unique   │
     │                                │
     │ Okay                           │

@@ -260,8 +260,66 @@ static MenuIndex acc_new_func() {
         return ACC_NEW;
     }
 
-    // Acc number number 10 characters
     if (confirmResults.dialogueValue == DIALOG_YES) {
+        // Check if any field is empty
+        if ((strlen(results.textInputs[0]) == 0) ||
+            (strlen(results.textInputs[1]) == 0) ||
+            (strlen(results.textInputs[2]) == 0) ||
+            (strlen(results.textInputs[3]) == 0) ||
+            (strlen(results.textInputs[4]) == 0)) {
+            BoxContent errorPage = {
+                .title = FG_RED "ERROR",
+                .content = {
+                    LINE_DEFAULT(FG_RED "You should fill out all the   "),
+                    LINE_DEFAULT(FG_RED "input fields"), LINE_DEFAULT(" "),
+                    LINE_DIALOGUE("Okay", DIALOG_PROCEED)}};
+
+            PromptInputs errorResult = display_box_prompt(&errorPage);
+
+            if (errorResult.dialogueValue == DIALOG_PROCEED) {
+                free_result(results);
+                return ACC_NEW;
+            }
+        }
+
+        // Acc number number 10 characters
+        if (strlen(results.textInputs[0]) != 10) {
+            BoxContent errorPage = {
+                .title = FG_RED "ERROR",
+                .content = {
+                    LINE_DEFAULT(FG_RED "Account Number is not 10      "),
+                    LINE_DEFAULT(FG_RED "characters"), LINE_DEFAULT(" "),
+                    LINE_DIALOGUE("Okay", DIALOG_PROCEED)}};
+
+            PromptInputs errorResult = display_box_prompt(&errorPage);
+
+            if (errorResult.dialogueValue == DIALOG_PROCEED) {
+                free_result(results);
+                return ACC_NEW;
+            }
+        }
+
+        // TODO
+        // email validation
+        // if (!is_valid_email(results.textInputs[2])) {
+        //     if (!(results.textInputs[3][0] >= '0' &&
+        //           results.textInputs[3][0] <= '9')) {
+        //         BoxContent errorPage = {
+        //             .title = FG_RED "ERROR",
+        //             .content = {
+        //                 LINE_DEFAULT(FG_RED "Email is not valid            "),
+        //                 LINE_DEFAULT(" "),
+        //                 LINE_DIALOGUE("Okay", DIALOG_PROCEED)}};
+
+        //         PromptInputs errorResult = display_box_prompt(&errorPage);
+
+        //         if (errorResult.dialogueValue == DIALOG_PROCEED) {
+        //             free_result(results);
+        //             return ACC_NEW;
+        //         }
+        //     }
+        // }
+
         // Check if 1st char in balance is a number
         if (!(results.textInputs[3][0] >= '0' &&
               results.textInputs[3][0] <= '9')) {
@@ -287,23 +345,6 @@ static MenuIndex acc_new_func() {
                 .content = {
                     LINE_DEFAULT(FG_RED "Balance should end with a     "),
                     LINE_DEFAULT(FG_RED "number"), LINE_DEFAULT(" "),
-                    LINE_DIALOGUE("Okay", DIALOG_PROCEED)}};
-
-            PromptInputs errorResult = display_box_prompt(&errorPage);
-
-            if (errorResult.dialogueValue == DIALOG_PROCEED) {
-                free_result(results);
-                return ACC_NEW;
-            }
-        }
-
-        // Check if acc # is 10 chars
-        if (strlen(results.textInputs[0]) != 10) {
-            BoxContent errorPage = {
-                .title = FG_RED "ERROR",
-                .content = {
-                    LINE_DEFAULT(FG_RED "Account Number is not 10      "),
-                    LINE_DEFAULT(FG_RED "characters"), LINE_DEFAULT(" "),
                     LINE_DIALOGUE("Okay", DIALOG_PROCEED)}};
 
             PromptInputs errorResult = display_box_prompt(&errorPage);
@@ -356,6 +397,22 @@ static MenuIndex acc_new_func() {
                     free_result(results);
                     return ACC_NEW;
                 }
+            }
+        }
+
+        // phone number must be 10 characters (excluding the "+ 20")
+        if (strlen(results.textInputs[4]) != 10) {
+            BoxContent errorPage = {
+                .title = FG_RED "ERROR",
+                .content = {
+                    LINE_DEFAULT(FG_RED "Phone Number is not valid    "),
+                    LINE_DEFAULT(" "), LINE_DIALOGUE("Okay", DIALOG_PROCEED)}};
+
+            PromptInputs errorResult = display_box_prompt(&errorPage);
+
+            if (errorResult.dialogueValue == DIALOG_PROCEED) {
+                free_result(results);
+                return ACC_NEW;
             }
         }
 
