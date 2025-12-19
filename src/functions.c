@@ -159,7 +159,7 @@ Status add(Account acc) {
     accounts[accountCnt] = acc;
     accountCnt++;
     account_merge_sort(accounts,0,accountCnt-1,ID);
-    save();
+    // save();
     ret.status = SUCCESS;
     strcpy(ret.message, "Account added successfully!");
     return ret;
@@ -197,7 +197,7 @@ Status delete(char *id) {
         }
     }
     accountCnt--;
-    save();
+    // save();
     ret.status = SUCCESS;
     strcpy(ret.message, "Account deleted successfully!");
     return ret;
@@ -233,7 +233,7 @@ Status modify(char *id, char *name, char *mobile, char *email) {
     strcpy(accounts[i].name, name);
     strcpy(accounts[i].mobile, mobile);
     strcpy(accounts[i].email, email);
-    save();
+    // save();
     ret.status = SUCCESS;
     strcpy(ret.message, "Account modified successfully!");
     return ret;
@@ -262,7 +262,7 @@ Status change_status(char *id) {
     }
     // account found and file exists
     accounts[i].status ^= 1;  // toggles status
-    save();
+    // save();
     ret.status = SUCCESS;
     strcpy(ret.message, "Account status changed successfully!");
     return ret;
@@ -326,7 +326,7 @@ Status withdraw(char *id, double amount) {
     fprintf(accountFile, "%s,withdraw,%.2f,%d-%d-%d\n", id, amount, get_today().day, get_today().month, get_today().year);
     fclose(accountFile);
     accounts[i].balance -= amount;
-    save();
+    // save();
     ret.status = SUCCESS;
     strcpy(ret.message, "Withdrawal completed successfully!");
     return ret;
@@ -389,7 +389,7 @@ Status deposit(char *id, double amount) {
     fprintf(accountFile, "%s,deposit,%.2f,%d-%d-%d\n", id, amount, get_today().day, get_today().month, get_today().year);
     fclose(accountFile);
     accounts[i].balance += amount;
-    save();
+    // save();
     ret.status = SUCCESS;
     strcpy(ret.message, "Deposit completed successfully!");
     return ret;
@@ -478,7 +478,7 @@ Status transfer(char *idFrom, char *idTo, double amount) {
     fclose(accountToFile);
     accounts[idxTo].balance += amount;
     accounts[idxFrom].balance -= amount;
-    save();
+    // save();
     ret.status = SUCCESS;
     strcpy(ret.message, "Transfer completed successfully!");
     return ret;
@@ -612,7 +612,7 @@ Status delete_multiple(DeleteMethod method, Date date) {
         for (i = 0; i < accountCnt; i++) {
             accounts[i] = temp[i];
         }
-        save();
+        // save();
         ret.status = SUCCESS;
         char buf[20];
         snprintf(buf, sizeof(buf), "%d", found);
@@ -638,7 +638,7 @@ Status delete_multiple(DeleteMethod method, Date date) {
         for (i = 0; i < accountCnt; i++) {
             accounts[i] = temp[i];
         }
-        save();
+        // save();
         ret.status = SUCCESS;
         char buf[20];
         snprintf(buf, sizeof(buf), "%d", found);
