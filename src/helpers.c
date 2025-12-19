@@ -198,6 +198,13 @@ int valid_email(char *s){
         return 0;
     }
     char *a=strtok(s,"@"),*b=strtok(NULL,"@");
+    for(i=0;b[i];i++){
+        if(i>2){
+            if(b[i]=='.'&&(b[i-1]=='.'||b[i-2]=='.'||b[i-3]=='.')){
+                return 0;
+            }
+        }
+    }
     if(strlen(a)==0||strlen(b)==0){
         return 0;
     }
