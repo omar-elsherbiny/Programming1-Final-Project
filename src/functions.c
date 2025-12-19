@@ -61,7 +61,7 @@ Status load() {
         strcat(fileName, ufid);
         strcat(fileName, ".txt");
         accounts[i].balance = strtod(ufbalance, NULL);
-        accounts[i].status = (strcmp(strtok(ufstatus, " "), "inactive") == 0 ? 0 : 1);
+        accounts[i].status = ((strcmp(ufstatus, "inactive\n") == 0 || strcmp(ufstatus, " inactive\n") == 0) ? 0 : 1);
         accounts[i].date.month = atoi(strtok(ufdate, "-"));
         accounts[i].date.year = atoi(strtok(NULL, "-"));
         // check if account transaction file exists, if not creates it
