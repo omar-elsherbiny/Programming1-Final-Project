@@ -76,12 +76,12 @@ Status load() {
     ret.status = SUCCESS;
     strcpy(ret.message, "Accounts loaded successfully!");
     fclose(f);
+    account_merge_sort(accounts,0,accountCnt-1,ID);
     return ret;
 }
 
 AccountResult query(char *id) {
     AccountResult ret;
-    account_merge_sort(accounts, 0, accountCnt-1, ID);
     int s = 0, e = accountCnt-1, mid;
     // binary search for account
     while (s < e) {
@@ -125,7 +125,6 @@ AccountResult advanced_search(char *keyword) {
             ret.n++;
         }
     }
-    account_merge_sort(ret.accounts, 0, ret.n-1, ID);
     if (!ret.n) {
         ret.status.status = ERROR;
         strcpy(ret.status.message, "No account with keyword found!");
@@ -155,17 +154,12 @@ Status add(Account acc) {
         f = fopen("files/accounts.txt", "r");
     }
     fclose(f);
-    f = fopen("files/accounts.txt", "a+");
-    if (fseek(f, -1, SEEK_END) == 0 && fgetc(f) != '\n') {
-        fseek(f, 0, SEEK_END);
-        fprintf(f, "\n");
-    }
     acc.status = 1;
     acc.date = get_month();
     accounts[accountCnt] = acc;
-    fprintf(f, "%s,%s,%s,%.2f,%s,%d-%d, %s\n", acc.id, acc.name, acc.email, acc.balance, acc.mobile, acc.date.month, acc.date.year, (acc.status ? "active" : "inactive"));
-    fclose(f);
     accountCnt++;
+    account_merge_sort(accounts,0,accountCnt-1,ID);
+    save();
     ret.status = SUCCESS;
     strcpy(ret.message, "Account added successfully!");
     return ret;
@@ -572,7 +566,6 @@ ReportResult report(char *id) {
 
 AccountResult print(SortMethod method) {
     AccountResult ret;
-    account_merge_sort(accounts, 0, accountCnt-1, method);
     int i;
     ret.n = accountCnt;
     if (!accountCnt) {
@@ -583,6 +576,7 @@ AccountResult print(SortMethod method) {
     for (i = 0; i < accountCnt; i++) {
         ret.accounts[i] = accounts[i];
     }
+    account_merge_sort(ret.accounts, 0, accountCnt-1, method);
     ret.status.status = SUCCESS;
     strcpy(ret.status.message, "Obtained all sorted accounts successfully!");
     return ret;
