@@ -132,72 +132,33 @@ static MenuIndex quit_func() {
 }
 
 static MenuIndex commands_func() {
-    enum DialogOptions {
-        DIALOG_ACC_NEW,
-        DIALOG_ACC_DELETE,
-        DIALOG_ACC_MODIFY,
-        DIALOG_ACC_SEARCH,
-        DIALOG_ACC_ADVANCESEARCH,
-        DIALOG_ACC_STATUS,
-        DIALOG_TRANS_WITHDRAW,
-        DIALOG_TRANS_DEPOSIT,
-        DIALOG_TRANS_TRANSFER,
-        DIALOG_OTHER_REPORT,
-        DIALOG_OTHER_PRINT,
-        DIALOG_LOGOUT
-    };
-
     BoxContent commandsPage = {
         .title = "Commands",
         .content = {
             LINE_DEFAULT("Manage Accounts:              "),
-            LINE_DIALOGUE("  %sAdd a new Account%s", DIALOG_ACC_NEW),
+            LINE_DIALOGUE("  %sAdd a new Account%s", ACC_NEW),
             LINE_DIALOGUE("  %sDelete an Existing Account%s",
-                          DIALOG_ACC_DELETE),
+                          ACC_DELETE),
             LINE_DIALOGUE("  %sModify an Existing Account%s",
-                          DIALOG_ACC_MODIFY),
-            LINE_DIALOGUE("  %sSearch an Account%s", DIALOG_ACC_SEARCH),
-            LINE_DIALOGUE("  %sAdvanced Searching%s", DIALOG_ACC_ADVANCESEARCH),
-            LINE_DIALOGUE("  %sChange an Account Status%s", DIALOG_ACC_STATUS),
+                          ACC_MODIFY),
+            LINE_DIALOGUE("  %sSearch an Account%s", ACC_SEARCH),
+            LINE_DIALOGUE("  %sAdvanced Searching%s", ACC_ADVANCESEARCH),
+            LINE_DIALOGUE("  %sChange an Account Status%s", ACC_STATUS),
             LINE_DEFAULT(" "), LINE_DEFAULT("Transactions:"),
             LINE_DIALOGUE("  %sWithdraw from an Account%s",
-                          DIALOG_TRANS_WITHDRAW),
-            LINE_DIALOGUE("  %sDeposit to an Account%s", DIALOG_TRANS_DEPOSIT),
+                          TRANS_WITHDRAW),
+            LINE_DIALOGUE("  %sDeposit to an Account%s", TRANS_DEPOSIT),
             LINE_DIALOGUE("  %sTransfer to an Account%s",
-                          DIALOG_TRANS_TRANSFER),
+                          TRANS_TRANSFER),
             LINE_DEFAULT(" "), LINE_DEFAULT("Others:"),
             LINE_DIALOGUE("  %sReport last transactions%s",
-                          DIALOG_OTHER_REPORT),
-            LINE_DIALOGUE("  %sPrint all Accounts%s", DIALOG_OTHER_PRINT),
-            LINE_DEFAULT(" "), LINE_DIALOGUE(FG_RED "Logout", DIALOG_LOGOUT)}};
+                          OTHER_REPORT),
+            LINE_DIALOGUE("  %sPrint all Accounts%s", OTHER_PRINT),
+            LINE_DEFAULT(" "), LINE_DIALOGUE(FG_RED "Logout", LOGIN)}};
 
     PromptInputs results = display_box_prompt(&commandsPage);
 
-    if (results.dialogueValue == DIALOG_LOGOUT)
-        return LOGIN;
-
-    if (results.dialogueValue == DIALOG_ACC_NEW)
-        return ACC_NEW;
-    if (results.dialogueValue == DIALOG_ACC_DELETE)
-        return ACC_DELETE;
-    if (results.dialogueValue == DIALOG_ACC_MODIFY)
-        return ACC_MODIFY;
-    if (results.dialogueValue == DIALOG_ACC_SEARCH)
-        return ACC_SEARCH;
-    if (results.dialogueValue == DIALOG_ACC_ADVANCESEARCH)
-        return ACC_ADVANCESEARCH;
-    if (results.dialogueValue == DIALOG_ACC_STATUS)
-        return ACC_STATUS;
-    if (results.dialogueValue == DIALOG_TRANS_WITHDRAW)
-        return TRANS_WITHDRAW;
-    if (results.dialogueValue == DIALOG_TRANS_DEPOSIT)
-        return TRANS_DEPOSIT;
-    if (results.dialogueValue == DIALOG_TRANS_TRANSFER)
-        return TRANS_TRANSFER;
-    if (results.dialogueValue == DIALOG_OTHER_REPORT)
-        return OTHER_REPORT;
-    if (results.dialogueValue == DIALOG_OTHER_PRINT)
-        return OTHER_PRINT;
+    return results.dialogueValue;
 }
 
 static MenuIndex acc_new_func() {
