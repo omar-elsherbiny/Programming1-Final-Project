@@ -342,7 +342,7 @@ void display_draw_box(DrawnBox *box) {
     fflush(stdout);
 }
 
-PromptInputs display_box_prompt(BoxContent *box) {
+PromptInputs display_box_prompt(BoxContent *box, int initialSelected) {
     int boxWidth, boxHeight;
     get_box_dimensions(box, &boxWidth, &boxHeight);
 
@@ -403,7 +403,9 @@ PromptInputs display_box_prompt(BoxContent *box) {
         textInputs[i] = calloc(LINE_LENGTH + 1, sizeof(char));
     }
 
-    int curr = 0;
+    initialSelected = (initialSelected < 0 ? 0 : initialSelected);
+    initialSelected = (initialSelected >= selectableCount ? selectableCount - 1 : initialSelected);
+    int curr = initialSelected;
     int prev = -1;
 
     int dialogueValue;
@@ -537,3 +539,11 @@ PromptInputs display_box_prompt(BoxContent *box) {
 
     return (PromptInputs){textInputCount, textInputs, dialogueValue};
 }
+
+/* TODO:
+- initialSelected testing
+    - commands
+    - report
+- initalText
+- fix free_result if already freed
+*/
