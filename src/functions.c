@@ -81,8 +81,8 @@ Status load() {
 
 AccountResult query(char *id) {
     AccountResult ret;
-    account_merge_sort(accounts, 0, accountCnt, ID);
-    int s = 0, e = accountCnt, mid;
+    account_merge_sort(accounts, 0, accountCnt-1, ID);
+    int s = 0, e = accountCnt-1, mid;
     // binary search for account
     while (s < e) {
         mid = (s + e) / 2;
@@ -116,7 +116,7 @@ AccountResult advanced_search(char *keyword) {
             ret.n++;
         }
     }
-    account_merge_sort(ret.accounts, 0, ret.n, ID);
+    account_merge_sort(ret.accounts, 0, ret.n-1, ID);
     if (!ret.n) {
         ret.status.status = ERROR;
         strcpy(ret.status.message, "No account with keyword found!");
@@ -493,13 +493,33 @@ ReportResult report(char *id) {
         strcpy(ret.status.message, "Account not found!");
         return ret;
     }
-    FILE *accountFile = fopen(strcat(id, ".txt"), "r");
+    char fileName[N];
+    strcpy(fileName, "files/accounts/");
+    strcat(fileName, id);
+    strcat(fileName, ".txt");
+    FILE *accountFile = fopen(fileName, "r");
     if (accountFile == NULL) {
-        FILE *createAccountFile = fopen(strcat(id, ".txt"), "w");
+        FILE *createAccountFile = fopen(fileName, "w");
         fclose(createAccountFile);
-        accountFile = fopen(strcat(id, ".txt"), "r");
+        accountFile = fopen(fileName, "r");
     }
     char line[5 * N], ufaccountId[N], ufpartyId[N], uftype[N], ufamount[N], ufdate[N];
+    Transaction transactions[N];
+    for (i = 0; fgets(line, sizeof(line), accountFile); i++) {
+        strcpy(ufaccountId, strtok(line, ","));
+        strcpy(ufpartyId, strtok(NULL, ","));
+        strcpy(uftype, strtok(NULL, ","));
+        strcpy(ufamount, strtok(NULL, ","));
+        strcpy(ufdate, strtok(NULL, ","));
+        strcpy(transactions[i].accountId, ufaccountId);
+        strcpy(transactions[i].partyId, ufpartyId);
+        strcpy(transactions[i].type, uftype);
+        transactions[i].amount = strtod(ufamount, NULL);
+        transactions[i].date.day = atoi(strtok(ufdate, "-"));
+        transactions[i].date.month = atoi(strtok(NULL, "-"));
+        transactions[i].date.year = atoi(strtok(NULL, "-"));
+    }
+    transaction_merge_sort(transactions,0,i-1);
     for (i = 0; fgets(line, sizeof(line), accountFile); i++) {
         strcpy(ufaccountId, strtok(line, ","));
         strcpy(ufpartyId, strtok(NULL, ","));
@@ -533,7 +553,7 @@ ReportResult report(char *id) {
 
 AccountResult print(SortMethod method) {
     AccountResult ret;
-    account_merge_sort(accounts, 0, accountCnt, method);
+    account_merge_sort(accounts, 0, accountCnt-1, method);
     int i;
     ret.n = accountCnt;
     if (!accountCnt) {
@@ -583,7 +603,9 @@ Status delete_multiple(DeleteMethod method, Date date) {
         ret.status = SUCCESS;
         char buf[20];
         snprintf(buf, sizeof(buf), "%d", found);
-        strcpy(ret.message, strcat(strcat("Successfully deleted ", buf), " account(s)!"));
+        strcpy(ret.message,"Successfully deleted ");
+        strcat(ret.message,buf);
+        strcat(ret.message," account(s)!");
         return ret;
     } else {
         for (i = 0; i < accountCnt; i++) {

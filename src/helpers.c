@@ -70,9 +70,9 @@ void account_merge_sort(Account accounts[], int l, int r, SortMethod method) {
         for (i = 0; i < r - mid; i++) {
             ra[i] = accounts[mid + 1 + i];
         }
-        int p1 = 0, p2 = 0, idx = 0;
+        int p1 = 0, p2 = 0, idx = l;
         while (p1 < mid - l + 1 && p2 < r - mid) {
-            if (cmp_accounts(la[p1], ra[p1], method) <= 0) {
+            if (cmp_accounts(la[p1], ra[p2], method) <= 0) {
                 accounts[idx++] = la[p1++];
             } else {
                 accounts[idx++] = ra[p2++];
@@ -145,9 +145,9 @@ void transaction_merge_sort(Transaction transactions[], int l, int r) {
         for (i = 0; i < r - mid; i++) {
             ra[i] = transactions[mid + 1 + i];
         }
-        int p1 = 0, p2 = 0, idx = 0;
+        int p1 = 0, p2 = 0, idx = l;
         while (p1 < mid - l + 1 && p2 < r - mid) {
-            if (cmp_transactions(la[p1], ra[p1]) >= 0) {
+            if (cmp_transactions(la[p1], ra[p2]) >= 0) {
                 transactions[idx++] = la[p1++];
             } else {
                 transactions[idx++] = ra[p2++];
