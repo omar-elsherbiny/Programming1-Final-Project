@@ -18,7 +18,6 @@ typedef enum
     ACC_NEW,
     ACC_DELETE,
     ACC_MODIFY,
-    ACC_MODIFY_SUB,
     ACC_SEARCH,
     ACC_ADVANCESEARCH,
     ACC_STATUS,
@@ -499,7 +498,7 @@ static MenuIndex acc_delete_func() {
         }
         else if(delMultiChoice.dialogueValue == DIALOG_LESSTHAN3MONTH){
             Date date;
-            Status deleteStatus = delete_multiple(DIALOG_LESSTHAN3MONTH,date);
+            Status deleteStatus = delete_multiple(INACTIVITY,date);
             print_status(deleteStatus);
             return COMMANDS;
         }
@@ -515,8 +514,8 @@ static MenuIndex acc_change_status(){
         DIALOG_BACK,
         DIALOG_CHANGE,
         DIALOG_DISCARD,
-        DIALOG_ACTIVE,
-        DIALOG_INACTIVE,
+        DIALOG_ACTIVE = 1,
+        DIALOG_INACTIVE = 0,
         DIALOG_OKAY,
     };
     BoxContent statusPage = {
@@ -545,8 +544,8 @@ static MenuIndex acc_change_status(){
                         LINE_DEFAULT("Account is currently active   "),
                         LINE_DEFAULT(" "),
                         LINE_DEFAULT("┌ Change account status ─────┐"),
-                        LINE_DIALOGUE("│ %s(x) Active%s                 │", DIALOG_ACTIVE),
-                        LINE_DIALOGUE("│ %s( ) Inactive%s               │", DIALOG_INACTIVE),
+                        LINE_DIALOGUE(findStatus.accounts[0].status ? "│ %s(x) Active%s                 │" : "│ %s( ) Active%s                 │", DIALOG_ACTIVE),
+                        LINE_DIALOGUE(findStatus.accounts[0].status ? "│ %s( ) Inactive%s               │" : "│ %s(x) Inactive%s               │", DIALOG_INACTIVE),
                         LINE_DEFAULT("└────────────────────────────┘"),
                         LINE_DEFAULT(" "),
                         LINE_DIALOGUE("Change", DIALOG_CHANGE),
@@ -555,7 +554,7 @@ static MenuIndex acc_change_status(){
                 //printf("%s %d",findStatus.accounts[0].name,findStatus.accounts[0].status);
                 //return RETURN; uncomment those and observe the status of the user to see the bug
                 sprintf(changeStatusPage.content[0].text ,"Account is currently %sactive", (findStatus.accounts[0].status == 0 ? "in" : ""));
-                enum DialogOptions selectedOption = DIALOG_ACTIVE;
+                enum DialogOptions selectedOption = findStatus.accounts[0].status;
                 PromptInputs results = display_box_prompt(&changeStatusPage);
                 while (results.dialogueValue != DIALOG_CHANGE && results.dialogueValue != DIALOG_DISCARD)
                 {
@@ -564,23 +563,24 @@ static MenuIndex acc_change_status(){
                     changeStatusPage.content[4] = LINE_DIALOGUE((selectedOption == DIALOG_INACTIVE ? "│ %s(x) Inactive%s               │" : "│ %s( ) Inactive%s               │"), DIALOG_INACTIVE);
                     results = display_box_prompt(&changeStatusPage);
                 }
-                if(selectedOption!=findStatus.accounts[0].status){ //TODO FIX OR CHECK WITH YASSEEEN
+
+                if((int)selectedOption!=findStatus.accounts[0].status){
                     Status changeStatus = change_status(id);
-                    print_status(changeStatus);
+                    print_status(changeStatus); 
                     free_result(statusResult);
                     return COMMANDS;
                 }
                 else{
-                    BoxContent warningPage = { //TODO FIX OR CHECK WITH YASEEEN
-                        .title = "Warning",
+                    BoxContent warningPage = {
+                        .title = FG_YELLOW "Warning",
                         .content = {
-                            LINE_DEFAULT("Account status is already set to that option."),
+                            LINE_DEFAULT(FG_YELLOW "Account status is already set to that option."),
                             LINE_DEFAULT(" "),
                             LINE_DIALOGUE("Okay",DIALOG_OKAY),
                         
                         }};
-                        PromptInputs warningRes = display_box_prompt(&warningPage);
-                        return COMMANDS;
+                    PromptInputs warningRes = display_box_prompt(&warningPage);
+                    return COMMANDS;
                 }
                 
             }
@@ -610,6 +610,21 @@ static MenuIndex acc_modify_func() {
                     LINE_DIALOGUE("Find", DIALOG_PROCEED),
                     LINE_DIALOGUE("Back", DIALOG_DISCARD)}};
 
+    BoxContent modifySubPage = {
+    .title = "Modify Account",
+    .content = {LINE_DEFAULT("┌ Name ──────────────────────┐"),
+                LINE_TEXT("│ %s │", 25, 0, ""),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT("┌ E-mail ────────────────────┐"),
+                LINE_TEXT("│ %s │", 25, 0, ""),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT("┌ Mobile ────────────────────┐"),
+                LINE_TEXT("│ +20 %s │", 10, 0, ""),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT(" "),
+                LINE_DIALOGUE("Modify", DIALOG_YES),
+                LINE_DIALOGUE("Back", DIALOG_DISCARD)}};
+
     PromptInputs results = display_box_prompt(&modifyPage);
 
     if (results.dialogueValue == DIALOG_DISCARD) {
@@ -624,60 +639,44 @@ static MenuIndex acc_modify_func() {
             return ACC_MODIFY;
     }
 
-    if (accountResults.status.status == SUCCESS) {
-        return ACC_MODIFY_SUB;
-    }
+    // Here we are looping over modify sub menu until it succeeded or user chose to go back
+    while (1) {
+        PromptInputs results = display_box_prompt(&modifySubPage);
 
-    free_result(results);
-    return COMMANDS;
-}
+        if (results.dialogueValue == DIALOG_DISCARD) {
+            free_result(results);
+            return ACC_MODIFY;
+        }
 
-static MenuIndex acc_modify_sub_func() {
-    enum DialogOptions {
-        DIALOG_PROCEED,
-        DIALOG_DISCARD,
-        DIALOG_YES,
-        DIALOG_NO
-    };
-
-    BoxContent modifySubPage = {
-        .title = "Modify Account",
-        .content = {LINE_DEFAULT("┌ Name ──────────────────────┐"),
-                    LINE_TEXT("│ %s │", 10, 0, ""),
-                    LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT("┌ E-mail ────────────────────┐"),
-                    LINE_TEXT("│ %s │", 25, 0, ""),
-                    LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT("┌ Mobile ────────────────────┐"),
-                    LINE_TEXT("│ +20 %s │", 10, 0, ""),
-                    LINE_DEFAULT("└────────────────────────────┘"),
+        // phone number must be 10 characters (excluding the "+ 20")
+        if (strlen(results.textInputs[2]) != 10) {
+            BoxContent errorPage = {
+                .title = FG_RED "ERROR",
+                .content = {
+                    LINE_DEFAULT(FG_RED "Phone Number is not valid"),
                     LINE_DEFAULT(" "),
-                    LINE_DIALOGUE("Modify", DIALOG_YES),
-                    LINE_DIALOGUE("Back", DIALOG_DISCARD)}};
+                    LINE_DIALOGUE("Okay", DIALOG_PROCEED)}};
 
-    PromptInputs results = display_box_prompt(&modifySubPage);
+            PromptInputs errorResult = display_box_prompt(&errorPage);
 
-    if (results.dialogueValue == DIALOG_DISCARD) {
-        free_result(results);
-        return ACC_MODIFY;
+            continue;
+        }
+
+        // Making a dummy Account variable
+        Account account;
+        strcpy(account.id, accountResults.accounts[0].id);
+        strcpy(account.name, results.textInputs[0]);
+        strcpy(account.email, results.textInputs[1]);
+        account.balance = accountResults.accounts[0].balance;
+        // Adding the 0 at the beginning of the phone number
+        sprintf(account.mobile, "0%s", results.textInputs[2]);
+
+        // Sending data to apply modification to modify()
+        Status status = modify(account.id, account.name, account.mobile, account.email);
+        print_status(status);
+
+        if (status.status == SUCCESS) break;
     }
-
-    // phone number must be 10 characters (excluding the "+ 20")
-    if (strlen(results.textInputs[2]) != 10) {
-        BoxContent errorPage = {
-            .title = FG_RED "ERROR",
-            .content = {
-                LINE_DEFAULT(FG_RED "Phone Number is not valid"),
-                LINE_DEFAULT(" "),
-                LINE_DIALOGUE("Okay", DIALOG_PROCEED)}};
-
-        PromptInputs errorResult = display_box_prompt(&errorPage);
-
-        free_result(results);
-        return ACC_MODIFY;
-    }
-
-    // TODO send data to functions
 
     free_result(results);
     return COMMANDS;
@@ -801,18 +800,28 @@ static MenuIndex other_print_func() {
 
 void mainloop() {
     // Put functions in the menuFunctions Array
-    menuFunctions[ENTRY] = entry_func;
+    menuFunctions[ENTRY] = entry_func; 
     menuFunctions[LOGIN] = login_func;
     menuFunctions[QUIT] = quit_func;
+
+    // Manage Accounts
     menuFunctions[COMMANDS] = commands_func;
     menuFunctions[ACC_NEW] = acc_new_func;
     menuFunctions[ACC_DELETE] = acc_delete_func;
     menuFunctions[ACC_MODIFY] = acc_modify_func;
-    menuFunctions[ACC_MODIFY_SUB] = acc_modify_sub_func;
+    // menuFunctions[ACC_SEARCH] = acc_search_status;
+    // menuFunctions[ACC_ADVANCESEARCH] = acc_advancesearch_status;
+    menuFunctions[ACC_STATUS] = acc_change_status;
+    
+    // Transactions
+    // menuFunctions[TRANS_WITHDRAW] = trans_withdraw_func;
+    // menuFunctions[TRANS_DEPOSIT] = trans_deposit_func;
+    // menuFunctions[TRANS_TRANSFER] = trans_transfer_func;
 
+    // Others
+    // menuFunctions[OTHER_REPORT] = other_report_func;
     menuFunctions[OTHER_PRINT] = other_print_func;
 
-    menuFunctions[ACC_STATUS] = acc_change_status;
     // Runs the main looping
     MenuIndex currentIndex = ENTRY;
     while (currentIndex != RETURN) {
