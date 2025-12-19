@@ -85,10 +85,10 @@ static MenuIndex login_func() {
     BoxContent loginPage = {
         .title = "Login",
         .content = {LINE_DEFAULT("┌ Username ──────────────────┐"),
-                    LINE_TEXT("│ %s │", 25, 0, ""),
+                    LINE_TEXT("│ %s │", 25, 0, "", ""),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT("┌ Password ──────────────────┐"),
-                    LINE_TEXT("│ %s │", 50, 1, ""),
+                    LINE_TEXT("│ %s │", 50, 1, "", ""),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT(" "), LINE_DIALOGUE("Login", DIALOG_LOGIN),
                     LINE_DIALOGUE(FG_RED "Quit", DIALOG_QUIT)}};
@@ -186,19 +186,19 @@ static MenuIndex acc_new_func() {
     BoxContent addAccountPage = {
         .title = "Add Account",
         .content = {LINE_DEFAULT("┌ Account Number ────────────┐"),
-                    LINE_TEXT("│ %s │", 10, 0, "0123456789\b"),
+                    LINE_TEXT("│ %s │", 10, 0, "0123456789\b", ""),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT("┌ Name ──────────────────────┐"),
-                    LINE_TEXT("│ %s │", 25, 0, ""),
+                    LINE_TEXT("│ %s │", 25, 0, "", ""),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT("┌ E-mail ────────────────────┐"),
-                    LINE_TEXT("│ %s │", 25, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`\b "),
+                    LINE_TEXT("│ %s │", 25, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`\b ", ""),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT("┌ Balance ───────────────────┐"),
-                    LINE_TEXT("│ %s ($) │", 20, 0, ",.0123456789\b"),
+                    LINE_TEXT("│ %s ($) │", 20, 0, ",.0123456789\b", ""),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT("┌ Mobile ────────────────────┐"),
-                    LINE_TEXT("│ + 20 %s │", 10, 0, "0123456789\b"),
+                    LINE_TEXT("│ + 20 %s │", 10, 0, "0123456789\b", ""),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT(" "), LINE_DIALOGUE("Add", DIALOG_ADD),
                     LINE_DIALOGUE("Discard", DIALOG_DISCARD)}};
@@ -392,7 +392,7 @@ static MenuIndex acc_delete_func() {
         BoxContent deleteOnePage = {
             .title = FG_RED "Delete Account",
             .content = {LINE_DEFAULT("┌ Account Number ────────────┐"),
-                        LINE_TEXT("│ %s │", 10, 0, "1234567890\b"),
+                        LINE_TEXT("│ %s │", 10, 0, "1234567890\b", ""),
                         LINE_DEFAULT("└────────────────────────────┘"),
                         LINE_DEFAULT(" "),
                         LINE_DIALOGUE(FG_RED "Delete", DIALOG_YES),
@@ -437,10 +437,10 @@ static MenuIndex acc_delete_func() {
                     .content = {LINE_DEFAULT(FG_RED "Delete all accounts created on"),
                                 LINE_DEFAULT(FG_RED "the given date below"),
                                 LINE_DEFAULT("          ┌ Month ─┐          "),
-                                LINE_TEXT("          │ %s │          ", 2, 0, "1234567890\b"),
+                                LINE_TEXT("          │ %s │          ", 2, 0, "1234567890\b", ""),
                                 LINE_DEFAULT("          └────────┘          "),
                                 LINE_DEFAULT("          ┌ Year ──┐          "),
-                                LINE_TEXT("          │ %s │          ", 4, 0, "1234567890\b"),
+                                LINE_TEXT("          │ %s │          ", 4, 0, "1234567890\b", ""),
                                 LINE_DEFAULT("          └────────┘          "),
                                 LINE_DEFAULT(" "),
                                 LINE_DIALOGUE(FG_RED "Delete", DIALOG_YES),
@@ -500,7 +500,7 @@ static MenuIndex acc_change_status() {
         .title = "Account Status",
         .content = {
             LINE_DEFAULT("┌ Account Number ────────────┐"),
-            LINE_TEXT("│ %s │", 10, 0, "1234567890\b"),
+            LINE_TEXT("│ %s │", 10, 0, "1234567890\b", ""),
             LINE_DEFAULT("└────────────────────────────┘"),
             LINE_DEFAULT(" "),
             LINE_DIALOGUE("Find", DIALOG_FIND),
@@ -550,16 +550,22 @@ static MenuIndex acc_change_status() {
                     .status = WARNING,
                     .message = "Account status is already set to that option."
                 };
+                print_status(status);
 
+                free_result(statusResult);
                 return COMMANDS;
             }
 
         } else if (accountResult.status.status == ERROR) {
             print_status(accountResult.status);
+
             free_result(statusResult);
             return ACC_STATUS;
         }
     }
+    
+    free_result(statusResult);
+    return COMMANDS;
 }
 
 static MenuIndex acc_modify_func() {
@@ -573,7 +579,7 @@ static MenuIndex acc_modify_func() {
     BoxContent modifyPage = {
         .title = "Modify Account",
         .content = {LINE_DEFAULT("┌ Account Number ────────────┐"),
-                    LINE_TEXT("│ %s │", 10, 0, "0123456789\b"),
+                    LINE_TEXT("│ %s │", 10, 0, "0123456789\b", ""),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT(" "),
                     LINE_DIALOGUE("Find", DIALOG_PROCEED),
@@ -590,13 +596,13 @@ static MenuIndex acc_modify_func() {
     BoxContent modifySubPage = {
         .title = "Modify Account",
         .content = {LINE_DEFAULT("┌ Name ──────────────────────┐"),
-                    LINE_TEXT("│ %s │", 25, 0, ""),
+                    LINE_TEXT("│ %s │", 25, 0, "", accountResults.accounts[0].name),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT("┌ E-mail ────────────────────┐"),
-                    LINE_TEXT("│ %s │", 25, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`\b "),
+                    LINE_TEXT("│ %s │", 25, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`\b ", accountResults.accounts[0].email),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT("┌ Mobile ────────────────────┐"),
-                    LINE_TEXT("│ +20 %s │", 10, 0, "0123456789\b"),
+                    LINE_TEXT("│ +20 %s │", 10, 0, "0123456789\b", accountResults.accounts[0].mobile + 1),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT(" "),
                     LINE_DIALOGUE("Modify", DIALOG_YES),
