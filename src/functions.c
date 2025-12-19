@@ -642,7 +642,9 @@ Status delete_multiple(DeleteMethod method, Date date) {
         ret.status = SUCCESS;
         char buf[20];
         snprintf(buf, sizeof(buf), "%d", found);
-        strcpy(ret.message, strcat(strcat("Successfully deleted ", buf), " account(s)!"));
+        strcpy(ret.message,"Successfully deleted ");
+        strcat(ret.message,buf);
+        strcat(ret.message," account(s)!");
         return ret;
     }
 }
