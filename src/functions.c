@@ -315,18 +315,9 @@ Status withdraw(char *id, double amount) {
         strcpy(ret.message, "Not enough balance for withdrawal!");
         return ret;
     }
-    FILE *accountFile = fopen(strcat(id, ".txt"), "r");
-    if (accountFile == NULL) {
-        FILE *createAccountFile = fopen(strcat(id, ".txt"), "w");
-        fclose(createAccountFile);
-        accountFile = fopen(strcat(id, ".txt"), "r");
-    }
-    fclose(accountFile);
-    accountFile = fopen(strcat(id, ".txt"), "a");
-    fprintf(accountFile, "%s,withdraw,%.2f,%d-%d-%d\n", id, amount, get_today().day, get_today().month, get_today().year);
-    fclose(accountFile);
     accounts[i].balance -= amount;
     // save();
+    // save_transaction(id,amount,WITHDRAW,"");
     ret.status = SUCCESS;
     strcpy(ret.message, "Withdrawal completed successfully!");
     return ret;
@@ -378,18 +369,9 @@ Status deposit(char *id, double amount) {
         strcpy(ret.message, "Deposit amount must be positive!");
         return ret;
     }
-    FILE *accountFile = fopen(strcat(id, ".txt"), "r");
-    if (accountFile == NULL) {
-        FILE *createAccountFile = fopen(strcat(id, ".txt"), "w");
-        fclose(createAccountFile);
-        accountFile = fopen(strcat(id, ".txt"), "r");
-    }
-    fclose(accountFile);
-    accountFile = fopen(strcat(id, ".txt"), "a");
-    fprintf(accountFile, "%s,deposit,%.2f,%d-%d-%d\n", id, amount, get_today().day, get_today().month, get_today().year);
-    fclose(accountFile);
     accounts[i].balance += amount;
     // save();
+    // save_transaction(id,amount,DEPOSIT,"");
     ret.status = SUCCESS;
     strcpy(ret.message, "Deposit completed successfully!");
     return ret;
@@ -456,29 +438,10 @@ Status transfer(char *idFrom, char *idTo, double amount) {
         strcpy(ret.message, "Transfer amount is greater than sender balance!");
         return ret;
     }
-    FILE *accountFromFile = fopen(strcat(idFrom, ".txt"), "r");
-    FILE *accountToFile = fopen(strcat(idTo, ".txt"), "r");
-    if (accountFromFile == NULL) {
-        FILE *createAccountFile = fopen(strcat(idFrom, ".txt"), "w");
-        fclose(createAccountFile);
-        accountFromFile = fopen(strcat(idFrom, ".txt"), "r");
-    }
-    fclose(accountFromFile);
-    if (accountToFile == NULL) {
-        FILE *createAccountFile = fopen(strcat(idTo, ".txt"), "w");
-        fclose(createAccountFile);
-        accountToFile = fopen(strcat(idTo, ".txt"), "r");
-    }
-    fclose(accountToFile);
-    accountFromFile = fopen(strcat(idFrom, ".txt"), "a");
-    fprintf(accountFromFile, "%s,transfer,-%.2f,%d-%d-%d,%s\n", idFrom, amount, get_today().day, get_today().month, get_today().year, idTo);
-    fclose(accountFromFile);
-    accountToFile = fopen(strcat(idTo, ".txt"), "a");
-    fprintf(accountToFile, "%s,transfer,%.2f,%d-%d-%d,%s\n", idTo, amount, get_today().day, get_today().month, get_today().year, idFrom);
-    fclose(accountToFile);
     accounts[idxTo].balance += amount;
     accounts[idxFrom].balance -= amount;
     // save();
+    // save_transaction(idFrom,amount,TRANSFER,idTo);
     ret.status = SUCCESS;
     strcpy(ret.message, "Transfer completed successfully!");
     return ret;
@@ -520,12 +483,14 @@ ReportResult report(char *id) {
     Transaction transactions[N];
     for (i = 0; fgets(line, sizeof(line), accountFile); i++) {
         strcpy(ufaccountId, strtok(line, ","));
-        strcpy(ufpartyId, strtok(NULL, ","));
         strcpy(uftype, strtok(NULL, ","));
         strcpy(ufamount, strtok(NULL, ","));
         strcpy(ufdate, strtok(NULL, ","));
+        if(!strcmp(uftype,"send")||!strcmp(uftype,"receive")){
+            strcpy(ufpartyId, strtok(NULL, ","));
+            strcpy(transactions[i].partyId, ufpartyId);
+        }
         strcpy(transactions[i].accountId, ufaccountId);
-        strcpy(transactions[i].partyId, ufpartyId);
         strcpy(transactions[i].type, uftype);
         transactions[i].amount = strtod(ufamount, NULL);
         transactions[i].date.day = atoi(strtok(ufdate, "-"));
@@ -535,13 +500,15 @@ ReportResult report(char *id) {
     transaction_merge_sort(transactions,0,i-1);
     for (i = 0; fgets(line, sizeof(line), accountFile); i++) {
         strcpy(ufaccountId, strtok(line, ","));
-        strcpy(ufpartyId, strtok(NULL, ","));
         strcpy(uftype, strtok(NULL, ","));
         strcpy(ufamount, strtok(NULL, ","));
         strcpy(ufdate, strtok(NULL, ","));
         Transaction trans;
+        if(!strcmp(uftype,"send")||!strcmp(uftype,"receive")){
+            strcpy(ufpartyId, strtok(NULL, ","));
+            strcpy(trans.partyId, ufpartyId);
+        }
         strcpy(trans.accountId, ufaccountId);
-        strcpy(trans.partyId, ufpartyId);
         strcpy(trans.type, uftype);
         trans.amount = strtod(ufamount, NULL);
         trans.date.day = atoi(strtok(ufdate, "-"));
