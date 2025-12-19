@@ -98,6 +98,15 @@ AccountResult query(char *id) {
             e = mid - 1;
         }
     }
+    if(s==e){
+        if (strcmp(accounts[s].id, id) == 0) {
+            ret.status.status = SUCCESS;
+            strcpy(ret.status.message, "Account found successfully!");
+            ret.n = 1;
+            ret.accounts[0] = accounts[s];
+            return ret;
+        }
+    }
     ret.status.status = ERROR;
     strcpy(ret.status.message, "Account not found!");
     ret.n = 0;
