@@ -740,7 +740,117 @@ static MenuIndex acc_search_func() {
     free_result(searchChoice);
     return ACC_SEARCH;
 }
+static MenuIndex acc_advancesearch_status(){
+    enum DialogOptions
+    {
+        DIALOG_FIND,
+        DIALOG_DISCARD,
+        DIALOG_BACK,
+        DIALOG_UP,
+        DIALOG_DOWN,
+    };
+    BoxContent searchPage = {
+        .title = "Search Accounts",
+        .content = {
+            LINE_DEFAULT("┌ Keyword ───────────────────┐"),
+            LINE_TEXT("│ %s │", 25, 0, "", ""),
+            LINE_DEFAULT("└────────────────────────────┘"),
+            LINE_DEFAULT(" "),
+            LINE_DIALOGUE("Find", DIALOG_FIND),
+            LINE_DIALOGUE("Discard", DIALOG_DISCARD),
+        }};
+        PromptInputs searchForName = display_box_prompt(&searchPage,0);
+        if(searchForName.dialogueValue == DIALOG_DISCARD){
+            free_result(searchForName);
+            return COMMANDS;
+        }
+        else{
+            char* name = searchForName.textInputs[0];
+            AccountResult searchResult = advanced_search(name);
+            if(searchResult.status.status == ERROR){
+                print_status(searchResult.status);
+                return ACC_ADVANCESEARCH;
+            }
+            else{
+                int currIndex = 0;
+                int lastScroll = 0;
+                PromptInputs advancedSearchResults = {.dialogueValue = -1};
+                char account1[LINE_LENGTH],
+                    name1[LINE_LENGTH],
+                    email1[LINE_LENGTH],
+                    balance1[LINE_LENGTH],
+                    mobile1[LINE_LENGTH],
+                    date1[LINE_LENGTH],
+                    status1[LINE_LENGTH],
 
+                    account2[LINE_LENGTH],
+                    name2[LINE_LENGTH],
+                    email2[LINE_LENGTH],
+                    balance2[LINE_LENGTH],
+                    mobile2[LINE_LENGTH],
+                    date2[LINE_LENGTH],
+                    status2[LINE_LENGTH];
+                while(advancedSearchResults.dialogueValue != DIALOG_BACK){
+                    Account *acc1 = &searchResult.accounts[currIndex];
+                    sprintf(account1, FG_CYAN "Account #:   " FG_RESET "%s", acc1->id);
+                    sprintf(name1, FG_CYAN "Name:       " FG_RESET " %s", acc1->name);
+                    sprintf(email1, FG_CYAN "E-mail:      " FG_RESET "%s", acc1->email);
+                    sprintf(balance1, FG_CYAN "Balance:     " FG_RESET "%.2f", acc1->balance);
+                    sprintf(mobile1, FG_CYAN "Mobile:      " FG_RESET "%s", acc1->mobile);
+                    sprintf(date1, FG_CYAN "Date Opened: " FG_RESET "%d-%d", acc1->date.month, acc1->date.year);
+                    sprintf(status1, FG_CYAN "Status:      " FG_RESET "%s", acc1->status ? "active" : "inactive");
+                    _Bool isSecond = currIndex + 1 < searchResult.n;
+                    if (isSecond)
+                    {
+                        Account *acc2 = &searchResult.accounts[currIndex + 1];
+                        sprintf(account2, FG_CYAN "Account #:   " FG_RESET "%s", acc2->id);
+                        sprintf(name2, FG_CYAN "Name:       " FG_RESET " %s", acc2->name);
+                        sprintf(email2, FG_CYAN "E-mail:      " FG_RESET "%s", acc2->email);
+                        sprintf(balance2, FG_CYAN "Balance:     " FG_RESET "%.2f", acc2->balance);
+                        sprintf(mobile2, FG_CYAN "Mobile:      " FG_RESET "%s", acc2->mobile);
+                        sprintf(date2, FG_CYAN "Date Opened: " FG_RESET "%d-%d", acc2->date.month, acc2->date.year);
+                        sprintf(status2, FG_CYAN "Status:      " FG_RESET "%s", acc2->status ? "active" : "inactive");
+                    }
+                    BoxContent advancedSearchResultsPage = {
+                        .title = "Report",
+                        .content = {
+                            currIndex - 2 >= 0 ? LINE_DIALOGUE("%s↑ ...%s                         ", DIALOG_UP) : LINE_DEFAULT(" "),
+                            LINE_DEFAULT(account1),
+                            LINE_DEFAULT(name1),
+                            LINE_DEFAULT(email1),
+                            LINE_DEFAULT(balance1),
+                            LINE_DEFAULT(mobile1),
+                            LINE_DEFAULT(date1),
+                            LINE_DEFAULT(status1),
+                            LINE_DEFAULT(" "),
+                            isSecond ? LINE_DEFAULT(account2) : LINE_DEFAULT(" "),
+                            isSecond ? LINE_DEFAULT(name2) : LINE_DEFAULT(" "),
+                            isSecond ? LINE_DEFAULT(email2) : LINE_DEFAULT(" "),
+                            isSecond ? LINE_DEFAULT(balance2) : LINE_DEFAULT(" "),
+                            isSecond ? LINE_DEFAULT(mobile2) : LINE_DEFAULT(" "),
+                            isSecond ? LINE_DEFAULT(date2) : LINE_DEFAULT(" "),
+                            isSecond ? LINE_DEFAULT(status2) : LINE_DEFAULT(" "),
+                            currIndex + 2 < searchResult.n ? LINE_DIALOGUE("%s↓ ...%s                         ", DIALOG_DOWN) : LINE_DEFAULT(" "),
+                            LINE_DEFAULT(" "),
+                            LINE_DIALOGUE("Back", DIALOG_BACK)}};
+
+                    advancedSearchResults = display_box_prompt(&advancedSearchResultsPage, lastScroll);
+                    if (advancedSearchResults.dialogueValue == DIALOG_UP)
+                    {
+                        currIndex = (currIndex - 2 >= 0) ? currIndex - 2 : 0;
+                        lastScroll = 0;
+                    }
+                    else if (advancedSearchResults.dialogueValue == DIALOG_DOWN)
+                    {
+                        currIndex = (currIndex + 2 < searchResult.n) ? currIndex + 2 : searchResult.n - 1;
+                        lastScroll = 1;
+                    }
+                }
+                return ACC_ADVANCESEARCH;
+            }
+        }
+        return COMMANDS;
+}
 static MenuIndex other_print_func() {
     enum DialogOptions { DIALOG_NAME = NAME,
                          DIALOG_BALANCE = BALANCE,
@@ -844,7 +954,7 @@ static MenuIndex other_print_func() {
                 isSecond ? LINE_DEFAULT(mobile2) : LINE_DEFAULT(" "),
                 isSecond ? LINE_DEFAULT(date2) : LINE_DEFAULT(" "),
                 isSecond ? LINE_DEFAULT(status2) : LINE_DEFAULT(" "),
-                currIndex + 1 < accountResult.n ? LINE_DIALOGUE("%s↓ ...%s                         ", DIALOG_DOWN) : LINE_DEFAULT(" "),
+                currIndex + 2 < accountResult.n ? LINE_DIALOGUE("%s↓ ...%s                         ", DIALOG_DOWN) : LINE_DEFAULT(" "),
                 LINE_DEFAULT(" "),
                 LINE_DIALOGUE("Back", DIALOG_BACK)}};
 
@@ -863,7 +973,8 @@ static MenuIndex other_print_func() {
 
 // -
 
-void mainloop() {
+    void mainloop()
+{
     // Put functions in the menuFunctions Array
     menuFunctions[ENTRY] = entry_func;
     menuFunctions[LOGIN] = login_func;
@@ -875,7 +986,7 @@ void mainloop() {
     menuFunctions[ACC_DELETE] = acc_delete_func;
     menuFunctions[ACC_MODIFY] = acc_modify_func;
     menuFunctions[ACC_SEARCH] = acc_search_func;
-    // menuFunctions[ACC_ADVANCESEARCH] = acc_advancesearch_status;
+    menuFunctions[ACC_ADVANCESEARCH] = acc_advancesearch_status;
     menuFunctions[ACC_STATUS] = acc_status_func;
 
     // Transactions
