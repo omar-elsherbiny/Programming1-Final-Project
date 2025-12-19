@@ -134,6 +134,11 @@ Status add(Account acc) {
             return ret;
         }
     }
+    if (!valid_email(acc.email)) {
+        ret.status = ERROR;
+        strcpy(ret.message, "Invalid email format!");
+        return ret;
+    }
     FILE *f = fopen("files/accounts.txt", "r");
     if (f == NULL) {
         f = fopen("files/accounts.txt", "w");
@@ -217,6 +222,11 @@ Status modify(char *id, char *name, char *mobile, char *email) {
         return ret;
     }
     // account found and file exists
+    if (!valid_email(email)) {
+        ret.status = ERROR;
+        strcpy(ret.message, "Invalid email format!");
+        return ret;
+    }
     strcpy(accounts[i].name, name);
     strcpy(accounts[i].mobile, mobile);
     strcpy(accounts[i].email, email);

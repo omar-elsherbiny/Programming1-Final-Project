@@ -180,3 +180,29 @@ void debug(char *str) {
     fclose(f);
     return;
 }
+
+int valid_email(char *s){
+    int at=0,i;
+    if(s[0]=='@'){
+        return 0;
+    }
+    for(i=0;s[i];i++){
+        at+=(s[i]=='@');
+        if(i){
+            if(s[i]==s[i-1]&&s[i]=='.'){
+                return 0;
+            }
+        }
+    }
+    if(at!=1){
+        return 0;
+    }
+    char *a=strtok(s,"@"),*b=strtok(NULL,"@");
+    if(strlen(a)==0||strlen(b)==0){
+        return 0;
+    }
+    if(a[0]=='.'||a[strlen(a)-1]=='.'||b[0]=='.'||b[strlen(b)-1]=='.'){
+        return 0;
+    }
+    return 1;
+}

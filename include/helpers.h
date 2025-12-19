@@ -67,4 +67,5 @@ int cmp_transactions(Transaction a, Transaction b);
 void transaction_merge_sort(Transaction transactions[], int l, int r);
 int month_diff(Date a, Date b);
 void debug(char *str);
+int valid_email(char *s);
 #endif
