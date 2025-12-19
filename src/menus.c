@@ -72,6 +72,25 @@ static void print_status(Status status) {
     display_box_prompt(&statusPage, 0);
 }
 
+static int print_confirm(char title[], char message[]) {
+    int lineCount;
+    Line *messageLines = MULTI_LINE_DEFAULT(message, "", 30, &lineCount);
+
+    BoxContent confirmPage = {0};
+    strcpy(confirmPage.title, title);
+
+    for (int i = 0; i < lineCount; i++) {
+        confirmPage.content[i] = messageLines[i];
+    }
+
+    confirmPage.content[lineCount] = LINE_DEFAULT(" ");
+    confirmPage.content[lineCount + 1] = LINE_DIALOGUE("Yes", 1);
+    confirmPage.content[lineCount + 2] = LINE_DIALOGUE("No", 0);
+    free(messageLines);
+
+    return display_box_prompt(&confirmPage, 1).dialogueValue;
+}
+
 // -
 
 // Menu functions definitions
@@ -222,157 +241,155 @@ static MenuIndex acc_new_func() {
         strcpy(account.email, results.textInputs[2]);
         account.balance = strtod(results.textInputs[3], NULL);
         sprintf(account.mobile, "%s", results.textInputs[4]);
-
-        BoxContent confirmAddAccountPage = {
-            .title = "Confirm Add",
-            .content = {LINE_DEFAULT("Are you sure you want to add  "),
-                        LINE_DEFAULT("this account?"), LINE_DEFAULT(" "),
-                        LINE_DIALOGUE("Yes", DIALOG_YES),
-                        LINE_DIALOGUE("No", DIALOG_NO)}};
     
-        PromptInputs confirmResults = display_box_prompt(&confirmAddAccountPage, 0);
+        // removing all commas from balance input field
+        remove_all_chars(results.textInputs[3], ',');
 
-        if (confirmResults.dialogueValue == DIALOG_NO) {
+        // Check if any field is empty
+        if ((strlen(results.textInputs[0]) == 0) ||
+            (strlen(results.textInputs[1]) == 0) ||
+            (strlen(results.textInputs[2]) == 0) ||
+            (strlen(results.textInputs[3]) == 0) ||
+            (strlen(results.textInputs[4]) == 0)) {
+                Status status = {
+                    .status = ERROR,
+                    .message = "You should fill out all the input fields"
+                };
+                print_status(status);
+
+                free_result(results);
+                continue;
+        }
+
+        // Acc number number 10 characters
+        if (strlen(results.textInputs[0]) != 10) {
+            Status status = {
+                .status = ERROR,
+                .message = "Account Number is not 10 characters"
+            };
+            print_status(status);
+
             free_result(results);
             continue;
         }
-    
-        if (confirmResults.dialogueValue == DIALOG_YES) {
-            // removing all commas from balance input field
-            remove_all_chars(results.textInputs[3], ',');
-    
-            // Check if any field is empty
-            if ((strlen(results.textInputs[0]) == 0) ||
-                (strlen(results.textInputs[1]) == 0) ||
-                (strlen(results.textInputs[2]) == 0) ||
-                (strlen(results.textInputs[3]) == 0) ||
-                (strlen(results.textInputs[4]) == 0)) {
-                    Status status = {
-                        .status = ERROR,
-                        .message = "You should fill out all the input fields"
-                    };
-                    print_status(status);
-    
-                    free_result(results);
-                    continue;
-            }
 
-            // Acc number number 10 characters
-            if (strlen(results.textInputs[0]) != 10) {
-                Status status = {
-                    .status = ERROR,
-                    .message = "Account Number is not 10 characters"
-                };
-                print_status(status);
-    
-                free_result(results);
-                return ACC_NEW;
-            }
-    
-            // email validation
-            if (!valid_email(results.textInputs[2])) {
-                Status status = {
-                    .status = ERROR,
-                    .message = "Email is not valid"
-                };
-                print_status(status);
-    
-                free_result(results);
-                continue;
-            }
-    
-            // Check if 1st char in balance is a number
-            if (!(results.textInputs[3][0] >= '0' &&
-                  results.textInputs[3][0] <= '9')) {
-                    Status status = {
-                        .status = ERROR,
-                        .message = "Balance should start with a number"
-                    };
-                    print_status(status);
-    
-                    free_result(results);
-                    return ACC_NEW;
-            }
-    
-            // Check if last char in balance is a number
-            if (results.textInputs[3][strlen(results.textInputs[3]) - 1] == '.') {
-                Status status = {
-                    .status = ERROR,
-                    .message = "Balance should end with a number"
-                };
-                print_status(status);
-    
-                free_result(results);
-                continue;
-            }
-    
-            // Check if there are only 1 decimal point
-            const char *token = results.textInputs[3];
-            int decimalCount = 0;
-            while ((token = strstr(token, ".")) != NULL)
-                decimalCount++, token++;
-            if (decimalCount > 1) {
-                Status status = {
-                    .status = ERROR,
-                    .message = "Balance should only have 1 decimal point"
-                };
-                print_status(status);
-    
-                free_result(results);
-                continue;
-            }
-    
-            // Check if balance has only 2 decimal places
-            char temp[LINE_LENGTH];
-            strcpy(temp, results.textInputs[3]);
-            token = strtok(temp, ".");
-            token = strtok(NULL, ".");
-            if (token != NULL) {
-                if (strlen(token) > 2) {
-                    Status status = {
-                        .status = ERROR,
-                        .message = "The balance should only be max of 2 decimal places"
-                    };
-                    print_status(status);
-    
-                    free_result(results);
-                    continue;
-                }
-            }
-    
-            // phone number must be 10 characters (excluding the "+ 20")
-            if (strlen(results.textInputs[4]) != 10) {
-                Status status = {
-                    .status = ERROR,
-                    .message = "Phone Number is not valid"
-                };
-                print_status(status);
-    
-                free_result(results);
-                continue;
-            }
-    
-            // filling up the a dummy account 
-            strcpy(account.id, results.textInputs[0]);
-            strcpy(account.name, results.textInputs[1]);
-            strcpy(account.email, results.textInputs[2]);
-            account.balance = strtod(results.textInputs[3], NULL);
-            sprintf(account.mobile, "0%s", results.textInputs[4]);
-            
-            // Sending the data to add() 
-            Status status = add(account);
+        // email validation
+        if (!valid_email(results.textInputs[2])) {
+            Status status = {
+                .status = ERROR,
+                .message = "Email is not valid"
+            };
             print_status(status);
 
-            if (status.status == ERROR) {
-                load();
-                
-                free_result(results);
-                return ACC_NEW;
-            }
-
-            save();
+            free_result(results);
+            continue;
         }
-    
+
+        // Check if 1st char in balance is a number
+        if (!(results.textInputs[3][0] >= '0' &&
+                results.textInputs[3][0] <= '9')) {
+                Status status = {
+                    .status = ERROR,
+                    .message = "Balance should start with a number"
+                };
+                print_status(status);
+
+                free_result(results);
+                continue;
+        }
+
+        // Check if last char in balance is a number
+        if (results.textInputs[3][strlen(results.textInputs[3]) - 1] == '.') {
+            Status status = {
+                .status = ERROR,
+                .message = "Balance should end with a number"
+            };
+            print_status(status);
+
+            free_result(results);
+            continue;
+        }
+
+        // Check if there are only 1 decimal point
+        const char *token = results.textInputs[3];
+        int decimalCount = 0;
+        while ((token = strstr(token, ".")) != NULL)
+            decimalCount++, token++;
+        if (decimalCount > 1) {
+            Status status = {
+                .status = ERROR,
+                .message = "Balance should only have 1 decimal point"
+            };
+            print_status(status);
+
+            free_result(results);
+            continue;
+        }
+
+        // Check if balance has only 2 decimal places
+        strcpy(temp, results.textInputs[3]);
+        token = strtok(temp, ".");
+        token = strtok(NULL, ".");
+        if (token != NULL) {
+            if (strlen(token) > 2) {
+                Status status = {
+                    .status = ERROR,
+                    .message = "The balance should only be max of 2 decimal places"
+                };
+                print_status(status);
+
+                free_result(results);
+                continue;
+            }
+        }
+
+        // phone number must be 10 characters (excluding the "+ 20")
+        if (strlen(results.textInputs[4]) != 10) {
+            Status status = {
+                .status = ERROR,
+                .message = "Phone Number is not valid"
+            };
+            print_status(status);
+
+            free_result(results);
+            continue;
+        }
+
+        // filling up the a dummy account 
+        strcpy(account.id, results.textInputs[0]);
+        strcpy(account.name, results.textInputs[1]);
+        strcpy(account.email, results.textInputs[2]);
+        account.balance = strtod(results.textInputs[3], NULL);
+        sprintf(account.mobile, "0%s", results.textInputs[4]);
+        
+        // Sending the data to add() to check if possible
+        Status status = add(account);
+        if (status.status == ERROR) {
+            sprintf(account.mobile, "%s", results.textInputs[4]);
+            print_status(status);
+            load();
+            
+            free_result(results);
+            continue;
+        }
+
+        // Data is finally valid here
+
+        // Lastly checking for confirmation
+        int confirmResults = print_confirm("Confirm Add", "Are you sure you want to add this account?");
+
+        if (confirmResults == 0) {
+            sprintf(account.mobile, "%s", results.textInputs[4]);
+            free_result(results);
+            load();
+            
+            continue;
+        }
+
+        save();
+        
+        print_status(status);
+
         free_result(results);
         return COMMANDS;
     }
