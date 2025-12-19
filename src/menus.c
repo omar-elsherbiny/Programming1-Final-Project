@@ -57,10 +57,10 @@ static void remove_all_chars(char *str, char c) {
 
 static void print_status(Status status) {
     int lineCount;
-    Line *statusMsgLines = MULTI_LINE_DEFAULT(status.message, (status.status == ERROR ? FG_RED : FG_GREEN), 30, &lineCount);
+    Line *statusMsgLines = MULTI_LINE_DEFAULT(status.message, (status.status == ERROR ? FG_RED : (status.status == WARNING ? FG_YELLOW : FG_GREEN)), 30, &lineCount);
 
     BoxContent statusPage = {0};
-    strcpy(statusPage.title, (status.status == ERROR ? FG_RED "ERROR" : FG_GREEN "SUCCESS"));
+    strcpy(statusPage.title, (status.status == ERROR ? FG_RED "ERROR" : (status.status == ERROR ? FG_YELLOW "WARNING" : FG_GREEN "SUCCESS")));
 
     for (int i = 0; i < lineCount; i++) {
         statusPage.content[i] = statusMsgLines[i];
@@ -192,7 +192,7 @@ static MenuIndex acc_new_func() {
                     LINE_TEXT("│ %s │", 25, 0, ""),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT("┌ E-mail ────────────────────┐"),
-                    LINE_TEXT("│ %s │", 25, 0, ""),
+                    LINE_TEXT("│ %s │", 25, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`\b "),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT("┌ Balance ───────────────────┐"),
                     LINE_TEXT("│ %s ($) │", 20, 0, ",.0123456789\b"),
@@ -235,92 +235,63 @@ static MenuIndex acc_new_func() {
             (strlen(results.textInputs[2]) == 0) ||
             (strlen(results.textInputs[3]) == 0) ||
             (strlen(results.textInputs[4]) == 0)) {
-            BoxContent errorPage = {
-                .title = FG_RED "ERROR",
-                .content = {
-                    LINE_DEFAULT(FG_RED "You should fill out all the   "),
-                    LINE_DEFAULT(FG_RED "input fields"), LINE_DEFAULT(" "),
-                    LINE_DIALOGUE("Okay", DIALOG_PROCEED)}};
+                Status status = {
+                    .status = ERROR,
+                    .message = "You should fill out all the input fields"
+                };
+                print_status(status);
 
-            PromptInputs errorResult = display_box_prompt(&errorPage, 0);
-
-            if (errorResult.dialogueValue == DIALOG_PROCEED) {
                 free_result(results);
                 return ACC_NEW;
-            }
         }
 
         // Acc number number 10 characters
         if (strlen(results.textInputs[0]) != 10) {
-            BoxContent errorPage = {
-                .title = FG_RED "ERROR",
-                .content = {
-                    LINE_DEFAULT(FG_RED "Account Number is not 10      "),
-                    LINE_DEFAULT(FG_RED "characters"), LINE_DEFAULT(" "),
-                    LINE_DIALOGUE("Okay", DIALOG_PROCEED)}};
+            Status status = {
+                .status = ERROR,
+                .message = "Account Number is not 10 characters"
+            };
+            print_status(status);
 
-            PromptInputs errorResult = display_box_prompt(&errorPage, 0);
-
-            if (errorResult.dialogueValue == DIALOG_PROCEED) {
-                free_result(results);
-                return ACC_NEW;
-            }
+            free_result(results);
+            return ACC_NEW;
         }
 
-        // TODO
         // email validation
-        // if (!is_valid_email(results.textInputs[2])) {
-        //     if (!(results.textInputs[3][0] >= '0' &&
-        //           results.textInputs[3][0] <= '9')) {
-        //         BoxContent errorPage = {
-        //             .title = FG_RED "ERROR",
-        //             .content = {
-        //                 LINE_DEFAULT(FG_RED "Email is not valid            "),
-        //                 LINE_DEFAULT(" "),
-        //                 LINE_DIALOGUE("Okay", DIALOG_PROCEED)}};
+        if (!valid_email(results.textInputs[2])) {
+            Status status = {
+                .status = ERROR,
+                .message = "Email is not valid"
+            };
+            print_status(status);
 
-        //         PromptInputs errorResult = display_box_prompt(&errorPage);
-
-        //         if (errorResult.dialogueValue == DIALOG_PROCEED) {
-        //             free_result(results);
-        //             return ACC_NEW;
-        //         }
-        //     }
-        // }
+            free_result(results);
+            return ACC_NEW;
+        }
 
         // Check if 1st char in balance is a number
         if (!(results.textInputs[3][0] >= '0' &&
               results.textInputs[3][0] <= '9')) {
-            BoxContent errorPage = {
-                .title = FG_RED "ERROR",
-                .content = {
-                    LINE_DEFAULT(FG_RED "Balance should start with a   "),
-                    LINE_DEFAULT(FG_RED "number"), LINE_DEFAULT(" "),
-                    LINE_DIALOGUE("Okay", DIALOG_PROCEED)}};
+                Status status = {
+                    .status = ERROR,
+                    .message = "Balance should start with a number"
+                };
+                print_status(status);
 
-            PromptInputs errorResult = display_box_prompt(&errorPage, 0);
-
-            if (errorResult.dialogueValue == DIALOG_PROCEED) {
                 free_result(results);
                 return ACC_NEW;
-            }
         }
 
         // Check if last char in balance is a number
         if (results.textInputs[3][strlen(results.textInputs[3]) - 1] == '.') {
-            BoxContent errorPage = {
-                .title = FG_RED "ERROR",
-                .content = {
-                    LINE_DEFAULT(FG_RED "Balance should end with a     "),
-                    LINE_DEFAULT(FG_RED "number"), LINE_DEFAULT(" "),
-                    LINE_DIALOGUE("Okay", DIALOG_PROCEED)}};
+            Status status = {
+                .status = ERROR,
+                .message = "Balance should end with a number"
+            };
+            print_status(status);
 
-            PromptInputs errorResult = display_box_prompt(&errorPage, 0);
-
-            if (errorResult.dialogueValue == DIALOG_PROCEED) {
-                free_result(results);
-                return ACC_NEW;
-            }
+            free_result(results);
+            return ACC_NEW;
         }
 
         // Check if there are only 1 decimal point
@@ -329,19 +300,14 @@ static MenuIndex acc_new_func() {
         while ((token = strstr(token, ".")) != NULL)
             decimalCount++, token++;
         if (decimalCount > 1) {
-            BoxContent errorPage = {
-                .title = FG_RED "ERROR",
-                .content = {
-                    LINE_DEFAULT(FG_RED "Balance should only have 1    "),
-                    LINE_DEFAULT(FG_RED "decimal point"), LINE_DEFAULT(" "),
-                    LINE_DIALOGUE("Okay", DIALOG_PROCEED)}};
+            Status status = {
+                .status = ERROR,
+                .message = "Balance should only have 1 decimal point"
+            };
+            print_status(status);
 
-            PromptInputs errorResult = display_box_prompt(&errorPage, 0);
-
-            if (errorResult.dialogueValue == DIALOG_PROCEED) {
-                free_result(results);
-                return ACC_NEW;
-            }
+            free_result(results);
+            return ACC_NEW;
         }
 
         // Check if balance has only 2 decimal places
@@ -351,37 +317,27 @@ static MenuIndex acc_new_func() {
         token = strtok(NULL, ".");
         if (token != NULL) {
             if (strlen(token) > 2) {
-                BoxContent errorPage = {
-                    .title = FG_RED "ERROR",
-                    .content = {
-                        LINE_DEFAULT(FG_RED "The balance should only be max"),
-                        LINE_DEFAULT(FG_RED "of 2 decimal places"),
-                        LINE_DEFAULT(" "),
-                        LINE_DIALOGUE("Okay", DIALOG_PROCEED)}};
+                Status status = {
+                    .status = ERROR,
+                    .message = "The balance should only be max of 2 decimal places"
+                };
+                print_status(status);
 
-                PromptInputs errorResult = display_box_prompt(&errorPage, 0);
-
-                if (errorResult.dialogueValue == DIALOG_PROCEED) {
-                    free_result(results);
-                    return ACC_NEW;
-                }
+                free_result(results);
+                return ACC_NEW;
             }
         }
 
         // phone number must be 10 characters (excluding the "+ 20")
         if (strlen(results.textInputs[4]) != 10) {
-            BoxContent errorPage = {
-                .title = FG_RED "ERROR",
-                .content = {
-                    LINE_DEFAULT(FG_RED "Phone Number is not valid    "),
-                    LINE_DEFAULT(" "), LINE_DIALOGUE("Okay", DIALOG_PROCEED)}};
+            Status status = {
+                .status = ERROR,
+                .message = "Phone Number is not valid"
+            };
+            print_status(status);
 
-            PromptInputs errorResult = display_box_prompt(&errorPage, 0);
-
-            if (errorResult.dialogueValue == DIALOG_PROCEED) {
-                free_result(results);
-                return ACC_NEW;
-            }
+            free_result(results);
+            return ACC_NEW;
         }
 
         Account account;
@@ -417,7 +373,7 @@ static MenuIndex acc_delete_func() {
     };
 
     BoxContent deletePage = {
-        .title = "Delete Account",
+        .title = FG_RED "Delete Account",
         .content = {LINE_DEFAULT("┌ Delete Option ─────────────┐"),
                     LINE_DIALOGUE("│ %sOne with an Account number%s │", DIALOG_DEL_ONE),
                     LINE_DIALOGUE("│ %sMultiple with a criteria%s   │", DIALOG_DEL_MULTI),
@@ -434,7 +390,7 @@ static MenuIndex acc_delete_func() {
 
     if (results.dialogueValue == DIALOG_DEL_ONE) {
         BoxContent deleteOnePage = {
-            .title = "Delete Account",
+            .title = FG_RED "Delete Account",
             .content = {LINE_DEFAULT("┌ Account Number ────────────┐"),
                         LINE_TEXT("│ %s │", 10, 0, "1234567890\b"),
                         LINE_DEFAULT("└────────────────────────────┘"),
@@ -457,50 +413,67 @@ static MenuIndex acc_delete_func() {
     } else if (results.dialogueValue == DIALOG_DEL_MULTI) {
         // Status delete_multiple(DeleteMethod method,Date date);
         BoxContent deleteMultiPage = {
-            .title = "Delete Account",
+            .title = FG_RED "Delete Account",
             .content = {
                 LINE_DEFAULT("┌ Multiple criteria ─────────┐"),
                 LINE_DIALOGUE("│ %sAccounts created on a Date%s │", DIALOG_DELETEGIVENDATE),
                 LINE_DIALOGUE("│ %sAccounts inactive 90 days%s  │", DIALOG_LESSTHAN3MONTH),
                 LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT(" "),
+                LINE_DIALOGUE("Discard", DIALOG_DISCARD)
             }};
-        PromptInputs delMultiChoice = display_box_prompt(&deleteMultiPage, 0);
-        if (delMultiChoice.dialogueValue == DIALOG_DELETEGIVENDATE) {
-            BoxContent deleteGivenDate = {
-                .title = "Delete Account",
-                .content = {LINE_DEFAULT("          ┌ Month ─┐          "),
-                            LINE_TEXT("          │ %s │          ", 2, 0, "1234567890\b"),
-                            LINE_DEFAULT("          └────────┘          "),
-                            LINE_DEFAULT("          ┌ Year ──┐          "),
-                            LINE_TEXT("          │ %s │          ", 4, 0, "1234567890\b"),
-                            LINE_DEFAULT("          └────────┘          "),
-                            LINE_DIALOGUE(FG_RED "Delete", DIALOG_YES),
-                            LINE_DIALOGUE("Discard", DIALOG_NO)}};
 
-            PromptInputs delDateResults = display_box_prompt(&deleteGivenDate, 3);
-            int month = atoi(delDateResults.textInputs[0]);
-            int year = atoi(delDateResults.textInputs[1]);
-            free_result(delDateResults);
-            if (month > 12) {
-                BoxContent errorPage = {
-                    .title = FG_RED "ERROR",
-                    .content = {
-                        LINE_DEFAULT(FG_RED "Invalid month inputted.       "),
-                        LINE_DEFAULT(FG_RED "make sure that month is less 12."), LINE_DEFAULT(" "),
-                        LINE_DIALOGUE("Okay", DIALOG_YES)}};
-                PromptInputs errorSelect = display_box_prompt(&errorPage, 0);
-                if (errorSelect.dialogueValue == DIALOG_YES) {
-                    free_result(errorSelect);
+        PromptInputs delMultiChoice = display_box_prompt(&deleteMultiPage, 2);
+
+        if (delMultiChoice.dialogueValue == DIALOG_DISCARD) {
+            free_result(results);
+            return ACC_DELETE;
+        }
+
+        if (delMultiChoice.dialogueValue == DIALOG_DELETEGIVENDATE) {
+            while (1) {
+                BoxContent deleteGivenDate = {
+                    .title =FG_RED  "Delete Account",
+                    .content = {LINE_DEFAULT(FG_RED "Delete all accounts created on"),
+                                LINE_DEFAULT(FG_RED "the given date below"),
+                                LINE_DEFAULT("          ┌ Month ─┐          "),
+                                LINE_TEXT("          │ %s │          ", 2, 0, "1234567890\b"),
+                                LINE_DEFAULT("          └────────┘          "),
+                                LINE_DEFAULT("          ┌ Year ──┐          "),
+                                LINE_TEXT("          │ %s │          ", 4, 0, "1234567890\b"),
+                                LINE_DEFAULT("          └────────┘          "),
+                                LINE_DEFAULT(" "),
+                                LINE_DIALOGUE(FG_RED "Delete", DIALOG_YES),
+                                LINE_DIALOGUE("Discard", DIALOG_DISCARD)}};
+                            
+                PromptInputs delDateResults = display_box_prompt(&deleteGivenDate, 3);
+                
+                int month = atoi(delDateResults.textInputs[0]);
+                int year = atoi(delDateResults.textInputs[1]);
+                free_result(delDateResults);
+                
+                if (delDateResults.dialogueValue == DIALOG_DISCARD) {
+                    free_result(results);
                     return ACC_DELETE;
                 }
-            }
-            Date date = {
-                date.month = month,
-                date.year = year};
-            Status multiDeleteStatus = delete_multiple(MONTH, date);
 
-            print_status(multiDeleteStatus);
-            return COMMANDS;
+                if (month > 12) {
+                    Status status = {
+                        .status = ERROR,
+                        .message = "Invalid month inputted. make sure that month is less 12."
+                    };
+                    print_status(status);
+                    continue;
+                }
+                Date date = {
+                    date.month = month,
+                    date.year = year};
+                Status status = delete_multiple(MONTH, date);
+
+                print_status(status);
+
+                if (status.status == SUCCESS) break;
+            }
         } else if (delMultiChoice.dialogueValue == DIALOG_LESSTHAN3MONTH) {
             Date date;
             Status deleteStatus = delete_multiple(INACTIVITY, date);
@@ -530,8 +503,8 @@ static MenuIndex acc_change_status() {
             LINE_TEXT("│ %s │", 10, 0, "1234567890\b"),
             LINE_DEFAULT("└────────────────────────────┘"),
             LINE_DEFAULT(" "),
-            LINE_DIALOGUE("FIND", DIALOG_FIND),
-            LINE_DIALOGUE("BACK", DIALOG_BACK),
+            LINE_DIALOGUE("Find", DIALOG_FIND),
+            LINE_DIALOGUE("Back", DIALOG_BACK),
         }};
     PromptInputs statusResult = display_box_prompt(&statusPage, 0);
     if (statusResult.dialogueValue == DIALOG_BACK) {
@@ -540,9 +513,9 @@ static MenuIndex acc_change_status() {
     } else if (statusResult.dialogueValue == DIALOG_FIND) {
         char *id = statusResult.textInputs[0];
 
-        AccountResult findStatus = query(id);
-        if (findStatus.status.status == SUCCESS) {
-            enum DialogOptions selectedOption = findStatus.accounts[0].status;
+        AccountResult accountResult = query(id);
+        if (accountResult.status.status == SUCCESS) {
+            enum DialogOptions selectedOption = accountResult.accounts[0].status;
             BoxContent changeStatusPage = {
                 .title = "Account Status",
                 .content = {
@@ -556,7 +529,7 @@ static MenuIndex acc_change_status() {
                     LINE_DIALOGUE("Change", DIALOG_CHANGE),
                     LINE_DIALOGUE("Discard", DIALOG_DISCARD),
                 }};
-            // printf("%s %d",findStatus.accounts[0].name,selectedOption);
+            // printf("%s %d",accountResult.accounts[0].name,selectedOption);
             // return RETURN; uncomment those and observe the status of the user to see the bug
             sprintf(changeStatusPage.content[0].text, "Account is currently %sactive", (selectedOption == 0 ? "in" : ""));
             PromptInputs results = display_box_prompt(&changeStatusPage, (int)!selectedOption);  // !not just adjusts index
@@ -567,26 +540,22 @@ static MenuIndex acc_change_status() {
                 results = display_box_prompt(&changeStatusPage, (int)!selectedOption);
             }
 
-            if ((int)selectedOption != findStatus.accounts[0].status) {
+            if ((int)selectedOption != accountResult.accounts[0].status) {
                 Status changeStatus = change_status(id);
                 print_status(changeStatus);
                 free_result(statusResult);
                 return COMMANDS;
             } else {
-                BoxContent warningPage = {
-                    .title = FG_YELLOW "Warning",
-                    .content = {
-                        LINE_DEFAULT(FG_YELLOW "Account status is already set to that option."),
-                        LINE_DEFAULT(" "),
-                        LINE_DIALOGUE("Okay", DIALOG_OKAY),
+                Status status = {
+                    .status = WARNING,
+                    .message = "Account status is already set to that option."
+                };
 
-                    }};
-                PromptInputs warningRes = display_box_prompt(&warningPage, 0);
                 return COMMANDS;
             }
 
-        } else if (findStatus.status.status == ERROR) {
-            print_status(findStatus.status);
+        } else if (accountResult.status.status == ERROR) {
+            print_status(accountResult.status);
             free_result(statusResult);
             return ACC_STATUS;
         }
@@ -610,29 +579,28 @@ static MenuIndex acc_modify_func() {
                     LINE_DIALOGUE("Find", DIALOG_PROCEED),
                     LINE_DIALOGUE("Back", DIALOG_DISCARD)}};
 
-    BoxContent modifySubPage = {
-        .title = "Modify Account",
-        .content = {LINE_DEFAULT("┌ Name ──────────────────────┐"),
-                    LINE_TEXT("│ %s │", 25, 0, ""),
-                    LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT("┌ E-mail ────────────────────┐"),
-                    LINE_TEXT("│ %s │", 25, 0, ""),
-                    LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT("┌ Mobile ────────────────────┐"),
-                    LINE_TEXT("│ +20 %s │", 10, 0, ""),
-                    LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT(" "),
-                    LINE_DIALOGUE("Modify", DIALOG_YES),
-                    LINE_DIALOGUE("Back", DIALOG_DISCARD)}};
-
     PromptInputs results = display_box_prompt(&modifyPage, 0);
+    AccountResult accountResults = query(results.textInputs[0]);
 
     if (results.dialogueValue == DIALOG_DISCARD) {
         free_result(results);
         return COMMANDS;
     }
 
-    AccountResult accountResults = query(results.textInputs[0]);
+    BoxContent modifySubPage = {
+        .title = "Modify Account",
+        .content = {LINE_DEFAULT("┌ Name ──────────────────────┐"),
+                    LINE_TEXT("│ %s │", 25, 0, ""),
+                    LINE_DEFAULT("└────────────────────────────┘"),
+                    LINE_DEFAULT("┌ E-mail ────────────────────┐"),
+                    LINE_TEXT("│ %s │", 25, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`\b "),
+                    LINE_DEFAULT("└────────────────────────────┘"),
+                    LINE_DEFAULT("┌ Mobile ────────────────────┐"),
+                    LINE_TEXT("│ +20 %s │", 10, 0, "0123456789\b"),
+                    LINE_DEFAULT("└────────────────────────────┘"),
+                    LINE_DEFAULT(" "),
+                    LINE_DIALOGUE("Modify", DIALOG_YES),
+                    LINE_DIALOGUE("Back", DIALOG_DISCARD)}};
 
     if (accountResults.status.status == ERROR) {
         print_status(accountResults.status);
@@ -650,14 +618,11 @@ static MenuIndex acc_modify_func() {
 
         // phone number must be 10 characters (excluding the "+ 20")
         if (strlen(results.textInputs[2]) != 10) {
-            BoxContent errorPage = {
-                .title = FG_RED "ERROR",
-                .content = {
-                    LINE_DEFAULT(FG_RED "Phone Number is not valid"),
-                    LINE_DEFAULT(" "),
-                    LINE_DIALOGUE("Okay", DIALOG_PROCEED)}};
-
-            PromptInputs errorResult = display_box_prompt(&errorPage, 0);
+            Status status = {
+                .status = ERROR,
+                .message = "Phone Number is not valid"
+            };
+            print_status(status);
 
             continue;
         }
