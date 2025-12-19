@@ -317,7 +317,7 @@ Status withdraw(char *id, double amount) {
     }
     accounts[i].balance -= amount;
     // save();
-    // save_transaction(id,amount,"withdraw","");
+    // save_transaction(id,amount,WITHDRAW,"");
     ret.status = SUCCESS;
     strcpy(ret.message, "Withdrawal completed successfully!");
     return ret;
@@ -371,7 +371,7 @@ Status deposit(char *id, double amount) {
     }
     accounts[i].balance += amount;
     // save();
-    // save_transaction(id,amount,"deposit","");
+    // save_transaction(id,amount,DEPOSIT,"");
     ret.status = SUCCESS;
     strcpy(ret.message, "Deposit completed successfully!");
     return ret;
@@ -441,8 +441,7 @@ Status transfer(char *idFrom, char *idTo, double amount) {
     accounts[idxTo].balance += amount;
     accounts[idxFrom].balance -= amount;
     // save();
-    // save_transaction(idFrom,-amount,"transfer",idTo);
-    // save_transaction(idTo,amount,"transfer",idFrom);
+    // save_transaction(idFrom,amount,TRANSFER,idTo);
     ret.status = SUCCESS;
     strcpy(ret.message, "Transfer completed successfully!");
     return ret;
