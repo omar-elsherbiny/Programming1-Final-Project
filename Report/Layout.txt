@@ -164,6 +164,14 @@ Delete Accounts
     │ Delete                         │
     │ Discard                        │
     └────────────────────────────────┘
+    ┌──────────── Error ─────────────┐
+    │ Invalid month inputted.        │
+    │ make sure that month is less   │
+    │ than 12.                       │
+    │                                │   
+    │                                │
+    │ Okay                           │
+    └────────────────────────────────┘
 
 Confirm Message
     ┌──────── Confirm Delete ────────┐
@@ -343,6 +351,13 @@ Error Message
     ┌──────────── Error ─────────────┐
     │ Account does not Exist         │
     │                                │
+    │ Okay                           │
+    └────────────────────────────────┘
+Warning Message 
+    ┌─────────── Warning ────────────┐
+    │ Account is already set to that │
+    │ option.                        │
+    │                                │                  
     │ Okay                           │
     └────────────────────────────────┘
 ____________________________________________________________________

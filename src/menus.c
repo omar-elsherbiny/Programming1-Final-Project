@@ -8,7 +8,8 @@
 #include "display.h"
 #include "functions.h"
 
-typedef enum {
+typedef enum
+{
     RETURN = -1,
     ENTRY = 0,
     LOGIN,
@@ -399,7 +400,9 @@ static MenuIndex acc_delete_func() {
         DIALOG_DEL_MULTI,
         DIALOG_DISCARD,
         DIALOG_YES,
-        DIALOG_NO
+        DIALOG_NO,
+        DIALOG_LESSTHAN3MONTH,
+        DIALOG_DELETEGIVENDATE
     };
 
     BoxContent deletePage = {
@@ -415,7 +418,7 @@ static MenuIndex acc_delete_func() {
 
     if (results.dialogueValue == DIALOG_DISCARD) {
         free_result(results);
-        return LOGIN;
+        return COMMANDS;
     }
 
     if (results.dialogueValue == DIALOG_DEL_ONE) {
@@ -434,12 +437,162 @@ static MenuIndex acc_delete_func() {
             free_result(results);
             return ACC_DELETE;
         }
+        else if (delOneResults.dialogueValue == DIALOG_YES)
+        {
+            char *toDel = delOneResults.textInputs[0];
+            Status deletionStatus = delete(toDel);
+            print_status(deletionStatus);
+            free_result(results);
+            return ACC_DELETE;
+        }
+    }
+    else if (results.dialogueValue == DIALOG_DEL_MULTI)
+    {
+        // Status delete_multiple(DeleteMethod method,Date date);
+        BoxContent deleteMultiPage = {
+            .title = "Delete Account",
+            .content = {
+                LINE_DEFAULT("┌ Multiple criteria ─────────┐"),
+                LINE_DIALOGUE("│ %sAccounts created on a Date%s │", DIALOG_DELETEGIVENDATE),
+                LINE_DIALOGUE("│ %sAccounts inactive 90 days%s  │", DIALOG_LESSTHAN3MONTH),
+                LINE_DEFAULT("└────────────────────────────┘"),
+            }};
+        PromptInputs delMultiChoice = display_box_prompt(&deleteMultiPage);
+        if(delMultiChoice.dialogueValue == DIALOG_DELETEGIVENDATE){
+            BoxContent deleteGivenDate = {
+                .title = "Delete Account",
+                .content = {LINE_DEFAULT("          ┌ Month ─┐          "),
+                            LINE_TEXT("          │ %s │          ", 2, 0, "1234567890\b"),
+                            LINE_DEFAULT("          └────────┘          "),
+                            LINE_DEFAULT("          ┌ Year ──┐          "),
+                            LINE_TEXT("          │ %s │          ", 4, 0, "1234567890\b"),
+                            LINE_DEFAULT("          └────────┘          "),
+                            LINE_DIALOGUE(FG_RED "Delete", DIALOG_YES),
+                            LINE_DIALOGUE("Discard", DIALOG_NO)}};
+
+            PromptInputs delDateResults = display_box_prompt(&deleteGivenDate);
+            int month = atoi(delDateResults.textInputs[0]);
+            int year = atoi(delDateResults.textInputs[1]);
+            free_result(delDateResults);
+            if (month > 12)
+            {
+                BoxContent errorPage = {
+                    .title = FG_RED "ERROR",
+                    .content = {
+                        LINE_DEFAULT(FG_RED "Invalid month inputted.       "),
+                        LINE_DEFAULT(FG_RED "make sure that month is less 12."), LINE_DEFAULT(" "),
+                        LINE_DIALOGUE("Okay", DIALOG_YES)}};
+                PromptInputs errorSelect = display_box_prompt(&errorPage);
+                if (errorSelect.dialogueValue == DIALOG_YES)
+                {
+                    free_result(errorSelect);
+                    return ACC_DELETE;
+                }
+            }
+            Date date = {
+                date.month = month,
+                date.year = year};
+            Status multiDeleteStatus = delete_multiple(MONTH,date);
+            print_status(multiDeleteStatus);
+            free_result(delDateResults);
+            return COMMANDS;
+        }
+        else if(delMultiChoice.dialogueValue == DIALOG_LESSTHAN3MONTH){
+            Date date;
+            Status deleteStatus = delete_multiple(DIALOG_LESSTHAN3MONTH,date);
+            print_status(deleteStatus);
+            return COMMANDS;
+        }
+    
+        
     }
 
     free_result(results);
     return COMMANDS;
 }
+static MenuIndex acc_change_status(){
+    enum DialogOptions{
+        DIALOG_FIND,
+        DIALOG_BACK,
+        DIALOG_CHANGE,
+        DIALOG_DISCARD,
+        DIALOG_ACTIVE,
+        DIALOG_INACTIVE,
+        DIALOG_OKAY,
+    };
+    BoxContent statusPage = {
+        .title = "Account Status",
+        .content = {LINE_DEFAULT("┌ Account Number ────────────┐"),
+                    LINE_TEXT("│ %s │", 10, 0, "1234567890\b"),
+                    LINE_DEFAULT("└────────────────────────────┘"),
+                    LINE_DEFAULT(" "),
+                    LINE_DIALOGUE("FIND", DIALOG_FIND),
+                    LINE_DIALOGUE("BACK",DIALOG_BACK),
+                }};
+        PromptInputs statusResult = display_box_prompt(&statusPage);
+        if(statusResult.dialogueValue == DIALOG_BACK){
+            free_result(statusResult);
+            return COMMANDS;
+        }
+        else if(statusResult.dialogueValue == DIALOG_FIND){
+            char* id = statusResult.textInputs[0];
+            
+            AccountResult findStatus = query(id);
+            if(findStatus.status.status == SUCCESS){
 
+                BoxContent changeStatusPage = {
+                    .title = "Account Status",
+                    .content = {
+                        LINE_DEFAULT("Account is currently active   "),
+                        LINE_DEFAULT(" "),
+                        LINE_DEFAULT("┌ Change account status ─────┐"),
+                        LINE_DIALOGUE("│ %s(x) Active%s                 │", DIALOG_ACTIVE),
+                        LINE_DIALOGUE("│ %s( ) Inactive%s               │", DIALOG_INACTIVE),
+                        LINE_DEFAULT("└────────────────────────────┘"),
+                        LINE_DEFAULT(" "),
+                        LINE_DIALOGUE("Change", DIALOG_CHANGE),
+                        LINE_DIALOGUE("Discard", DIALOG_DISCARD),
+                    }};
+                //printf("%s %d",findStatus.accounts[0].name,findStatus.accounts[0].status);
+                //return RETURN; uncomment those and observe the status of the user to see the bug
+                sprintf(changeStatusPage.content[0].text ,"Account is currently %sactive", (findStatus.accounts[0].status == 0 ? "in" : ""));
+                enum DialogOptions selectedOption = DIALOG_ACTIVE;
+                PromptInputs results = display_box_prompt(&changeStatusPage);
+                while (results.dialogueValue != DIALOG_CHANGE && results.dialogueValue != DIALOG_DISCARD)
+                {
+                    selectedOption = results.dialogueValue;
+                    changeStatusPage.content[3] = LINE_DIALOGUE((selectedOption == DIALOG_ACTIVE ? "│ %s(x) Active%s                 │" : "│ %s( ) Active%s                 │"), DIALOG_ACTIVE);
+                    changeStatusPage.content[4] = LINE_DIALOGUE((selectedOption == DIALOG_INACTIVE ? "│ %s(x) Inactive%s               │" : "│ %s( ) Inactive%s               │"), DIALOG_INACTIVE);
+                    results = display_box_prompt(&changeStatusPage);
+                }
+                if(selectedOption!=findStatus.accounts[0].status){ //TODO FIX OR CHECK WITH YASSEEEN
+                    Status changeStatus = change_status(id);
+                    print_status(changeStatus);
+                    free_result(statusResult);
+                    return COMMANDS;
+                }
+                else{
+                    BoxContent warningPage = { //TODO FIX OR CHECK WITH YASEEEN
+                        .title = "Warning",
+                        .content = {
+                            LINE_DEFAULT("Account status is already set to that option."),
+                            LINE_DEFAULT(" "),
+                            LINE_DIALOGUE("Okay",DIALOG_OKAY),
+                        
+                        }};
+                        PromptInputs warningRes = display_box_prompt(&warningPage);
+                        return COMMANDS;
+                }
+                
+            }
+            else if(findStatus.status.status == ERROR){
+                print_status(findStatus.status);
+                free_result(statusResult);
+                return ACC_STATUS;
+            }
+        }
+
+}
 static MenuIndex acc_modify_func() {
     enum DialogOptions {
         DIALOG_PROCEED,
@@ -659,6 +812,7 @@ void mainloop() {
 
     menuFunctions[OTHER_PRINT] = other_print_func;
 
+    menuFunctions[ACC_STATUS] = acc_change_status;
     // Runs the main looping
     MenuIndex currentIndex = ENTRY;
     while (currentIndex != RETURN) {
