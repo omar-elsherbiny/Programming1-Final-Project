@@ -493,8 +493,8 @@ static MenuIndex acc_delete_func() {
                 date.month = month,
                 date.year = year};
             Status multiDeleteStatus = delete_multiple(MONTH,date);
+            
             print_status(multiDeleteStatus);
-            free_result(delDateResults);
             return COMMANDS;
         }
         else if(delMultiChoice.dialogueValue == DIALOG_LESSTHAN3MONTH){
@@ -503,13 +503,12 @@ static MenuIndex acc_delete_func() {
             print_status(deleteStatus);
             return COMMANDS;
         }
-    
-        
     }
 
     free_result(results);
     return COMMANDS;
 }
+
 static MenuIndex acc_change_status(){
     enum DialogOptions{
         DIALOG_FIND,
@@ -593,6 +592,7 @@ static MenuIndex acc_change_status(){
         }
 
 }
+
 static MenuIndex acc_modify_func() {
     enum DialogOptions {
         DIALOG_PROCEED,
@@ -751,9 +751,9 @@ static MenuIndex other_print_func() {
         sprintf(account1, "Account #: %s", acc1->id);
         sprintf(name1, "Name : %s", acc1->name);
         sprintf(email1, "E-mail: %s", acc1->email);
-        sprintf(balance1, "Balance: %f", acc1->balance);
+        sprintf(balance1, "Balance: %.2f", acc1->balance);
         sprintf(mobile1, "Mobile: %s", acc1->mobile);
-        sprintf(date1, "Date Opened: %s", " acc1->date");
+        sprintf(date1, "Date Opened: %d-%d", acc1->date.month, acc1->date.year);
         sprintf(status1, "Status: %s", acc1->status ? "active" : "inactive");
         _Bool isSecond = currIndex + 1 < accountResult.n;
         if (isSecond) {
@@ -761,9 +761,9 @@ static MenuIndex other_print_func() {
             sprintf(account2, "Account #: %s", acc2->id);
             sprintf(name2, "Name : %s", acc2->name);
             sprintf(email2, "E-mail: %s", acc2->email);
-            sprintf(balance2, "Balance: %f", acc2->balance);
+            sprintf(balance2, "Balance: %.2f", acc2->balance);
             sprintf(mobile2, "Mobile: %s", acc2->mobile);
-            sprintf(date2, "Date Opened: %s", "acc2->date");
+            sprintf(date2, "Date Opened: %d-%d", acc2->date.month, acc2->date.year);
             sprintf(status2, "Status: %s", acc2->status ? "active" : "inactive");
         }
         BoxContent reportPage = {
