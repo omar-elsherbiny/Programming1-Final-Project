@@ -35,15 +35,15 @@ static MenuIndex tempIndex;
 // -
 
 static void free_result(PromptInputs results) {
-    if (results.textInputs==NULL) return;
-    
+    if (results.textInputs == NULL) return;
+
     for (int i = 0; i < results.textInputCount; i++) {
         free(results.textInputs[i]);
-        results.textInputs[i]=NULL;
+        results.textInputs[i] = NULL;
     }
 
     free(results.textInputs);
-    results.textInputs=NULL;
+    results.textInputs = NULL;
 }
 
 static void remove_all_chars(char *str, char c) {
@@ -165,26 +165,24 @@ static MenuIndex commands_func() {
     BoxContent commandsPage = {
         .title = "Commands",
         .content = {
-            LINE_DEFAULT("Manage Accounts:              "),
+            LINE_DEFAULT(FG_CYAN "Manage Accounts:              "),
             LINE_DIALOGUE("  %sAdd a new Account%s", ACC_NEW),
-            LINE_DIALOGUE("  %sDelete an Existing Account%s",
-                          ACC_DELETE),
-            LINE_DIALOGUE("  %sModify an Existing Account%s",
-                          ACC_MODIFY),
+            LINE_DIALOGUE("  %sDelete an Existing Account%s", ACC_DELETE),
+            LINE_DIALOGUE("  %sModify an Existing Account%s", ACC_MODIFY),
             LINE_DIALOGUE("  %sSearch an Account%s", ACC_SEARCH),
             LINE_DIALOGUE("  %sAdvanced Searching%s", ACC_ADVANCESEARCH),
             LINE_DIALOGUE("  %sChange an Account Status%s", ACC_STATUS),
-            LINE_DEFAULT(" "), LINE_DEFAULT("Transactions:"),
-            LINE_DIALOGUE("  %sWithdraw from an Account%s",
-                          TRANS_WITHDRAW),
+            LINE_DEFAULT(" "),
+            LINE_DEFAULT(FG_CYAN "Transactions:"),
+            LINE_DIALOGUE("  %sWithdraw from an Account%s", TRANS_WITHDRAW),
             LINE_DIALOGUE("  %sDeposit to an Account%s", TRANS_DEPOSIT),
-            LINE_DIALOGUE("  %sTransfer to an Account%s",
-                          TRANS_TRANSFER),
-            LINE_DEFAULT(" "), LINE_DEFAULT("Others:"),
-            LINE_DIALOGUE("  %sReport last transactions%s",
-                          OTHER_REPORT),
+            LINE_DIALOGUE("  %sTransfer to an Account%s", TRANS_TRANSFER),
+            LINE_DEFAULT(" "),
+            LINE_DEFAULT(FG_CYAN "Others:"),
+            LINE_DIALOGUE("  %sReport last transactions%s", OTHER_REPORT),
             LINE_DIALOGUE("  %sPrint all Accounts%s", OTHER_PRINT),
-            LINE_DEFAULT(" "), LINE_DIALOGUE(FG_RED "Logout", LOGIN)}};
+            LINE_DEFAULT(" "),
+            LINE_DIALOGUE(FG_RED "Logout", LOGIN)}};
 
     int dialogueIndex = (int)prevIndex - (int)(ACC_NEW);  // depends on menu order in MenuIndex enum;
     dialogueIndex = (dialogueIndex < 0 ? 0 : dialogueIndex);
@@ -230,18 +228,18 @@ static MenuIndex acc_new_func() {
                         LINE_DIALOGUE("Discard", DIALOG_DISCARD)}};
 
         PromptInputs results = display_box_prompt(&addAccountPage, 0);
-    
+
         if (results.dialogueValue == DIALOG_DISCARD) {
             free_result(results);
             return COMMANDS;
         }
-    
+
         strcpy(account.id, results.textInputs[0]);
         strcpy(account.name, results.textInputs[1]);
         strcpy(account.email, results.textInputs[2]);
         account.balance = strtod(results.textInputs[3], NULL);
         sprintf(account.mobile, "%s", results.textInputs[4]);
-    
+
         // removing all commas from balance input field
         remove_all_chars(results.textInputs[3], ',');
 
@@ -251,22 +249,20 @@ static MenuIndex acc_new_func() {
             (strlen(results.textInputs[2]) == 0) ||
             (strlen(results.textInputs[3]) == 0) ||
             (strlen(results.textInputs[4]) == 0)) {
-                Status status = {
-                    .status = ERROR,
-                    .message = "You should fill out all the input fields"
-                };
-                print_status(status);
+            Status status = {
+                .status = ERROR,
+                .message = "You should fill out all the input fields"};
+            print_status(status);
 
-                free_result(results);
-                continue;
+            free_result(results);
+            continue;
         }
 
         // Acc number number 10 characters
         if (strlen(results.textInputs[0]) != 10) {
             Status status = {
                 .status = ERROR,
-                .message = "Account Number is not 10 characters"
-            };
+                .message = "Account Number is not 10 characters"};
             print_status(status);
 
             free_result(results);
@@ -277,8 +273,7 @@ static MenuIndex acc_new_func() {
         if (!valid_email(results.textInputs[2])) {
             Status status = {
                 .status = ERROR,
-                .message = "Email is not valid"
-            };
+                .message = "Email is not valid"};
             print_status(status);
 
             free_result(results);
@@ -287,23 +282,21 @@ static MenuIndex acc_new_func() {
 
         // Check if 1st char in balance is a number
         if (!(results.textInputs[3][0] >= '0' &&
-                results.textInputs[3][0] <= '9')) {
-                Status status = {
-                    .status = ERROR,
-                    .message = "Balance should start with a number"
-                };
-                print_status(status);
+              results.textInputs[3][0] <= '9')) {
+            Status status = {
+                .status = ERROR,
+                .message = "Balance should start with a number"};
+            print_status(status);
 
-                free_result(results);
-                continue;
+            free_result(results);
+            continue;
         }
 
         // Check if last char in balance is a number
         if (results.textInputs[3][strlen(results.textInputs[3]) - 1] == '.') {
             Status status = {
                 .status = ERROR,
-                .message = "Balance should end with a number"
-            };
+                .message = "Balance should end with a number"};
             print_status(status);
 
             free_result(results);
@@ -318,8 +311,7 @@ static MenuIndex acc_new_func() {
         if (decimalCount > 1) {
             Status status = {
                 .status = ERROR,
-                .message = "Balance should only have 1 decimal point"
-            };
+                .message = "Balance should only have 1 decimal point"};
             print_status(status);
 
             free_result(results);
@@ -334,8 +326,7 @@ static MenuIndex acc_new_func() {
             if (strlen(token) > 2) {
                 Status status = {
                     .status = ERROR,
-                    .message = "The balance should only be max of 2 decimal places"
-                };
+                    .message = "The balance should only be max of 2 decimal places"};
                 print_status(status);
 
                 free_result(results);
@@ -347,28 +338,27 @@ static MenuIndex acc_new_func() {
         if (strlen(results.textInputs[4]) != 10) {
             Status status = {
                 .status = ERROR,
-                .message = "Phone Number is not valid"
-            };
+                .message = "Phone Number is not valid"};
             print_status(status);
 
             free_result(results);
             continue;
         }
 
-        // filling up the a dummy account 
+        // filling up the a dummy account
         strcpy(account.id, results.textInputs[0]);
         strcpy(account.name, results.textInputs[1]);
         strcpy(account.email, results.textInputs[2]);
         account.balance = strtod(results.textInputs[3], NULL);
         sprintf(account.mobile, "0%s", results.textInputs[4]);
-        
+
         // Sending the data to add() to check if possible
         Status status = add(account);
         if (status.status == ERROR) {
             sprintf(account.mobile, "%s", results.textInputs[4]);
             print_status(status);
             load();
-            
+
             free_result(results);
             continue;
         }
@@ -382,18 +372,17 @@ static MenuIndex acc_new_func() {
             sprintf(account.mobile, "%s", results.textInputs[4]);
             free_result(results);
             load();
-            
+
             continue;
         }
 
         save();
-        
+
         print_status(status);
 
         free_result(results);
         return COMMANDS;
     }
-
 }
 
 static MenuIndex acc_delete_func() {
@@ -455,8 +444,7 @@ static MenuIndex acc_delete_func() {
                 LINE_DIALOGUE("│ %sAccounts inactive 90 days%s  │", DIALOG_LESSTHAN3MONTH),
                 LINE_DEFAULT("└────────────────────────────┘"),
                 LINE_DEFAULT(" "),
-                LINE_DIALOGUE("Discard", DIALOG_DISCARD)
-            }};
+                LINE_DIALOGUE("Discard", DIALOG_DISCARD)}};
 
         PromptInputs delMultiChoice = display_box_prompt(&deleteMultiPage, 2);
 
@@ -468,7 +456,7 @@ static MenuIndex acc_delete_func() {
         if (delMultiChoice.dialogueValue == DIALOG_DELETEGIVENDATE) {
             while (1) {
                 BoxContent deleteGivenDate = {
-                    .title =FG_RED  "Delete Account",
+                    .title = FG_RED "Delete Account",
                     .content = {LINE_DEFAULT(FG_RED "Delete all accounts created on"),
                                 LINE_DEFAULT(FG_RED "the given date below"),
                                 LINE_DEFAULT("          ┌ Month ─┐          "),
@@ -480,13 +468,13 @@ static MenuIndex acc_delete_func() {
                                 LINE_DEFAULT(" "),
                                 LINE_DIALOGUE(FG_RED "Delete", DIALOG_YES),
                                 LINE_DIALOGUE("Discard", DIALOG_DISCARD)}};
-                            
+
                 PromptInputs delDateResults = display_box_prompt(&deleteGivenDate, 3);
-                
+
                 int month = atoi(delDateResults.textInputs[0]);
                 int year = atoi(delDateResults.textInputs[1]);
                 free_result(delDateResults);
-                
+
                 if (delDateResults.dialogueValue == DIALOG_DISCARD) {
                     free_result(results);
                     return ACC_DELETE;
@@ -495,8 +483,7 @@ static MenuIndex acc_delete_func() {
                 if (month > 12) {
                     Status status = {
                         .status = ERROR,
-                        .message = "Invalid month inputted. make sure that month is less 12."
-                    };
+                        .message = "Invalid month inputted. make sure that month is less 12."};
                     print_status(status);
                     continue;
                 }
@@ -521,7 +508,7 @@ static MenuIndex acc_delete_func() {
     return COMMANDS;
 }
 
-static MenuIndex acc_change_status() {
+static MenuIndex acc_status_func() {
     enum DialogOptions {
         DIALOG_FIND,
         DIALOG_BACK,
@@ -552,9 +539,10 @@ static MenuIndex acc_change_status() {
         if (accountResult.status.status == SUCCESS) {
             enum DialogOptions selectedOption = accountResult.accounts[0].status;
             BoxContent changeStatusPage = {
+
                 .title = "Account Status",
                 .content = {
-                    LINE_DEFAULT("Account is currently active   "),
+                    LINE_DEFAULT(FG_CYAN "Account is currently active   " FG_RESET),
                     LINE_DEFAULT(" "),
                     LINE_DEFAULT("┌ Change account status ─────┐"),
                     LINE_DIALOGUE(selectedOption ? "│ %s(x) Active%s                 │" : "│ %s( ) Active%s                 │", DIALOG_ACTIVE),
@@ -566,7 +554,7 @@ static MenuIndex acc_change_status() {
                 }};
             // printf("%s %d",accountResult.accounts[0].name,selectedOption);
             // return RETURN; uncomment those and observe the status of the user to see the bug
-            sprintf(changeStatusPage.content[0].text, "Account is currently %sactive", (selectedOption == 0 ? "in" : ""));
+            sprintf(changeStatusPage.content[0].text, FG_CYAN "Account is currently %sactive" FG_RESET, (selectedOption == 0 ? "in" : ""));
             PromptInputs results = display_box_prompt(&changeStatusPage, (int)!selectedOption);  // !not just adjusts index
             while (results.dialogueValue != DIALOG_CHANGE && results.dialogueValue != DIALOG_DISCARD) {
                 selectedOption = results.dialogueValue;
@@ -583,8 +571,7 @@ static MenuIndex acc_change_status() {
             } else {
                 Status status = {
                     .status = WARNING,
-                    .message = "Account status is already set to that option."
-                };
+                    .message = "Account status is already set to that option."};
                 print_status(status);
 
                 free_result(statusResult);
@@ -598,7 +585,7 @@ static MenuIndex acc_change_status() {
             return ACC_STATUS;
         }
     }
-    
+
     free_result(statusResult);
     return COMMANDS;
 }
@@ -661,8 +648,7 @@ static MenuIndex acc_modify_func() {
         if (strlen(results.textInputs[2]) != 10) {
             Status status = {
                 .status = ERROR,
-                .message = "Phone Number is not valid"
-            };
+                .message = "Phone Number is not valid"};
             print_status(status);
 
             continue;
@@ -686,6 +672,73 @@ static MenuIndex acc_modify_func() {
 
     free_result(results);
     return COMMANDS;
+}
+
+static MenuIndex acc_search_func() {
+    enum DialogOptions {
+        DIALOG_FIND,
+        DIALOG_DISCARD,
+        DIALOG_BACK,
+    };
+
+    BoxContent searchPage = {
+        .title = "Search Account",
+        .content = {
+            LINE_DEFAULT("┌ Account Number ────────────┐"),
+            LINE_TEXT("│ %s │", 10, 0, "1234567890\b", ""),
+            LINE_DEFAULT("└────────────────────────────┘"),
+            LINE_DEFAULT(" "),
+            LINE_DIALOGUE("Find", DIALOG_FIND),
+            LINE_DIALOGUE("Discard", DIALOG_DISCARD),
+        }};
+    PromptInputs searchChoice = display_box_prompt(&searchPage, 0);
+
+    if (searchChoice.dialogueValue == DIALOG_DISCARD) {
+        free_result(searchChoice);
+        return COMMANDS;
+    }
+
+    char *id = searchChoice.textInputs[0];
+    AccountResult searchResult = query(id);
+    if (searchResult.status.status == ERROR) {
+        Status error = searchResult.status;
+        free_result(searchChoice);
+        print_status(error);
+        return ACC_SEARCH;
+    }
+
+    Account foundAccount = searchResult.accounts[0];
+    char account1[LINE_LENGTH],
+        name1[LINE_LENGTH],
+        email1[LINE_LENGTH],
+        balance1[LINE_LENGTH],
+        mobile1[LINE_LENGTH],
+        date1[LINE_LENGTH],
+        status1[LINE_LENGTH];
+
+    sprintf(account1, FG_CYAN "Account #:   " FG_RESET "%s", foundAccount.id);
+    sprintf(name1, FG_CYAN "Name:       " FG_RESET " %s", foundAccount.name);
+    sprintf(email1, FG_CYAN "E-mail:      " FG_RESET "%s", foundAccount.email);
+    sprintf(balance1, FG_CYAN "Balance:     " FG_RESET "%.2f", foundAccount.balance);
+    sprintf(mobile1, FG_CYAN "Mobile:      " FG_RESET "%s", foundAccount.mobile);
+    sprintf(date1, FG_CYAN "Date Opened: " FG_RESET "%d-%d", foundAccount.date.month, foundAccount.date.year);
+    sprintf(status1, FG_CYAN "Status:      " FG_RESET "%s", foundAccount.status ? "active" : "inactive");
+    BoxContent accountDetails = {
+        .title = "Search Account",
+        .content = {
+            LINE_DEFAULT(account1),
+            LINE_DEFAULT(name1),
+            LINE_DEFAULT(email1),
+            LINE_DEFAULT(balance1),
+            LINE_DEFAULT(mobile1),
+            LINE_DEFAULT(date1),
+            LINE_DEFAULT(status1),
+            LINE_DEFAULT(" "),
+            LINE_DIALOGUE("Back", DIALOG_BACK)}};
+    display_box_prompt(&accountDetails, 0);
+
+    free_result(searchChoice);
+    return ACC_SEARCH;
 }
 
 static MenuIndex other_print_func() {
@@ -754,23 +807,23 @@ static MenuIndex other_print_func() {
 
     while (reportResults.dialogueValue != DIALOG_BACK) {
         Account *acc1 = &accountResult.accounts[currIndex];
-        sprintf(account1, "Account #: %s", acc1->id);
-        sprintf(name1, "Name : %s", acc1->name);
-        sprintf(email1, "E-mail: %s", acc1->email);
-        sprintf(balance1, "Balance: %.2f", acc1->balance);
-        sprintf(mobile1, "Mobile: %s", acc1->mobile);
-        sprintf(date1, "Date Opened: %d-%d", acc1->date.month, acc1->date.year);
-        sprintf(status1, "Status: %s", acc1->status ? "active" : "inactive");
+        sprintf(account1, FG_CYAN "Account #:   " FG_RESET "%s", acc1->id);
+        sprintf(name1, FG_CYAN "Name:       " FG_RESET " %s", acc1->name);
+        sprintf(email1, FG_CYAN "E-mail:      " FG_RESET "%s", acc1->email);
+        sprintf(balance1, FG_CYAN "Balance:     " FG_RESET "%.2f", acc1->balance);
+        sprintf(mobile1, FG_CYAN "Mobile:      " FG_RESET "%s", acc1->mobile);
+        sprintf(date1, FG_CYAN "Date Opened: " FG_RESET "%d-%d", acc1->date.month, acc1->date.year);
+        sprintf(status1, FG_CYAN "Status:      " FG_RESET "%s", acc1->status ? "active" : "inactive");
         _Bool isSecond = currIndex + 1 < accountResult.n;
         if (isSecond) {
             Account *acc2 = &accountResult.accounts[currIndex + 1];
-            sprintf(account2, "Account #: %s", acc2->id);
-            sprintf(name2, "Name : %s", acc2->name);
-            sprintf(email2, "E-mail: %s", acc2->email);
-            sprintf(balance2, "Balance: %.2f", acc2->balance);
-            sprintf(mobile2, "Mobile: %s", acc2->mobile);
-            sprintf(date2, "Date Opened: %d-%d", acc2->date.month, acc2->date.year);
-            sprintf(status2, "Status: %s", acc2->status ? "active" : "inactive");
+            sprintf(account2, FG_CYAN "Account #:   " FG_RESET "%s", acc2->id);
+            sprintf(name2, FG_CYAN "Name:       " FG_RESET " %s", acc2->name);
+            sprintf(email2, FG_CYAN "E-mail:      " FG_RESET "%s", acc2->email);
+            sprintf(balance2, FG_CYAN "Balance:     " FG_RESET "%.2f", acc2->balance);
+            sprintf(mobile2, FG_CYAN "Mobile:      " FG_RESET "%s", acc2->mobile);
+            sprintf(date2, FG_CYAN "Date Opened: " FG_RESET "%d-%d", acc2->date.month, acc2->date.year);
+            sprintf(status2, FG_CYAN "Status:      " FG_RESET "%s", acc2->status ? "active" : "inactive");
         }
         BoxContent reportPage = {
             .title = "Report",
@@ -807,72 +860,7 @@ static MenuIndex other_print_func() {
 
     return COMMANDS;
 }
-static MenuIndex acc_search_status(){
-    enum DialogOptions{
-        DIALOG_FIND,
-        DIALOG_DISCARD,
-        DIALOG_BACK,
-    };
-    BoxContent searchPage = {
-        .title = "Search Account",
-        .content = {
-            LINE_DEFAULT("┌ Account Number ────────────┐"),
-            LINE_TEXT("│ %s │", 10, 0, "1234567890\b", ""),
-            LINE_DEFAULT("└────────────────────────────┘"),
-            LINE_DEFAULT(" "),
-            LINE_DIALOGUE("Find", DIALOG_FIND),
-            LINE_DIALOGUE("Discard", DIALOG_DISCARD),
-        }};
-    PromptInputs searchChoice = display_box_prompt(&searchPage,0);
-    if(searchChoice.dialogueValue == DIALOG_DISCARD){
-        free_result(searchChoice);
-        return COMMANDS;
-    }
-    else if(searchChoice.dialogueValue == DIALOG_FIND){
-        char *id= searchChoice.textInputs[0];
-        AccountResult searchResult = query(id);
-        if(searchResult.status.status == ERROR){
-            Status error = searchResult.status;
-            free_result(searchChoice);
-            print_status(error);
-            return ACC_SEARCH;
-        }
-        else if(searchResult.status.status == SUCCESS){
-            Account foundAccount = searchResult.accounts[0];
-            char account1[LINE_LENGTH],
-                name1[LINE_LENGTH],
-                email1[LINE_LENGTH],
-                balance1[LINE_LENGTH],
-                mobile1[LINE_LENGTH],
-                date1[LINE_LENGTH],
-                status1[LINE_LENGTH];
-            sprintf(account1, "Account #: %s", foundAccount.id);
-            sprintf(name1, "Name : %s", foundAccount.name);
-            sprintf(email1, "E-mail: %s", foundAccount.email);
-            sprintf(balance1, "Balance: %.2f", foundAccount.balance);
-            sprintf(mobile1, "Mobile: %s", foundAccount.mobile);
-            sprintf(date1, "Date Opened: %d-%d", foundAccount.date.month, foundAccount.date.year);
-            sprintf(status1, "Status: %s", foundAccount.status ? "active" : "inactive");
-            BoxContent accountDetails = {
-                .title = "Search Account",
-                .content = {
-                    LINE_DEFAULT(account1),
-                    LINE_DEFAULT(name1),
-                    LINE_DEFAULT(email1),
-                    LINE_DEFAULT(balance1),
-                    LINE_DEFAULT(mobile1),
-                    LINE_DEFAULT(date1),
-                    LINE_DEFAULT(status1),
-                    LINE_DEFAULT(" "),
-                    LINE_DIALOGUE("Back", DIALOG_BACK)}};
-            PromptInputs foundPage = display_box_prompt(&accountDetails,0);
-            if(foundPage.dialogueValue == DIALOG_BACK){
-                return ACC_SEARCH;
-            }
 
-        }
-    }
-}
 // -
 
 void mainloop() {
@@ -886,9 +874,9 @@ void mainloop() {
     menuFunctions[ACC_NEW] = acc_new_func;
     menuFunctions[ACC_DELETE] = acc_delete_func;
     menuFunctions[ACC_MODIFY] = acc_modify_func;
-    menuFunctions[ACC_SEARCH] = acc_search_status;
+    menuFunctions[ACC_SEARCH] = acc_search_func;
     // menuFunctions[ACC_ADVANCESEARCH] = acc_advancesearch_status;
-    menuFunctions[ACC_STATUS] = acc_change_status;
+    menuFunctions[ACC_STATUS] = acc_status_func;
 
     // Transactions
     // menuFunctions[TRANS_WITHDRAW] = trans_withdraw_func;
