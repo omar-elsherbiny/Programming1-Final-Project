@@ -362,12 +362,15 @@ static MenuIndex acc_new_func() {
             // Sending the data to add() 
             Status status = add(account);
             print_status(status);
-    
-            free_result(results);
-            if (status.status == ERROR)
+
+            if (status.status == ERROR) {
+                load();
+                
+                free_result(results);
                 return ACC_NEW;
-            if (status.status == SUCCESS)
-                return COMMANDS;
+            }
+
+            save();
         }
     
         free_result(results);
