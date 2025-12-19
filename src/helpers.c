@@ -181,7 +181,9 @@ void debug(char *str) {
     return;
 }
 
-int valid_email(char *s){
+int valid_email(char *str){
+    char s[N];
+    strcpy(s,str);
     int at=0,i;
     if(s[0]=='@'){
         return 0;
