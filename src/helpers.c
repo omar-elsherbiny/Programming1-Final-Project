@@ -14,7 +14,7 @@ int cmp_accounts(Account a, Account b, SortMethod method) {
         return strcmp(a.name, b.name);
     }
     if (method == BALANCE) {
-        return (a.balance < b.balance ? -1 : (a.balance == b.balance ? 0 : 1));
+        return (a.balance < b.balance ? 1 : (a.balance == b.balance ? 0 : -1));
     }
     if (method == STATUS) {
         return (a.status < b.status ? 1 : (a.status == b.status ? 0 : -1));
