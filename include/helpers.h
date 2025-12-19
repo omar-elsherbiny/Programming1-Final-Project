@@ -10,6 +10,12 @@ typedef enum {
 } StatusCode;
 
 typedef enum {
+    WITHDRAW,
+    DEPOSIT,
+    TRANSFER
+} TransactionType;
+
+typedef enum {
     ID,
     NAME,
     BALANCE,
@@ -69,4 +75,5 @@ void transaction_merge_sort(Transaction transactions[], int l, int r);
 int month_diff(Date a, Date b);
 void debug(char *str);
 int valid_email(char *s);
+void save_transaction(char *id,double amount,TransactionType type,char *partyId);
 #endif

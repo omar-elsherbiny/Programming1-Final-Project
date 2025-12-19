@@ -88,11 +88,15 @@ void account_merge_sort(Account accounts[], int l, int r, SortMethod method) {
 }
 
 double day_withdrawals(DateDay day, char *id) {
-    FILE *accountFile = fopen(strcat(id, ".txt"), "r");
+    char fileName[N];
+    strcpy(fileName, "files/accounts/");
+    strcat(fileName,id);
+    strcat(fileName,".txt");
+    FILE *accountFile = fopen(fileName, "r");
     if (accountFile == NULL) {
-        FILE *createAccountFile = fopen(strcat(id, ".txt"), "w");
+        FILE *createAccountFile = fopen(fileName, "w");
         fclose(createAccountFile);
-        accountFile = fopen(strcat(id, ".txt"), "r");
+        accountFile = fopen(fileName, "r");
     }
     char line[4 * N], ufid[N], uftype[N], ufamount[N], ufdaydate[N];
     int i;
@@ -214,4 +218,39 @@ int valid_email(char *str){
         return 0;
     }
     return 1;
+}
+
+void save_transaction(char *id,double amount,TransactionType type,char *to){
+    char fileName[N];
+    strcpy(fileName, "files/accounts/");
+    strcat(fileName,id);
+    strcat(fileName,".txt");
+    FILE *accountFile = fopen(fileName, "r");
+    if (accountFile == NULL) {
+        FILE *createAccountFile = fopen(fileName, "w");
+        fclose(createAccountFile);
+        accountFile = fopen(fileName, "r");
+    }
+    fclose(accountFile);
+    accountFile = fopen(fileName, "a");
+    if(type==WITHDRAW||type==DEPOSIT){
+        strcpy(to,"");
+    }
+    fprintf(accountFile, "%s,%s,%.2f,%d-%d-%d,%s\n", id, (type==WITHDRAW?"withdraw":(type==DEPOSIT?"deposit":"send")), amount, get_today().day, get_today().month, get_today().year,to);
+    fclose(accountFile);
+    if(type==TRANSFER){
+        strcpy(fileName, "files/accounts/");
+        strcat(fileName,to);
+        strcat(fileName,".txt");
+        accountFile = fopen(fileName, "r");
+        if (accountFile == NULL) {
+            FILE *createAccountFile = fopen(fileName, "w");
+            fclose(createAccountFile);
+            accountFile = fopen(fileName, "r");
+        }
+        fclose(accountFile);
+        accountFile = fopen(fileName, "a");
+        fprintf(accountFile, "%s,receive,%.2f,%d-%d-%d,%s\n", to, amount, get_today().day, get_today().month, get_today().year,id);
+        fclose(accountFile);
+    }
 }
