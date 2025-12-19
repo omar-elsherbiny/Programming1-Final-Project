@@ -587,6 +587,7 @@ Printing
     │ Account #: 6767676767          │
     │ Name: Rick Astley              │
     │ E-mail: rick.astley@email.com  │
+    │ Balance: 67.676767             │
     │ Mobile: +67 6767 676767        │
     │ Date Opened: February 2007     │
     │ Status: active                 │
@@ -594,6 +595,7 @@ Printing
     │ Account #: 0101010101          │
     │ Name: Hatsune Miku             │
     │ E-mail: miku.uwu@gmail.com     │
+    │ Balance: 67.676767             │
     │ Mobile: +01 01001 11001        │
     │ Date Opened: August 2007       │
     │ Status: active                 │

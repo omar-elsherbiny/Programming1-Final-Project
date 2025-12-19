@@ -530,6 +530,122 @@ static MenuIndex acc_modify_sub_func() {
     return COMMANDS;
 }
 
+static MenuIndex other_print_func() {
+    enum DialogOptions { DIALOG_NAME = NAME,
+                         DIALOG_BALANCE = BALANCE,
+                         DIALOG_DATE = DATE,
+                         DIALOG_PRINT,
+                         DIALOG_BACK,
+                         DIALOG_UP,
+                         DIALOG_DOWN,
+    };
+
+    BoxContent printPage = {
+        .title = "Print Accounts",
+        .content = {LINE_DEFAULT("Choose how you want the       "),
+                    LINE_DEFAULT("printing be sorted by         "),
+                    LINE_DEFAULT(" "),
+                    LINE_DEFAULT("┌ Sort by ───────────────────┐"),
+                    LINE_DIALOGUE("│ %s(x) Name%s                   │", DIALOG_NAME),
+                    LINE_DIALOGUE("│ %s( ) Balance%s                │", DIALOG_BALANCE),
+                    LINE_DIALOGUE("│ %s( ) Date Opened%s            │", DIALOG_DATE),
+                    LINE_DEFAULT("└────────────────────────────┘"),
+                    LINE_DEFAULT(" "), LINE_DIALOGUE("Print", DIALOG_PRINT),
+                    LINE_DIALOGUE("Back", DIALOG_BACK)}};
+
+    // selection loop
+    enum DialogOptions selectedOption = DIALOG_NAME;
+    PromptInputs results = display_box_prompt(&printPage);
+    while (results.dialogueValue != DIALOG_PRINT && results.dialogueValue != DIALOG_BACK) {
+        selectedOption = results.dialogueValue;
+        printPage.content[4] = LINE_DIALOGUE((selectedOption == DIALOG_NAME ? "│ %s(x) Name%s                   │" : "│ %s( ) Name%s                   │"), DIALOG_NAME);
+        printPage.content[5] = LINE_DIALOGUE((selectedOption == DIALOG_BALANCE ? "│ %s(x) Balance%s                │" : "│ %s( ) Balance%s                │"), DIALOG_BALANCE);
+        printPage.content[6] = LINE_DIALOGUE((selectedOption == DIALOG_DATE ? "│ %s(x) Date Opened%s            │" : "│ %s( ) Date Opened%s            │"), DIALOG_DATE);
+        results = display_box_prompt(&printPage);
+    }
+
+    // load();  // TODO: DELETE
+    AccountResult accountResult = print((SortMethod)selectedOption);
+
+    if (accountResult.status.status == ERROR) {
+        print_status(accountResult.status);
+        return OTHER_PRINT;
+    }
+
+    if (results.dialogueValue == DIALOG_BACK) return COMMANDS;
+
+    // report
+    int currIndex = 0;
+    PromptInputs reportResults = {.dialogueValue = -1};
+    char account1[LINE_LENGTH],
+        name1[LINE_LENGTH],
+        email1[LINE_LENGTH],
+        balance1[LINE_LENGTH],
+        mobile1[LINE_LENGTH],
+        date1[LINE_LENGTH],
+        status1[LINE_LENGTH],
+
+        account2[LINE_LENGTH],
+        name2[LINE_LENGTH],
+        email2[LINE_LENGTH],
+        balance2[LINE_LENGTH],
+        mobile2[LINE_LENGTH],
+        date2[LINE_LENGTH],
+        status2[LINE_LENGTH];
+
+    while (reportResults.dialogueValue != DIALOG_BACK) {
+        Account *acc1 = &accountResult.accounts[currIndex];
+        sprintf(account1, "Account #: %s", acc1->id);
+        sprintf(name1, "Name : %s", acc1->name);
+        sprintf(email1, "E-mail: %s", acc1->email);
+        sprintf(balance1, "Balance: %f", acc1->balance);
+        sprintf(mobile1, "Mobile: %s", acc1->mobile);
+        sprintf(date1, "Date Opened: %s", " acc1->date");
+        sprintf(status1, "Status: %s", acc1->status ? "active" : "inactive");
+        _Bool isSecond = currIndex + 1 < accountResult.n;
+        if (isSecond) {
+            Account *acc2 = &accountResult.accounts[currIndex + 1];
+            sprintf(account2, "Account #: %s", acc2->id);
+            sprintf(name2, "Name : %s", acc2->name);
+            sprintf(email2, "E-mail: %s", acc2->email);
+            sprintf(balance2, "Balance: %f", acc2->balance);
+            sprintf(mobile2, "Mobile: %s", acc2->mobile);
+            sprintf(date2, "Date Opened: %s", "acc2->date");
+            sprintf(status2, "Status: %s", acc2->status ? "active" : "inactive");
+        }
+        BoxContent reportPage = {
+            .title = "Report",
+            .content = {
+                currIndex - 2 >= 0 ? LINE_DIALOGUE("%s↑ ...%s                         ", DIALOG_UP) : LINE_DEFAULT(" "),
+                LINE_DEFAULT(account1),
+                LINE_DEFAULT(name1),
+                LINE_DEFAULT(email1),
+                LINE_DEFAULT(balance1),
+                LINE_DEFAULT(mobile1),
+                LINE_DEFAULT(date1),
+                LINE_DEFAULT(status1),
+                LINE_DEFAULT(" "),
+                isSecond ? LINE_DEFAULT(account2) : LINE_DEFAULT(" "),
+                isSecond ? LINE_DEFAULT(name2) : LINE_DEFAULT(" "),
+                isSecond ? LINE_DEFAULT(email2) : LINE_DEFAULT(" "),
+                isSecond ? LINE_DEFAULT(balance2) : LINE_DEFAULT(" "),
+                isSecond ? LINE_DEFAULT(mobile2) : LINE_DEFAULT(" "),
+                isSecond ? LINE_DEFAULT(date2) : LINE_DEFAULT(" "),
+                isSecond ? LINE_DEFAULT(status2) : LINE_DEFAULT(" "),
+                currIndex + 1 < accountResult.n ? LINE_DIALOGUE("%s↓ ...%s                         ", DIALOG_DOWN) : LINE_DEFAULT(" "),
+                LINE_DEFAULT(" "),
+                LINE_DIALOGUE("Back", DIALOG_BACK)}};
+
+        reportResults = display_box_prompt(&reportPage);
+        if (reportResults.dialogueValue == DIALOG_UP)
+            currIndex = (currIndex - 2 >= 0) ? currIndex - 2 : 0;
+        else if (reportResults.dialogueValue == DIALOG_DOWN)
+            currIndex = (currIndex + 2 < accountResult.n) ? currIndex + 2 : accountResult.n - 1;
+    }
+
+    return COMMANDS;
+}
+
 void mainloop() {
     // Put functions in the menuFunctions Array
     menuFunctions[ENTRY] = entry_func;
@@ -540,6 +656,8 @@ void mainloop() {
     menuFunctions[ACC_DELETE] = acc_delete_func;
     menuFunctions[ACC_MODIFY] = acc_modify_func;
     menuFunctions[ACC_MODIFY_SUB] = acc_modify_sub_func;
+
+    menuFunctions[OTHER_PRINT] = other_print_func;
 
     // Runs the main looping
     MenuIndex currentIndex = ENTRY;
