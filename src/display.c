@@ -54,12 +54,13 @@ Line LINE_DIALOGUE(const char text[], int value) {
     return res;
 }
 
-Line LINE_TEXT(const char text[], int maxLen, _Bool hidden, const char validChars[]) {
+Line LINE_TEXT(const char text[], int maxLen, _Bool hidden, const char validChars[], const char initialText[]) {
     Line res = {
         .type = TEXT,
         .data.options = {.maxLen = maxLen, .hidden = hidden}};
     strcpy(res.text, text);
     strcpy(res.data.options.validChars, validChars);
+    strcpy(res.data.options.initialText, initialText);
     return res;
 }
 
@@ -360,7 +361,7 @@ PromptInputs display_box_prompt(BoxContent *box, int initialSelected) {
         if (line->text[0] == '\0') break;
         strcpy(resultBox.content[i], line->text);
         if (line->type == TEXT) {
-            format_string(line->text, "", boxWidth, 0, resultBox.content[i]);
+            format_string(line->text, line->data.options.initialText, boxWidth, 0, resultBox.content[i]);
             textInputCount++;
         }
         if (line->type == DIALOGUE) replace_wrap_string(line->text, "", "", resultBox.content[i]);
@@ -399,8 +400,15 @@ PromptInputs display_box_prompt(BoxContent *box, int initialSelected) {
 
     int *textOffsets = calloc(textInputCount, sizeof(int));
     char **textInputs = malloc(textInputCount * sizeof(char *));
-    for (int i = 0; i < textInputCount; i++) {
-        textInputs[i] = calloc(LINE_LENGTH + 1, sizeof(char));
+    t = 0;
+    for (int i = 0; i < LINE_COUNT; i++) {
+        Line *line = &box->content[i];
+        if (line->text[0] == '\0') break;
+        if (line->type != TEXT) continue;
+        textInputs[t] = calloc(LINE_LENGTH + 1, sizeof(char));
+        textInputs[t][0] = '\0';
+        strcpy(textInputs[t], line->data.options.initialText);
+        t++;
     }
 
     initialSelected = (initialSelected < 0 ? 0 : initialSelected);
@@ -416,8 +424,9 @@ PromptInputs display_box_prompt(BoxContent *box, int initialSelected) {
     char *currResLine = resultBox.content[resultIndexMap[curr]];
 
     if (currLine->type == TEXT) {
-        format_string(currLine->text, BLINK "█" BLINK_RESET, boxWidth, 0, currResLine);
         textInput = textInputs[textIndexMap[curr]];
+        sprintf(tempTextInput, "%s" BLINK "█" BLINK_RESET, textInput);
+        format_string(currLine->text, tempTextInput, boxWidth, 0, currResLine);
     }  // add initial FLIP TEXT
     else {
         replace_wrap_string(currLine->text, FLIP, FLIP_RESET, currResLine);
@@ -539,11 +548,3 @@ PromptInputs display_box_prompt(BoxContent *box, int initialSelected) {
 
     return (PromptInputs){textInputCount, textInputs, dialogueValue};
 }
-
-/* TODO:
-- initialSelected testing
-    - commands
-    - report
-- initalText
-- fix free_result if already freed
-*/

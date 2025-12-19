@@ -51,14 +51,15 @@ typedef enum {  // defines each line type
     DIALOGUE,
 } LineType;
 
+#define LINE_LENGTH 300
+#define LINE_COUNT 100
+
 typedef struct {  // defines the properties of an input text field
     int maxLen;
     _Bool hidden;
     char validChars[256];
+    char initialText[LINE_LENGTH];
 } TextOptions;
-
-#define LINE_LENGTH 300
-#define LINE_COUNT 100
 
 typedef struct {
     char text[LINE_LENGTH];
@@ -90,7 +91,7 @@ typedef struct {
 
 Line LINE_DEFAULT(const char text[]);                                                           // constructs a line of DEFAULT type
 Line LINE_DIALOGUE(const char text[], int value);                                               // constructs a line of DIALOGUE type
-Line LINE_TEXT(const char str[], int maxLen, _Bool hidden, const char validChars[]);            // constructs a line of TEXT type
+Line LINE_TEXT(const char str[], int maxLen, _Bool hidden, const char validChars[], const char initialText[]);            // constructs a line of TEXT type
 Line *MULTI_LINE_DEFAULT(const char text[], const char linePrefix[], int width, int *lineCnt);  // constructs multiple DEFAULT lines given some large text
 
 void display_init(void);                                                // initialize the terminal to use ANSI codes and UTF-8
