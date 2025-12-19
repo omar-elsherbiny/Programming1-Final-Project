@@ -183,182 +183,197 @@ static MenuIndex acc_new_func() {
         DIALOG_PROCEED
     };
 
-    BoxContent addAccountPage = {
-        .title = "Add Account",
-        .content = {LINE_DEFAULT("┌ Account Number ────────────┐"),
-                    LINE_TEXT("│ %s │", 10, 0, "0123456789\b", ""),
-                    LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT("┌ Name ──────────────────────┐"),
-                    LINE_TEXT("│ %s │", 25, 0, "", ""),
-                    LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT("┌ E-mail ────────────────────┐"),
-                    LINE_TEXT("│ %s │", 25, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`@.\b ", ""),
-                    LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT("┌ Balance ───────────────────┐"),
-                    LINE_TEXT("│ %s ($) │", 20, 0, ",.0123456789\b", ""),
-                    LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT("┌ Mobile ────────────────────┐"),
-                    LINE_TEXT("│ + 20 %s │", 10, 0, "0123456789\b", ""),
-                    LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT(" "), LINE_DIALOGUE("Add", DIALOG_ADD),
-                    LINE_DIALOGUE("Discard", DIALOG_DISCARD)}};
+    Account account = {0};
 
-    PromptInputs results = display_box_prompt(&addAccountPage, 0);
-
-    if (results.dialogueValue == DIALOG_DISCARD) {
-        free_result(results);
-        return COMMANDS;
-    }
-
-    BoxContent confirmAddAccountPage = {
-        .title = "Confirm Add",
-        .content = {LINE_DEFAULT("Are you sure you want to add  "),
-                    LINE_DEFAULT("this account?"), LINE_DEFAULT(" "),
-                    LINE_DIALOGUE("Yes", DIALOG_YES),
-                    LINE_DIALOGUE("No", DIALOG_NO)}};
-
-    PromptInputs confirmResults = display_box_prompt(&confirmAddAccountPage, 0);
-
-    if (confirmResults.dialogueValue == DIALOG_NO) {
-        free_result(results);
-        printf("%d", confirmResults.dialogueValue);
-        return ACC_NEW;
-    }
-
-    if (confirmResults.dialogueValue == DIALOG_YES) {
-        // removing all commas from balance input field
-        remove_all_chars(results.textInputs[3], ',');
-
-        // Check if any field is empty
-        if ((strlen(results.textInputs[0]) == 0) ||
-            (strlen(results.textInputs[1]) == 0) ||
-            (strlen(results.textInputs[2]) == 0) ||
-            (strlen(results.textInputs[3]) == 0) ||
-            (strlen(results.textInputs[4]) == 0)) {
-                Status status = {
-                    .status = ERROR,
-                    .message = "You should fill out all the input fields"
-                };
-                print_status(status);
-
-                free_result(results);
-                return ACC_NEW;
-        }
-
-        // Acc number number 10 characters
-        if (strlen(results.textInputs[0]) != 10) {
-            Status status = {
-                .status = ERROR,
-                .message = "Account Number is not 10 characters"
-            };
-            print_status(status);
-
-            free_result(results);
-            return ACC_NEW;
-        }
-
-        // email validation
-        if (!valid_email(results.textInputs[2])) {
-            Status status = {
-                .status = ERROR,
-                .message = "Email is not valid"
-            };
-            print_status(status);
-
-            free_result(results);
-            return ACC_NEW;
-        }
-
-        // Check if 1st char in balance is a number
-        if (!(results.textInputs[3][0] >= '0' &&
-              results.textInputs[3][0] <= '9')) {
-                Status status = {
-                    .status = ERROR,
-                    .message = "Balance should start with a number"
-                };
-                print_status(status);
-
-                free_result(results);
-                return ACC_NEW;
-        }
-
-        // Check if last char in balance is a number
-        if (results.textInputs[3][strlen(results.textInputs[3]) - 1] == '.') {
-            Status status = {
-                .status = ERROR,
-                .message = "Balance should end with a number"
-            };
-            print_status(status);
-
-            free_result(results);
-            return ACC_NEW;
-        }
-
-        // Check if there are only 1 decimal point
-        const char *token = results.textInputs[3];
-        int decimalCount = 0;
-        while ((token = strstr(token, ".")) != NULL)
-            decimalCount++, token++;
-        if (decimalCount > 1) {
-            Status status = {
-                .status = ERROR,
-                .message = "Balance should only have 1 decimal point"
-            };
-            print_status(status);
-
-            free_result(results);
-            return ACC_NEW;
-        }
-
-        // Check if balance has only 2 decimal places
+    while (1) {
+        // make a temp string to fill the balance
         char temp[LINE_LENGTH];
-        strcpy(temp, results.textInputs[3]);
-        token = strtok(temp, ".");
-        token = strtok(NULL, ".");
-        if (token != NULL) {
-            if (strlen(token) > 2) {
-                Status status = {
-                    .status = ERROR,
-                    .message = "The balance should only be max of 2 decimal places"
-                };
-                print_status(status);
+        sprintf(temp, "%.2f", account.balance);
 
-                free_result(results);
-                return ACC_NEW;
-            }
-        }
+        BoxContent addAccountPage = {
+            .title = "Add Account",
+            .content = {LINE_DEFAULT("┌ Account Number ────────────┐"),
+                        LINE_TEXT("│ %s │", 10, 0, "0123456789\b", account.id),
+                        LINE_DEFAULT("└────────────────────────────┘"),
+                        LINE_DEFAULT("┌ Name ──────────────────────┐"),
+                        LINE_TEXT("│ %s │", 25, 0, "", account.name),
+                        LINE_DEFAULT("└────────────────────────────┘"),
+                        LINE_DEFAULT("┌ E-mail ────────────────────┐"),
+                        LINE_TEXT("│ %s │", 25, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`@.\b ", account.email),
+                        LINE_DEFAULT("└────────────────────────────┘"),
+                        LINE_DEFAULT("┌ Balance ───────────────────┐"),
+                        LINE_TEXT("│ %s ($) │", 20, 0, ",.0123456789\b", temp),
+                        LINE_DEFAULT("└────────────────────────────┘"),
+                        LINE_DEFAULT("┌ Mobile ────────────────────┐"),
+                        LINE_TEXT("│ + 20 %s │", 10, 0, "0123456789\b", account.mobile),
+                        LINE_DEFAULT("└────────────────────────────┘"),
+                        LINE_DEFAULT(" "), LINE_DIALOGUE("Add", DIALOG_ADD),
+                        LINE_DIALOGUE("Discard", DIALOG_DISCARD)}};
 
-        // phone number must be 10 characters (excluding the "+ 20")
-        if (strlen(results.textInputs[4]) != 10) {
-            Status status = {
-                .status = ERROR,
-                .message = "Phone Number is not valid"
-            };
-            print_status(status);
-
+        PromptInputs results = display_box_prompt(&addAccountPage, 0);
+    
+        if (results.dialogueValue == DIALOG_DISCARD) {
             free_result(results);
-            return ACC_NEW;
+            return COMMANDS;
         }
-
-        Account account;
+    
         strcpy(account.id, results.textInputs[0]);
         strcpy(account.name, results.textInputs[1]);
         strcpy(account.email, results.textInputs[2]);
         account.balance = strtod(results.textInputs[3], NULL);
-        sprintf(account.mobile, "0%s", results.textInputs[4]);
+        sprintf(account.mobile, "%s", results.textInputs[4]);
 
-        Status status = add(account);
-        print_status(status);
+        BoxContent confirmAddAccountPage = {
+            .title = "Confirm Add",
+            .content = {LINE_DEFAULT("Are you sure you want to add  "),
+                        LINE_DEFAULT("this account?"), LINE_DEFAULT(" "),
+                        LINE_DIALOGUE("Yes", DIALOG_YES),
+                        LINE_DIALOGUE("No", DIALOG_NO)}};
+    
+        PromptInputs confirmResults = display_box_prompt(&confirmAddAccountPage, 0);
 
+        if (confirmResults.dialogueValue == DIALOG_NO) {
+            free_result(results);
+            continue;
+        }
+    
+        if (confirmResults.dialogueValue == DIALOG_YES) {
+            // removing all commas from balance input field
+            remove_all_chars(results.textInputs[3], ',');
+    
+            // Check if any field is empty
+            if ((strlen(results.textInputs[0]) == 0) ||
+                (strlen(results.textInputs[1]) == 0) ||
+                (strlen(results.textInputs[2]) == 0) ||
+                (strlen(results.textInputs[3]) == 0) ||
+                (strlen(results.textInputs[4]) == 0)) {
+                    Status status = {
+                        .status = ERROR,
+                        .message = "You should fill out all the input fields"
+                    };
+                    print_status(status);
+    
+                    free_result(results);
+                    continue;
+            }
+
+            // Acc number number 10 characters
+            if (strlen(results.textInputs[0]) != 10) {
+                Status status = {
+                    .status = ERROR,
+                    .message = "Account Number is not 10 characters"
+                };
+                print_status(status);
+    
+                free_result(results);
+                return ACC_NEW;
+            }
+    
+            // email validation
+            if (!valid_email(results.textInputs[2])) {
+                Status status = {
+                    .status = ERROR,
+                    .message = "Email is not valid"
+                };
+                print_status(status);
+    
+                free_result(results);
+                continue;
+            }
+    
+            // Check if 1st char in balance is a number
+            if (!(results.textInputs[3][0] >= '0' &&
+                  results.textInputs[3][0] <= '9')) {
+                    Status status = {
+                        .status = ERROR,
+                        .message = "Balance should start with a number"
+                    };
+                    print_status(status);
+    
+                    free_result(results);
+                    return ACC_NEW;
+            }
+    
+            // Check if last char in balance is a number
+            if (results.textInputs[3][strlen(results.textInputs[3]) - 1] == '.') {
+                Status status = {
+                    .status = ERROR,
+                    .message = "Balance should end with a number"
+                };
+                print_status(status);
+    
+                free_result(results);
+                continue;
+            }
+    
+            // Check if there are only 1 decimal point
+            const char *token = results.textInputs[3];
+            int decimalCount = 0;
+            while ((token = strstr(token, ".")) != NULL)
+                decimalCount++, token++;
+            if (decimalCount > 1) {
+                Status status = {
+                    .status = ERROR,
+                    .message = "Balance should only have 1 decimal point"
+                };
+                print_status(status);
+    
+                free_result(results);
+                continue;
+            }
+    
+            // Check if balance has only 2 decimal places
+            char temp[LINE_LENGTH];
+            strcpy(temp, results.textInputs[3]);
+            token = strtok(temp, ".");
+            token = strtok(NULL, ".");
+            if (token != NULL) {
+                if (strlen(token) > 2) {
+                    Status status = {
+                        .status = ERROR,
+                        .message = "The balance should only be max of 2 decimal places"
+                    };
+                    print_status(status);
+    
+                    free_result(results);
+                    continue;
+                }
+            }
+    
+            // phone number must be 10 characters (excluding the "+ 20")
+            if (strlen(results.textInputs[4]) != 10) {
+                Status status = {
+                    .status = ERROR,
+                    .message = "Phone Number is not valid"
+                };
+                print_status(status);
+    
+                free_result(results);
+                continue;
+            }
+    
+            // filling up the a dummy account 
+            strcpy(account.id, results.textInputs[0]);
+            strcpy(account.name, results.textInputs[1]);
+            strcpy(account.email, results.textInputs[2]);
+            account.balance = strtod(results.textInputs[3], NULL);
+            sprintf(account.mobile, "0%s", results.textInputs[4]);
+            
+            // Sending the data to add() 
+            Status status = add(account);
+            print_status(status);
+    
+            free_result(results);
+            if (status.status == ERROR)
+                return ACC_NEW;
+            if (status.status == SUCCESS)
+                return COMMANDS;
+        }
+    
         free_result(results);
-        if (status.status == ERROR)
-            return ACC_NEW;
-        if (status.status == SUCCESS)
-            return COMMANDS;
+        return COMMANDS;
     }
 
-    free_result(results);
-    return COMMANDS;
 }
 
 static MenuIndex acc_delete_func() {
