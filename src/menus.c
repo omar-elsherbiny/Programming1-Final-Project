@@ -790,7 +790,72 @@ static MenuIndex other_print_func() {
 
     return COMMANDS;
 }
+static MenuIndex acc_search_status(){
+    enum DialogOptions{
+        DIALOG_FIND,
+        DIALOG_DISCARD,
+        DIALOG_BACK,
+    };
+    BoxContent searchPage = {
+        .title = "Search Account",
+        .content = {
+            LINE_DEFAULT("┌ Account Number ────────────┐"),
+            LINE_TEXT("│ %s │", 10, 0, "1234567890\b", ""),
+            LINE_DEFAULT("└────────────────────────────┘"),
+            LINE_DEFAULT(" "),
+            LINE_DIALOGUE("Find", DIALOG_FIND),
+            LINE_DIALOGUE("Discard", DIALOG_DISCARD),
+        }};
+    PromptInputs searchChoice = display_box_prompt(&searchPage,0);
+    if(searchChoice.dialogueValue == DIALOG_DISCARD){
+        free_result(searchChoice);
+        return COMMANDS;
+    }
+    else if(searchChoice.dialogueValue == DIALOG_FIND){
+        char *id= searchChoice.textInputs[0];
+        AccountResult searchResult = query(id);
+        if(searchResult.status.status == ERROR){
+            Status error = searchResult.status;
+            free_result(searchChoice);
+            print_status(error);
+            return ACC_SEARCH;
+        }
+        else if(searchResult.status.status == SUCCESS){
+            Account foundAccount = searchResult.accounts[0];
+            char account1[LINE_LENGTH],
+                name1[LINE_LENGTH],
+                email1[LINE_LENGTH],
+                balance1[LINE_LENGTH],
+                mobile1[LINE_LENGTH],
+                date1[LINE_LENGTH],
+                status1[LINE_LENGTH];
+            sprintf(account1, "Account #: %s", foundAccount.id);
+            sprintf(name1, "Name : %s", foundAccount.name);
+            sprintf(email1, "E-mail: %s", foundAccount.email);
+            sprintf(balance1, "Balance: %.2f", foundAccount.balance);
+            sprintf(mobile1, "Mobile: %s", foundAccount.mobile);
+            sprintf(date1, "Date Opened: %d-%d", foundAccount.date.month, foundAccount.date.year);
+            sprintf(status1, "Status: %s", foundAccount.status ? "active" : "inactive");
+            BoxContent accountDetails = {
+                .title = "Search Account",
+                .content = {
+                    LINE_DEFAULT(account1),
+                    LINE_DEFAULT(name1),
+                    LINE_DEFAULT(email1),
+                    LINE_DEFAULT(balance1),
+                    LINE_DEFAULT(mobile1),
+                    LINE_DEFAULT(date1),
+                    LINE_DEFAULT(status1),
+                    LINE_DEFAULT(" "),
+                    LINE_DIALOGUE("Back", DIALOG_BACK)}};
+            PromptInputs foundPage = display_box_prompt(&accountDetails,0);
+            if(foundPage.dialogueValue == DIALOG_BACK){
+                return ACC_SEARCH;
+            }
 
+        }
+    }
+}
 // -
 
 void mainloop() {
@@ -804,7 +869,7 @@ void mainloop() {
     menuFunctions[ACC_NEW] = acc_new_func;
     menuFunctions[ACC_DELETE] = acc_delete_func;
     menuFunctions[ACC_MODIFY] = acc_modify_func;
-    // menuFunctions[ACC_SEARCH] = acc_search_status;
+    menuFunctions[ACC_SEARCH] = acc_search_status;
     // menuFunctions[ACC_ADVANCESEARCH] = acc_advancesearch_status;
     menuFunctions[ACC_STATUS] = acc_change_status;
 
