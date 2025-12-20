@@ -233,8 +233,9 @@ int valid_email(char *str){
     return 1;
 }
 
-void save_transaction(char *id,double amount,TransactionType type,char *to){
-    char fileName[N];
+void save_transaction(char *id,double amount,TransactionType type,char *t){
+    char fileName[N],to[N];
+    strcpy(to,t);
     strcpy(fileName, "files/accounts/");
     strcat(fileName,id);
     strcat(fileName,".txt");
