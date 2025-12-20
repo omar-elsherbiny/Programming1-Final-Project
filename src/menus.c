@@ -60,7 +60,7 @@ static void print_status(Status status) {
     Line *statusMsgLines = MULTI_LINE_DEFAULT(status.message, (status.status == ERROR ? FG_RED : (status.status == WARNING ? FG_YELLOW : FG_GREEN)), 30, &lineCount);
 
     BoxContent statusPage = {0};
-    strcpy(statusPage.title, (status.status == ERROR ? FG_RED "ERROR" : (status.status == ERROR ? FG_YELLOW "WARNING" : FG_GREEN "SUCCESS")));
+    strcpy(statusPage.title, (status.status == ERROR ? FG_RED "ERROR" : (status.status == WARNING ? FG_YELLOW "WARNING" : FG_GREEN "SUCCESS")));
 
     for (int i = 0; i < lineCount; i++) {
         statusPage.content[i] = statusMsgLines[i];
