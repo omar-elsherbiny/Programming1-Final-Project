@@ -1679,7 +1679,7 @@ static MenuIndex other_print_func() {
         }
     }
 
-    return COMMANDS;
+    return OTHER_PRINT;
 }
 
 // -
