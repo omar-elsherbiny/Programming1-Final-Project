@@ -34,6 +34,7 @@ int cmp_accounts(Account a, Account b, SortMethod method) {
             }
         }
     }
+    return 0;
 }
 
 int cmp_transactions(Transaction a, Transaction b) {
@@ -52,7 +53,25 @@ int cmp_transactions(Transaction a, Transaction b) {
             } else if (a.date.day > b.date.day) {
                 return 1;
             } else {
-                return 0;
+                if (a.date.hour < b.date.hour) {
+                    return -1;
+                } else if (a.date.hour > b.date.hour) {
+                    return 1;
+                } else {
+                    if (a.date.minute < b.date.minute) {
+                        return -1;
+                    } else if (a.date.minute > b.date.minute) {
+                        return 1;
+                    } else {
+                        if (a.date.second < b.date.second) {
+                            return -1;
+                        } else if (a.date.second > b.date.second) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                }
             }
         }
     }
@@ -125,6 +144,9 @@ DateDay get_today() {
     ret.day = tm_info->tm_mday;
     ret.month = tm_info->tm_mon + 1;
     ret.year = tm_info->tm_year + 1900;
+    ret.hour = tm_info->tm_hour;
+    ret.minute = tm_info->tm_min;
+    ret.second = tm_info->tm_sec;
     return ret;
 }
 
@@ -235,6 +257,7 @@ int valid_email(char *str){
 
 void save_transaction(char *id,double amount,TransactionType type,char *t){
     char fileName[N],to[N];
+    DateDay now=get_today();
     strcpy(to,t);
     strcpy(fileName, "files/accounts/");
     strcat(fileName,id);
@@ -250,7 +273,7 @@ void save_transaction(char *id,double amount,TransactionType type,char *t){
     if(type==WITHDRAW||type==DEPOSIT){
         strcpy(to,"");
     }
-    fprintf(accountFile, "%s,%s,%.2f,%d-%d-%d%s%s\n", id, (type==WITHDRAW?"withdraw":(type==DEPOSIT?"deposit":"send")), amount, get_today().day, get_today().month, get_today().year,(type==TRANSFER?",":""),to);
+    fprintf(accountFile, "%s,%s,%.2f,%d-%d-%d %d:%s%d:%s%d %s%s%s\n", id, (type==WITHDRAW?"withdraw":(type==DEPOSIT?"deposit":"send")), amount, now.day, now.month, now.year,now.hour-(12*(now.hour>12))+12*(now.hour==0),(now.minute<10?"0":""),now.minute,(now.second<10?"0":""),now.second,(now.hour>11?"pm":"am"),(type==TRANSFER?",":""),to);
     fclose(accountFile);
     if(type==TRANSFER){
         strcpy(fileName, "files/accounts/");
@@ -264,7 +287,7 @@ void save_transaction(char *id,double amount,TransactionType type,char *t){
         }
         fclose(accountFile);
         accountFile = fopen(fileName, "a");
-        fprintf(accountFile, "%s,receive,%.2f,%d-%d-%d,%s\n", to, amount, get_today().day, get_today().month, get_today().year,id);
+        fprintf(accountFile, "%s,receive,%.2f,%d-%d-%d %d:%s%d:%s%d %s,%s\n", to, amount, now.day, now.month, now.year,now.hour-(12*(now.hour>12))+12*(now.hour==0),(now.minute<10?" ":""),now.minute,(now.second<10?" ":""),now.second,(now.hour>11?"pm":"am"),(type==TRANSFER?",":""),id);
         fclose(accountFile);
     }
 }

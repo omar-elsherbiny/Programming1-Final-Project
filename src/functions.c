@@ -493,11 +493,13 @@ ReportResult report(char *id) {
     }
     char line[5 * N], ufaccountId[N], ufpartyId[N], uftype[N], ufamount[N], ufdate[N];
     Transaction transactions[N];
+    int transCnt=0;
     for (i = 0; fgets(line, sizeof(line), accountFile); i++) {
         strcpy(ufaccountId, strtok(line, ","));
         strcpy(uftype, strtok(NULL, ","));
         strcpy(ufamount, strtok(NULL, ","));
         strcpy(ufdate, strtok(NULL, ","));
+        strcpy(ufpartyId,"");
         if(!strcmp(uftype,"send")||!strcmp(uftype,"receive")){
             strcpy(ufpartyId, strtok(NULL, ","));
             strcpy(transactions[i].partyId, ufpartyId);
@@ -508,28 +510,17 @@ ReportResult report(char *id) {
         transactions[i].date.day = atoi(strtok(ufdate, "-"));
         transactions[i].date.month = atoi(strtok(NULL, "-"));
         transactions[i].date.year = atoi(strtok(NULL, "-"));
+        transCnt++;
     }
+    fclose(accountFile);
+    accountFile = fopen(fileName, "w");
     transaction_merge_sort(transactions,0,i-1);
-    for (i = 0; fgets(line, sizeof(line), accountFile); i++) {
-        strcpy(ufaccountId, strtok(line, ","));
-        strcpy(uftype, strtok(NULL, ","));
-        strcpy(ufamount, strtok(NULL, ","));
-        strcpy(ufdate, strtok(NULL, ","));
-        Transaction trans;
-        if(!strcmp(uftype,"send")||!strcmp(uftype,"receive")){
-            strcpy(ufpartyId, strtok(NULL, ","));
-            strcpy(trans.partyId, ufpartyId);
-        }
-        strcpy(trans.accountId, ufaccountId);
-        strcpy(trans.type, uftype);
-        trans.amount = strtod(ufamount, NULL);
-        trans.date.day = atoi(strtok(ufdate, "-"));
-        trans.date.month = atoi(strtok(NULL, "-"));
-        trans.date.year = atoi(strtok(NULL, "-"));
-        ret.transactions[ret.n] = trans;
-        ret.n++;
-        if (ret.n == 5) {
-            break;
+    for (i = 0; i<transCnt; i++) {
+        DateDay now=transactions[i].date;
+        fprintf(accountFile,"%s,%s,%.2f,%d-%d-%d %d:%s%d:%s%d %s%s%s\n", id, transactions[i].type, transactions[i].amount, now.day, now.month, now.year,now.hour-(12*(now.hour>12))+12*(now.hour==0),(now.minute<10?"0":""),now.minute,(now.second<10?"0":""),now.second,(now.hour>11?"pm":"am"),((!strcmp(transactions[i].type,"send")||!strcmp(transactions[i].type,"receive"))?",":""),transactions[i].partyId);
+        if (ret.n < 5) {
+            ret.transactions[ret.n] = transactions[i];
+            ret.n++;
         }
     }
     fclose(accountFile);

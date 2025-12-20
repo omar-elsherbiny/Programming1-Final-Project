@@ -37,7 +37,7 @@ typedef struct {
 } Date;
 
 typedef struct {
-    int day, month, year;
+    int day, month, year, hour, minute, second;
 } DateDay;
 typedef struct {
     int status;  // inactive 0, active 1
