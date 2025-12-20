@@ -34,16 +34,17 @@ static MenuIndex tempIndex;
 
 // -
 
-static void free_result(PromptInputs results) {
-    if (results.textInputs == NULL) return;
+static void free_result(PromptInputs* results) {
+    if (results->textInputs == NULL) return;
 
-    for (int i = 0; i < results.textInputCount; i++) {
-        free(results.textInputs[i]);
-        results.textInputs[i] = NULL;
+    for (int i = 0; i < results->textInputCount; i++) {
+        free(results->textInputs[i]);
+        results->textInputs[i] = NULL;
     }
 
-    free(results.textInputs);
-    results.textInputs = NULL;
+    free(results->textInputs);
+    results->textInputs = NULL;
+    results->textInputCount = 0;
 }
 
 static void remove_all_chars(char* str, char c) {
@@ -116,7 +117,7 @@ static MenuIndex login_func() {
     PromptInputs results = display_box_prompt(&loginPage, 0);
 
     if (results.dialogueValue == DIALOG_QUIT) {
-        free_result(results);
+        free_result(&results);
         return QUIT;
     }
 
@@ -126,7 +127,7 @@ static MenuIndex login_func() {
     if (status.status == ERROR) {
         print_status(status);
 
-        free_result(results);
+        free_result(&results);
         return LOGIN;
     }
 
@@ -135,11 +136,11 @@ static MenuIndex login_func() {
     if (status.status == ERROR) {
         print_status(status);
 
-        free_result(results);
+        free_result(&results);
         return LOGIN;
     }
 
-    free_result(results);
+    free_result(&results);
     return COMMANDS;
 }
 
@@ -232,7 +233,7 @@ static MenuIndex acc_new_func() {
         PromptInputs results = display_box_prompt(&addAccountPage, 0);
 
         if (results.dialogueValue == DIALOG_DISCARD) {
-            free_result(results);
+            free_result(&results);
             return COMMANDS;
         }
 
@@ -257,7 +258,7 @@ static MenuIndex acc_new_func() {
                 .message = "You should fill out all the input fields"};
             print_status(status);
 
-            free_result(results);
+            free_result(&results);
             continue;
         }
 
@@ -268,7 +269,7 @@ static MenuIndex acc_new_func() {
                 .message = "Account Number is not 10 characters"};
             print_status(status);
 
-            free_result(results);
+            free_result(&results);
             continue;
         }
 
@@ -279,7 +280,7 @@ static MenuIndex acc_new_func() {
                 .message = "Email is not valid"};
             print_status(status);
 
-            free_result(results);
+            free_result(&results);
             continue;
         }
 
@@ -291,7 +292,7 @@ static MenuIndex acc_new_func() {
                 .message = "Balance should start with a number"};
             print_status(status);
 
-            free_result(results);
+            free_result(&results);
             continue;
         }
 
@@ -302,7 +303,7 @@ static MenuIndex acc_new_func() {
                 .message = "Balance should end with a number"};
             print_status(status);
 
-            free_result(results);
+            free_result(&results);
             continue;
         }
 
@@ -317,7 +318,7 @@ static MenuIndex acc_new_func() {
                 .message = "Balance should only have 1 decimal point"};
             print_status(status);
 
-            free_result(results);
+            free_result(&results);
             continue;
         }
 
@@ -332,7 +333,7 @@ static MenuIndex acc_new_func() {
                     .message = "The balance should only be max of 2 decimal places"};
                 print_status(status);
 
-                free_result(results);
+                free_result(&results);
                 continue;
             }
         }
@@ -344,7 +345,7 @@ static MenuIndex acc_new_func() {
                 .message = "Phone Number is not valid"};
             print_status(status);
 
-            free_result(results);
+            free_result(&results);
             continue;
         }
 
@@ -361,7 +362,7 @@ static MenuIndex acc_new_func() {
             print_status(status);
             load();
 
-            free_result(results);
+            free_result(&results);
             continue;
         }
 
@@ -371,7 +372,7 @@ static MenuIndex acc_new_func() {
         int confirmResults = print_confirm("Confirm Add", "Are you sure you want to add this account?");
 
         if (confirmResults == 0) {
-            free_result(results);
+            free_result(&results);
             load();
 
             continue;
@@ -381,7 +382,7 @@ static MenuIndex acc_new_func() {
 
         print_status(status);
 
-        free_result(results);
+        free_result(&results);
         return COMMANDS;
     }
 }
@@ -428,7 +429,7 @@ static MenuIndex acc_delete_func() {
             PromptInputs delOneResults = display_box_prompt(&deleteOnePage, 2);
 
             if (delOneResults.dialogueValue == DIALOG_NO) {
-                free_result(delOneResults);
+                free_result(&delOneResults);
                 return ACC_DELETE;
             }
 
@@ -441,7 +442,7 @@ static MenuIndex acc_delete_func() {
                     .message = "You should fill out the input field"};
                 print_status(status);
 
-                free_result(delOneResults);
+                free_result(&delOneResults);
                 continue;
             }
 
@@ -452,7 +453,7 @@ static MenuIndex acc_delete_func() {
                     .message = "Account Number is not 10 characters"};
                 print_status(status);
 
-                free_result(delOneResults);
+                free_result(&delOneResults);
                 continue;
             }
 
@@ -469,7 +470,7 @@ static MenuIndex acc_delete_func() {
 
             print_status(deletionStatus);
 
-            free_result(delOneResults);
+            free_result(&delOneResults);
             return ACC_DELETE;
         }
     } else if (results.dialogueValue == DIALOG_DEL_MULTI) {
@@ -488,7 +489,7 @@ static MenuIndex acc_delete_func() {
             PromptInputs delMultiChoice = display_box_prompt(&deleteMultiPage, 2);
 
             if (delMultiChoice.dialogueValue == DIALOG_DISCARD) {
-                free_result(results);
+                free_result(&results);
                 return ACC_DELETE;
             }
 
@@ -519,7 +520,7 @@ static MenuIndex acc_delete_func() {
 
                     int month = atoi(delDateResults.textInputs[0]);
                     int year = atoi(delDateResults.textInputs[1]);
-                    free_result(delDateResults);
+                    free_result(&delDateResults);
 
                     if (delDateResults.dialogueValue == DIALOG_DISCARD) {
                         return ACC_DELETE;
@@ -603,7 +604,7 @@ static MenuIndex acc_modify_func() {
         PromptInputs results = display_box_prompt(&modifyPage, 0);
 
         strcpy(accNum, results.textInputs[0]);
-        free_result(results);
+        free_result(&results);
 
         if (results.dialogueValue == DIALOG_DISCARD) {
             return COMMANDS;
@@ -664,7 +665,7 @@ static MenuIndex acc_modify_func() {
             PromptInputs results = display_box_prompt(&modifySubPage, 0);
 
             if (results.dialogueValue == DIALOG_DISCARD) {
-                free_result(results);
+                free_result(&results);
                 break;
             }
 
@@ -682,7 +683,7 @@ static MenuIndex acc_modify_func() {
                     .message = "You should fill out all the input fields"};
                 print_status(status);
 
-                free_result(results);
+                free_result(&results);
                 continue;
             }
 
@@ -693,7 +694,7 @@ static MenuIndex acc_modify_func() {
                     .message = "Email is not valid"};
                 print_status(status);
 
-                free_result(results);
+                free_result(&results);
                 continue;
             }
 
@@ -722,7 +723,7 @@ static MenuIndex acc_modify_func() {
             Status status = modify(account.id, account.name, account.mobile, account.email);
             if (status.status == ERROR) {
                 print_status(status);
-                free_result(results);
+                free_result(&results);
                 load();
 
                 continue;
@@ -732,7 +733,7 @@ static MenuIndex acc_modify_func() {
             int confirmResults = print_confirm("Confirm Modify", "Are you sure you want to modify this account?");
 
             if (confirmResults == 0) {
-                free_result(results);
+                free_result(&results);
                 load();
 
                 continue;
@@ -770,7 +771,7 @@ static MenuIndex acc_search_func() {
         PromptInputs searchChoice = display_box_prompt(&searchPage, 0);
 
         if (searchChoice.dialogueValue == DIALOG_DISCARD) {
-            free_result(searchChoice);
+            free_result(&searchChoice);
             return COMMANDS;
         }
 
@@ -797,12 +798,12 @@ static MenuIndex acc_search_func() {
         AccountResult searchResult = query(searchChoice.textInputs[0]);
         if (searchResult.status.status == ERROR) {
             Status error = searchResult.status;
-            free_result(searchChoice);
+            free_result(&searchChoice);
             print_status(error);
             continue;
         }
 
-        free_result(searchChoice);
+        free_result(&searchChoice);
 
         Account foundAccount = searchResult.accounts[0];
         char account1[LINE_LENGTH],
@@ -865,7 +866,7 @@ static MenuIndex acc_advancesearch_status() {
             }};
         PromptInputs searchForName = display_box_prompt(&searchPage, 0);
         if (searchForName.dialogueValue == DIALOG_DISCARD) {
-            free_result(searchForName);
+            free_result(&searchForName);
             return COMMANDS;
         }
 
@@ -991,7 +992,7 @@ static MenuIndex acc_status_func() {
         PromptInputs statusResult = display_box_prompt(&statusPage, 0);
 
         if (statusResult.dialogueValue == DIALOG_BACK) {
-            free_result(statusResult);
+            free_result(&statusResult);
             return COMMANDS;
         }
 
@@ -1015,7 +1016,7 @@ static MenuIndex acc_status_func() {
             continue;
         }
 
-        free_result(statusResult);
+        free_result(&statusResult);
 
         AccountResult accountResult = query(accNum);
         if (accountResult.status.status == SUCCESS) {
@@ -1115,7 +1116,7 @@ static MenuIndex trans_withdraw_func() {
         PromptInputs withdrawChoice = display_box_prompt(&withdrawAccountPage, 0);
 
         if (withdrawChoice.dialogueValue == DIALOG_BACK) {
-            free_result(withdrawChoice);
+            free_result(&withdrawChoice);
             return COMMANDS;
         }
 
@@ -1143,7 +1144,7 @@ static MenuIndex trans_withdraw_func() {
         AccountResult searchResult = query(withdrawChoice.textInputs[0]);
         if (searchResult.status.status == ERROR) {
             Status error = searchResult.status;
-            free_result(withdrawChoice);
+            free_result(&withdrawChoice);
             print_status(error);
             continue;
         }
@@ -1159,7 +1160,7 @@ static MenuIndex trans_withdraw_func() {
                 .message = "Amount should start with a number"};
             print_status(status);
 
-            free_result(withdrawChoice);
+            free_result(&withdrawChoice);
             continue;
         }
 
@@ -1170,7 +1171,7 @@ static MenuIndex trans_withdraw_func() {
                 .message = "Amount should end with a number"};
             print_status(status);
 
-            free_result(withdrawChoice);
+            free_result(&withdrawChoice);
             continue;
         }
 
@@ -1185,7 +1186,7 @@ static MenuIndex trans_withdraw_func() {
                 .message = "Amount should only have 1 decimal point"};
             print_status(status);
 
-            free_result(withdrawChoice);
+            free_result(&withdrawChoice);
             continue;
         }
 
@@ -1200,7 +1201,7 @@ static MenuIndex trans_withdraw_func() {
                     .message = "The amount should only be max of 2 decimal places"};
                 print_status(status);
 
-                free_result(withdrawChoice);
+                free_result(&withdrawChoice);
                 continue;
             }
         }
@@ -1210,13 +1211,13 @@ static MenuIndex trans_withdraw_func() {
         if (status.status == ERROR) {
             print_status(status);
             load();
-            free_result(withdrawChoice);
+            free_result(&withdrawChoice);
             continue;
         }
         int confirmResults = print_confirm("Confirm Withdraw", "Are you sure you want to withdraw the given amount?");
 
         if (confirmResults == 0) {
-            free_result(withdrawChoice);
+            free_result(&withdrawChoice);
             load();
 
             continue;
@@ -1225,7 +1226,7 @@ static MenuIndex trans_withdraw_func() {
         save();
         save_transaction(accNum, amountNum, WITHDRAW, "");
         print_status(status);
-        free_result(withdrawChoice);
+        free_result(&withdrawChoice);
         return COMMANDS;
     }
 
@@ -1262,7 +1263,7 @@ static MenuIndex trans_deposit_func() {
         PromptInputs depositChoice = display_box_prompt(&depositAccountPage, 0);
 
         if (depositChoice.dialogueValue == DIALOG_BACK) {
-            free_result(depositChoice);
+            free_result(&depositChoice);
             return COMMANDS;
         }
 
@@ -1290,7 +1291,7 @@ static MenuIndex trans_deposit_func() {
         AccountResult searchResult = query(depositChoice.textInputs[0]);
         if (searchResult.status.status == ERROR) {
             Status error = searchResult.status;
-            free_result(depositChoice);
+            free_result(&depositChoice);
             print_status(error);
             continue;
         }
@@ -1306,7 +1307,7 @@ static MenuIndex trans_deposit_func() {
                 .message = "Amount should start with a number"};
             print_status(status);
 
-            free_result(depositChoice);
+            free_result(&depositChoice);
             continue;
         }
 
@@ -1317,7 +1318,7 @@ static MenuIndex trans_deposit_func() {
                 .message = "Amount should end with a number"};
             print_status(status);
 
-            free_result(depositChoice);
+            free_result(&depositChoice);
             continue;
         }
 
@@ -1332,7 +1333,7 @@ static MenuIndex trans_deposit_func() {
                 .message = "Amount should only have 1 decimal point"};
             print_status(status);
 
-            free_result(depositChoice);
+            free_result(&depositChoice);
             continue;
         }
 
@@ -1347,7 +1348,7 @@ static MenuIndex trans_deposit_func() {
                     .message = "The amount should only be max of 2 decimal places"};
                 print_status(status);
 
-                free_result(depositChoice);
+                free_result(&depositChoice);
                 continue;
             }
         }
@@ -1357,14 +1358,14 @@ static MenuIndex trans_deposit_func() {
         if (status.status == ERROR) {
             print_status(status);
             load();
-            free_result(depositChoice);
+            free_result(&depositChoice);
             continue;
         }
 
         int confirmResults = print_confirm("Confirm Deposit", "Are you sure you want to deposit the given amount?");
 
         if (confirmResults == 0) {
-            free_result(depositChoice);
+            free_result(&depositChoice);
             load();
 
             continue;
@@ -1373,7 +1374,7 @@ static MenuIndex trans_deposit_func() {
         save();
         save_transaction(accNum, amountNum, DEPOSIT, "");
         print_status(status);
-        free_result(depositChoice);
+        free_result(&depositChoice);
         return COMMANDS;
     }
 
@@ -1412,7 +1413,7 @@ static MenuIndex trans_transfer_func() {
         PromptInputs transferChoice = display_box_prompt(&transferAccountPage, 0);
 
         if (transferChoice.dialogueValue == DIALOG_BACK) {
-            free_result(transferChoice);
+            free_result(&transferChoice);
             return COMMANDS;
         }
 
@@ -1441,7 +1442,7 @@ static MenuIndex trans_transfer_func() {
         AccountResult searchResult = query(transferChoice.textInputs[0]);
         if (searchResult.status.status == ERROR) {
             Status error = searchResult.status;
-            free_result(transferChoice);
+            free_result(&transferChoice);
             print_status(error);
             continue;
         }
@@ -1467,7 +1468,7 @@ static MenuIndex trans_transfer_func() {
         searchResult = query(transferChoice.textInputs[1]);
         if (searchResult.status.status == ERROR) {
             Status error = searchResult.status;
-            free_result(transferChoice);
+            free_result(&transferChoice);
             print_status(error);
             continue;
         }
@@ -1483,7 +1484,7 @@ static MenuIndex trans_transfer_func() {
                 .message = "Amount should start with a number"};
             print_status(status);
 
-            free_result(transferChoice);
+            free_result(&transferChoice);
             continue;
         }
 
@@ -1494,7 +1495,7 @@ static MenuIndex trans_transfer_func() {
                 .message = "Amount should end with a number"};
             print_status(status);
 
-            free_result(transferChoice);
+            free_result(&transferChoice);
             continue;
         }
 
@@ -1509,7 +1510,7 @@ static MenuIndex trans_transfer_func() {
                 .message = "Amount should only have 1 decimal point"};
             print_status(status);
 
-            free_result(transferChoice);
+            free_result(&transferChoice);
             continue;
         }
 
@@ -1524,7 +1525,7 @@ static MenuIndex trans_transfer_func() {
                     .message = "The amount should only be max of 2 decimal places"};
                 print_status(status);
 
-                free_result(transferChoice);
+                free_result(&transferChoice);
                 continue;
             }
         }
@@ -1534,14 +1535,14 @@ static MenuIndex trans_transfer_func() {
         if (status.status == ERROR) {
             print_status(status);
             load();
-            free_result(transferChoice);
+            free_result(&transferChoice);
             continue;
         }
 
         int confirmResults = print_confirm("Confirm Transfer", "Are you sure you want to transfer the given amount?");
 
         if (confirmResults == 0) {
-            free_result(transferChoice);
+            free_result(&transferChoice);
             load();
 
             continue;
@@ -1550,7 +1551,7 @@ static MenuIndex trans_transfer_func() {
         save();
         save_transaction(sendNum, amountNum, TRANSFER, receiveNum);
         print_status(status);
-        free_result(transferChoice);
+        free_result(&transferChoice);
         return COMMANDS;
     }
 
@@ -1583,12 +1584,12 @@ static MenuIndex other_report_func() {
         PromptInputs reportPageResult = display_box_prompt(&reportPage, 0);
 
         if (reportPageResult.dialogueValue == DIALOG_BACK) {
-            free_result(reportPageResult);
+            free_result(&reportPageResult);
             return COMMANDS;
         }
 
         strcpy(accNum, reportPageResult.textInputs[0]);
-        free_result(reportPageResult);
+        free_result(&reportPageResult);
 
         if (strlen(accNum) == 0) {
             Status status = {
@@ -1630,10 +1631,10 @@ static MenuIndex other_report_func() {
 
         for (int i = 0; i < reportResult.n; i++) {
             _Bool isPositive = (reportResult.transactions[i].type[0] == 'D' || reportResult.transactions[i].type[10] == 'R');
-            sprintf(amount[i], (isPositive ? FG_CYAN "Amount: " FG_GREEN "+%.2f" FG_RESET : FG_CYAN "Amount: " FG_RED "-%.2f" FG_RESET), reportResult.transactions[i].amount);
+            sprintf(amount[i], (isPositive ? FG_CYAN "Amount: " FG_GREEN "+%.2f ($)" FG_RESET : FG_CYAN "Amount: " FG_RED "-%.2f ($)" FG_RESET), reportResult.transactions[i].amount);
             sprintf(type[i], FG_CYAN "Type:   " FG_RESET "%s", reportResult.transactions[i].type);
             sprintf(party[i], (reportResult.transactions[i].type[10] == 'S' ? FG_CYAN "To:     " FG_RESET "%s" : FG_CYAN "From:   " FG_RESET "%s"), reportResult.transactions[i].partyId);
-            sprintf(date[i], FG_CYAN "Date:   " FG_RESET "%d/%d/%d %d:%02d:%02d %s", reportResult.transactions[i].date.day,
+            sprintf(date[i], FG_CYAN "Date:   " FG_RESET "%d/%d/%d %2d:%02d:%02d %s", reportResult.transactions[i].date.day,
                     reportResult.transactions[i].date.month,
                     reportResult.transactions[i].date.year,
                     reportResult.transactions[i].date.hour - (12 * (reportResult.transactions[i].date.hour > 12)) + 12 * (reportResult.transactions[i].date.hour == 0),
@@ -1643,11 +1644,10 @@ static MenuIndex other_report_func() {
         }
 
         BoxContent reportPageEntries = {
-            .title = "Report", 
+            .title = "Report",
             .content = {
-                LINE_DEFAULT(FG_CYAN"(Most recent transaction first)"),
-                LINE_DEFAULT(" ")
-            }};
+                LINE_DEFAULT(FG_CYAN "(Most recent transaction first)"),
+                LINE_DEFAULT(" ")}};
 
         int l = 2;
         for (int i = 0; i < reportResult.n; i++) {
