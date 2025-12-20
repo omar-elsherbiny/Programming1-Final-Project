@@ -415,6 +415,11 @@ Status transfer(char *idFrom, char *idTo, double amount) {
         f = fopen("files/accounts.txt", "r");
     }
     fclose(f);
+    if (!strcmp(idTo,idFrom)) {
+        ret.status = ERROR;
+        strcpy(ret.message, "Same account number entered in both fields!");
+        return ret;
+    }
     for (i = 0; i < accountCnt; i++) {
         if (!strcmp(idFrom, accounts[i].id)) {
             foundFrom = 1;
