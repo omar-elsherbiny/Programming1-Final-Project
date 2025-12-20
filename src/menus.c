@@ -706,125 +706,159 @@ static MenuIndex acc_modify_func() {
         DIALOG_NO
     };
 
-    BoxContent modifyPage = {
-        .title = "Modify Account",
-        .content = {LINE_DEFAULT("┌ Account Number ────────────┐"),
-                    LINE_TEXT("│ %s │", 10, 0, "0123456789\b", ""),
-                    LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT(" "),
-                    LINE_DIALOGUE("Find", DIALOG_PROCEED),
-                    LINE_DIALOGUE("Back", DIALOG_DISCARD)}};
+    char accNum[LINE_LENGTH] = "";
 
-    PromptInputs results = display_box_prompt(&modifyPage, 0);
-
-    // Checking if account exists
-    AccountResult accountResult = query(results.textInputs[0]);
-
-    // Making a dummy account an initializing it with the query result
-    Account account = accountResult.accounts[0];
-
-    if (results.dialogueValue == DIALOG_DISCARD) {
-        free_result(results);
-        return COMMANDS;
-    }
-
-    if (accountResult.status.status == ERROR) {
-        print_status(accountResult.status);
-        return ACC_MODIFY;
-    }
-
-    // Here we are looping over modify sub menu until it succeeded or user chose to go back
     while (1) {
-        BoxContent modifySubPage = {
+        BoxContent modifyPage = {
             .title = "Modify Account",
-            .content = {LINE_DEFAULT("┌ Name ──────────────────────┐"),
-                        LINE_TEXT("│ %s │", 25, 0, "", account.name),
-                        LINE_DEFAULT("└────────────────────────────┘"),
-                        LINE_DEFAULT("┌ E-mail ────────────────────┐"),
-                        LINE_TEXT("│ %s │", 25, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`@.\b ", account.email),
-                        LINE_DEFAULT("└────────────────────────────┘"),
-                        LINE_DEFAULT("┌ Mobile ────────────────────┐"),
-                        LINE_TEXT("│ +20 %s │", 10, 0, "0123456789\b", account.mobile + 1),
+            .content = {LINE_DEFAULT("┌ Account Number ────────────┐"),
+                        LINE_TEXT("│ %s │", 10, 0, "0123456789\b", accNum),
                         LINE_DEFAULT("└────────────────────────────┘"),
                         LINE_DEFAULT(" "),
-                        LINE_DIALOGUE("Modify", DIALOG_YES),
+                        LINE_DIALOGUE("Find", DIALOG_PROCEED),
                         LINE_DIALOGUE("Back", DIALOG_DISCARD)}};
+    
+        PromptInputs results = display_box_prompt(&modifyPage, 0);
+    
+        strcpy(accNum, results.textInputs[0]);
+        free_result(results);
 
-        PromptInputs results = display_box_prompt(&modifySubPage, 0);
-
-        if (results.dialogueValue == DIALOG_DISCARD) {
-            free_result(results);
-            return ACC_MODIFY;
-        }
-
-        // Copying the input fields values of the account variable
-        strcpy(account.name, results.textInputs[0]);
-        strcpy(account.email, results.textInputs[1]);
-        sprintf(account.mobile, "%s", results.textInputs[2]);
-
-        // Check if any field is empty
-        if ((strlen(results.textInputs[0]) == 0) ||
-            (strlen(results.textInputs[1]) == 0) ||
-            (strlen(results.textInputs[2]) == 0)) {
+        // Check if the field is empty
+        if (strlen(accNum) == 0) {
             Status status = {
                 .status = ERROR,
                 .message = "You should fill out all the input fields"};
             print_status(status);
-
-            free_result(results);
+    
             continue;
         }
-
-        // email validation
-        if (!valid_email(results.textInputs[1])) {
+    
+        // Acc number number 10 characters
+        if (strlen(accNum) != 10) {
             Status status = {
                 .status = ERROR,
-                .message = "Email is not valid"};
+                .message = "Account Number is not 10 characters"};
             print_status(status);
-
-            free_result(results);
+    
+            continue;
+        }    
+    
+        // Checking if account exists
+        AccountResult accountResult = query(accNum);
+    
+        // Making a dummy account an initializing it with the query result
+        Account account = accountResult.accounts[0];
+    
+        if (results.dialogueValue == DIALOG_DISCARD) {
+            return COMMANDS;
+        }
+    
+        if (accountResult.status.status == ERROR) {
+            print_status(accountResult.status);
             continue;
         }
+    
+        // Here we are looping over modify sub menu until it succeeded or user chose to go back
+        while (1) {
+            BoxContent modifySubPage = {
+                .title = "Modify Account",
+                .content = {LINE_DEFAULT("┌ Name ──────────────────────┐"),
+                            LINE_TEXT("│ %s │", 25, 0, "", account.name),
+                            LINE_DEFAULT("└────────────────────────────┘"),
+                            LINE_DEFAULT("┌ E-mail ────────────────────┐"),
+                            LINE_TEXT("│ %s │", 25, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`@.\b ", account.email),
+                            LINE_DEFAULT("└────────────────────────────┘"),
+                            LINE_DEFAULT("┌ Mobile ────────────────────┐"),
+                            LINE_TEXT("│ +20 %s │", 10, 0, "0123456789\b", account.mobile + 1),
+                            LINE_DEFAULT("└────────────────────────────┘"),
+                            LINE_DEFAULT(" "),
+                            LINE_DIALOGUE("Modify", DIALOG_YES),
+                            LINE_DIALOGUE("Back", DIALOG_DISCARD)}};
+    
+            PromptInputs results = display_box_prompt(&modifySubPage, 0);
+    
+            if (results.dialogueValue == DIALOG_DISCARD) {
+                free_result(results);
+                break;
+            }
+    
+            // Copying the input fields values of the account variable
+            strcpy(account.name, results.textInputs[0]);
+            strcpy(account.email, results.textInputs[1]);
+            sprintf(account.mobile, "0%s", results.textInputs[2]);
+    
+            // Check if any field is empty
+            if ((strlen(results.textInputs[0]) == 0) ||
+                (strlen(results.textInputs[1]) == 0) ||
+                (strlen(results.textInputs[2]) == 0)) {
+                Status status = {
+                    .status = ERROR,
+                    .message = "You should fill out all the input fields"};
+                print_status(status);
+    
+                free_result(results);
+                continue;
+            }
+    
+            // email validation
+            if (!valid_email(results.textInputs[1])) {
+                Status status = {
+                    .status = ERROR,
+                    .message = "Email is not valid"};
+                print_status(status);
+    
+                free_result(results);
+                continue;
+            }
+    
+            // phone number must be 10 characters (excluding the "+ 20")
+            if (strlen(results.textInputs[2]) != 10) {
+                Status status = {
+                    .status = ERROR,
+                    .message = "Phone Number is not valid"};
+                print_status(status);
+    
+                continue;
+            }
 
-        // phone number must be 10 characters (excluding the "+ 20")
-        if (strlen(results.textInputs[2]) != 10) {
-            Status status = {
-                .status = ERROR,
-                .message = "Phone Number is not valid"};
+            if (strcmp(account.name, accountResult.accounts[0].name) == 0 &&
+                strcmp(account.email, accountResult.accounts[0].email) == 0 &&
+                strcmp(account.mobile, accountResult.accounts[0].mobile) == 0) {
+                    Status status = {
+                        .status = WARNING,
+                        .message = "There is nothing changed to apply"};
+                    print_status(status);
+
+                    continue;
+
+            }
+
+            // Sending data to apply modification to modify()
+            Status status = modify(account.id, account.name, account.mobile, account.email);
+            if (status.status == ERROR) {
+                print_status(status);
+                free_result(results);
+                load();
+    
+                continue;
+            }
+    
+            // Checking if for confirmation
+            int confirmResults = print_confirm("Confirm Modify", "Are you sure you want to modify this account?");
+    
+            if (confirmResults == 0) {
+                free_result(results);
+                load();
+    
+                continue;
+            }
+    
+            save();
             print_status(status);
-
-            continue;
+    
+            return COMMANDS;
         }
-
-        // Fixing phone number formating before sending it the the modify function
-        sprintf(account.mobile, "0%s", results.textInputs[2]);
-        // Sending data to apply modification to modify()
-        Status status = modify(account.id, account.name, account.mobile, account.email);
-        if (status.status == ERROR) {
-            print_status(status);
-            free_result(results);
-            load();
-
-            continue;
-        }
-
-        // Checking if for confirmation
-        int confirmResults = print_confirm("Confirm Modify", "Are you sure you want to modify this account?");
-
-        if (confirmResults == 0) {
-            free_result(results);
-            load();
-
-            continue;
-        }
-
-        save();
-        print_status(status);
-
-        break;
     }
-
-    free_result(results);
     return COMMANDS;
 }
 
