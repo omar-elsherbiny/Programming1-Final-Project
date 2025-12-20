@@ -1095,16 +1095,22 @@ static MenuIndex trans_withdraw_func() {
     };
 
     char accNum[LINE_LENGTH] = "", withAmount[LINE_LENGTH] = "";
+    double amountNum = 0;
 
     while (1) {
+        sprintf(withAmount, "%.2f", amountNum);
         BoxContent withdrawAccountPage = {
             .title = "Withdraw",
             .content = {
                 LINE_DEFAULT("┌" FG_CYAN " Account Number " FG_RESET "────────────┐"),
                 LINE_TEXT("│ %s │", 10, 0, "1234567890\b", accNum),
                 LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT("┌" FG_CYAN " Withdraw Amount " FG_RESET "───────────┐"),
+                LINE_TEXT("│ %s " FG_GREEN "($)" FG_RESET " │", 20, 0, ".1234567890\b", withAmount),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT("(Max $10,000 per transaction) "),
                 LINE_DEFAULT(" "),
-                LINE_DIALOGUE(FG_CYAN "Find", DIALOG_FIND),
+                LINE_DIALOGUE(FG_CYAN "Proceed", DIALOG_PROCEED),
                 LINE_DIALOGUE("Back", DIALOG_BACK),
             }};
         PromptInputs withdrawChoice = display_box_prompt(&withdrawAccountPage, 0);
@@ -1115,6 +1121,7 @@ static MenuIndex trans_withdraw_func() {
         }
 
         strcpy(accNum, withdrawChoice.textInputs[0]);
+        amountNum = strtod(withdrawChoice.textInputs[1], NULL);
 
         if (strlen(withdrawChoice.textInputs[0]) == 0) {
             Status status = {
@@ -1141,106 +1148,78 @@ static MenuIndex trans_withdraw_func() {
             print_status(error);
             continue;
         }
-
-        free_result(withdrawChoice);
-        double amountNum = 0;
-
-        while (1) {
-            sprintf(withAmount, "%.2f", amountNum);
-            BoxContent withdrawAmountPage = {
-                .title = "Withdraw",
-                .content = {
-                    LINE_DEFAULT("┌" FG_CYAN " Withdraw Amount " FG_RESET "───────────┐"),
-                    LINE_TEXT("│ %s " FG_GREEN "($)" FG_RESET " │", 20, 0, ".1234567890\b", withAmount),
-                    LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT("(Max $10,000 per transaction) "),
-                    LINE_DEFAULT(" "),
-                    LINE_DIALOGUE(FG_CYAN "Proceed", DIALOG_PROCEED),
-                    LINE_DIALOGUE("Back", DIALOG_BACK),
-                }};
-
-            PromptInputs amountResults = display_box_prompt(&withdrawAmountPage, 0);
-            amountNum = strtod(amountResults.textInputs[0], NULL);
-            if (amountResults.dialogueValue == DIALOG_BACK) {
-                break;
-            }
-            char temp[LINE_LENGTH];
-            // Check if 1st char in amount is a number
-            if (!(amountResults.textInputs[0][0] >= '0' &&
-                  amountResults.textInputs[0][0] <= '9')) {
-                Status status = {
-                    .status = ERROR,
-                    .message = "Amount should start with a number"};
-                print_status(status);
-
-                free_result(amountResults);
-                continue;
-            }
-
-            // Check if last char in amount is a number
-            if (amountResults.textInputs[0][strlen(amountResults.textInputs[0]) - 1] == '.') {
-                Status status = {
-                    .status = ERROR,
-                    .message = "Amount should end with a number"};
-                print_status(status);
-
-                free_result(amountResults);
-                continue;
-            }
-
-            // Check if there are only 1 decimal point
-            const char* token = amountResults.textInputs[0];
-            int decimalCount = 0;
-            while ((token = strstr(token, ".")) != NULL)
-                decimalCount++, token++;
-            if (decimalCount > 1) {
-                Status status = {
-                    .status = ERROR,
-                    .message = "Amount should only have 1 decimal point"};
-                print_status(status);
-
-                free_result(amountResults);
-                continue;
-            }
-
-            // Check if amount has only 2 decimal places
-            strcpy(temp, amountResults.textInputs[0]);
-            token = strtok(temp, ".");
-            token = strtok(NULL, ".");
-            if (token != NULL) {
-                if (strlen(token) > 2) {
-                    Status status = {
-                        .status = ERROR,
-                        .message = "The amount should only be max of 2 decimal places"};
-                    print_status(status);
-
-                    free_result(amountResults);
-                    continue;
-                }
-            }
-
-            // Sending data to withdraw()
-            Status status = withdraw(accNum, amountNum);
-            if (status.status == ERROR) {
-                print_status(status);
-                load();
-                free_result(amountResults);
-                continue;
-            }
-            int confirmResults = print_confirm("Confirm Withdraw", "Are you sure you want to withdraw the given amount?");
-
-            if (confirmResults == 0) {
-                free_result(amountResults);
-                load();
-
-                continue;
-            }
-            save();
-            save_transaction(accNum, amountNum, WITHDRAW, "");
-            print_status(status);
-            free_result(amountResults);
-            return COMMANDS;
+        if (withdrawChoice.dialogueValue == DIALOG_BACK) {
+            break;
         }
+        char temp[LINE_LENGTH];
+        // Check if 1st char in amount is a number
+        if (!(withdrawChoice.textInputs[1][0] >= '0' &&
+                withdrawChoice.textInputs[1][0] <= '9')) {
+            Status status = {
+                .status = ERROR,
+                .message = "Amount should start with a number"};
+            print_status(status);
+
+            free_result(withdrawChoice);
+            continue;
+        }
+
+        // Check if last char in amount is a number
+        if (withdrawChoice.textInputs[1][strlen(withdrawChoice.textInputs[1]) - 1] == '.') {
+            Status status = {
+                .status = ERROR,
+                .message = "Amount should end with a number"};
+            print_status(status);
+
+            free_result(withdrawChoice);
+            continue;
+        }
+
+        // Check if there are only 1 decimal point
+        const char* token = withdrawChoice.textInputs[1];
+        int decimalCount = 0;
+        while ((token = strstr(token, ".")) != NULL)
+            decimalCount++, token++;
+        if (decimalCount > 1) {
+            Status status = {
+                .status = ERROR,
+                .message = "Amount should only have 1 decimal point"};
+            print_status(status);
+
+            free_result(withdrawChoice);
+            continue;
+        }
+
+        // Check if amount has only 2 decimal places
+        strcpy(temp, withdrawChoice.textInputs[1]);
+        token = strtok(temp, ".");
+        token = strtok(NULL, ".");
+        if (token != NULL) {
+            if (strlen(token) > 2) {
+                Status status = {
+                    .status = ERROR,
+                    .message = "The amount should only be max of 2 decimal places"};
+                print_status(status);
+
+                free_result(withdrawChoice);
+                continue;
+            }
+        }
+
+        // Sending data to withdraw()
+        Status status = withdraw(accNum, amountNum);
+        if (status.status == ERROR) {
+            print_status(status);
+            load();
+            free_result(withdrawChoice);
+            continue;
+        }
+
+        save();
+        save_transaction(accNum, amountNum, WITHDRAW, "");
+        print_status(status);
+        free_result(withdrawChoice);
+        return COMMANDS;
     }
 
     return COMMANDS;
@@ -1255,16 +1234,22 @@ static MenuIndex trans_deposit_func() {
     };
 
     char accNum[LINE_LENGTH] = "", depAmount[LINE_LENGTH] = "";
+    double amountNum = 0;
 
     while (1) {
+        sprintf(depAmount, "%.2f", amountNum);
         BoxContent depositAccountPage = {
             .title = "Deposit",
             .content = {
                 LINE_DEFAULT("┌" FG_CYAN " Account Number " FG_RESET "────────────┐"),
                 LINE_TEXT("│ %s │", 10, 0, "1234567890\b", accNum),
                 LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT("┌" FG_CYAN " Deposit Amount " FG_RESET "────────────┐"),
+                LINE_TEXT("│ %s " FG_GREEN "($)" FG_RESET " │", 20, 0, ".1234567890\b", depAmount),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT("(Max $10,000 per transaction) "),
                 LINE_DEFAULT(" "),
-                LINE_DIALOGUE(FG_CYAN "Find", DIALOG_FIND),
+                LINE_DIALOGUE(FG_CYAN "Proceed", DIALOG_PROCEED),
                 LINE_DIALOGUE("Back", DIALOG_BACK),
             }};
         PromptInputs depositChoice = display_box_prompt(&depositAccountPage, 0);
@@ -1275,6 +1260,7 @@ static MenuIndex trans_deposit_func() {
         }
 
         strcpy(accNum, depositChoice.textInputs[0]);
+        amountNum = strtod(depositChoice.textInputs[1], NULL);
 
         if (strlen(depositChoice.textInputs[0]) == 0) {
             Status status = {
@@ -1301,106 +1287,78 @@ static MenuIndex trans_deposit_func() {
             print_status(error);
             continue;
         }
-
-        free_result(depositChoice);
-        double amountNum = 0;
-
-        while (1) {
-            sprintf(depAmount, "%.2f", amountNum);
-            BoxContent depositAmountPage = {
-                .title = "Deposit",
-                .content = {
-                    LINE_DEFAULT("┌" FG_CYAN " Deposit Amount " FG_RESET "────────────┐"),
-                    LINE_TEXT("│ %s " FG_GREEN "($)" FG_RESET " │", 20, 0, ".1234567890\b", depAmount),
-                    LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT("(Max $10,000 per transaction) "),
-                    LINE_DEFAULT(" "),
-                    LINE_DIALOGUE(FG_CYAN "Proceed", DIALOG_PROCEED),
-                    LINE_DIALOGUE("Back", DIALOG_BACK),
-                }};
-
-            PromptInputs amountResults = display_box_prompt(&depositAmountPage, 0);
-            amountNum = strtod(amountResults.textInputs[0], NULL);
-            if (amountResults.dialogueValue == DIALOG_BACK) {
-                break;
-            }
-            char temp[LINE_LENGTH];
-            // Check if 1st char in amount is a number
-            if (!(amountResults.textInputs[0][0] >= '0' &&
-                  amountResults.textInputs[0][0] <= '9')) {
-                Status status = {
-                    .status = ERROR,
-                    .message = "Amount should start with a number"};
-                print_status(status);
-
-                free_result(amountResults);
-                continue;
-            }
-
-            // Check if last char in amount is a number
-            if (amountResults.textInputs[0][strlen(amountResults.textInputs[0]) - 1] == '.') {
-                Status status = {
-                    .status = ERROR,
-                    .message = "Amount should end with a number"};
-                print_status(status);
-
-                free_result(amountResults);
-                continue;
-            }
-
-            // Check if there are only 1 decimal point
-            const char* token = amountResults.textInputs[0];
-            int decimalCount = 0;
-            while ((token = strstr(token, ".")) != NULL)
-                decimalCount++, token++;
-            if (decimalCount > 1) {
-                Status status = {
-                    .status = ERROR,
-                    .message = "Amount should only have 1 decimal point"};
-                print_status(status);
-
-                free_result(amountResults);
-                continue;
-            }
-
-            // Check if amount has only 2 decimal places
-            strcpy(temp, amountResults.textInputs[0]);
-            token = strtok(temp, ".");
-            token = strtok(NULL, ".");
-            if (token != NULL) {
-                if (strlen(token) > 2) {
-                    Status status = {
-                        .status = ERROR,
-                        .message = "The amount should only be max of 2 decimal places"};
-                    print_status(status);
-
-                    free_result(amountResults);
-                    continue;
-                }
-            }
-
-            // Sending data to deposit()
-            Status status = deposit(accNum, amountNum);
-            if (status.status == ERROR) {
-                print_status(status);
-                load();
-                free_result(amountResults);
-                continue;
-            }
-            int confirmResults = print_confirm("Confirm Deposit", "Are you sure you want to deposit the given amount?");
-
-            if (confirmResults == 0) {
-                free_result(amountResults);
-                load();
-
-                continue;
-            }
-            save();
-            save_transaction(accNum, amountNum, DEPOSIT, "");
-            print_status(status);
-            free_result(amountResults);
-            return COMMANDS;
+        if (depositChoice.dialogueValue == DIALOG_BACK) {
+            break;
         }
+        char temp[LINE_LENGTH];
+        // Check if 1st char in amount is a number
+        if (!(depositChoice.textInputs[1][0] >= '0' &&
+                depositChoice.textInputs[1][0] <= '9')) {
+            Status status = {
+                .status = ERROR,
+                .message = "Amount should start with a number"};
+            print_status(status);
+
+            free_result(depositChoice);
+            continue;
+        }
+
+        // Check if last char in amount is a number
+        if (depositChoice.textInputs[1][strlen(depositChoice.textInputs[1]) - 1] == '.') {
+            Status status = {
+                .status = ERROR,
+                .message = "Amount should end with a number"};
+            print_status(status);
+
+            free_result(depositChoice);
+            continue;
+        }
+
+        // Check if there are only 1 decimal point
+        const char* token = depositChoice.textInputs[1];
+        int decimalCount = 0;
+        while ((token = strstr(token, ".")) != NULL)
+            decimalCount++, token++;
+        if (decimalCount > 1) {
+            Status status = {
+                .status = ERROR,
+                .message = "Amount should only have 1 decimal point"};
+            print_status(status);
+
+            free_result(depositChoice);
+            continue;
+        }
+
+        // Check if amount has only 2 decimal places
+        strcpy(temp, depositChoice.textInputs[1]);
+        token = strtok(temp, ".");
+        token = strtok(NULL, ".");
+        if (token != NULL) {
+            if (strlen(token) > 2) {
+                Status status = {
+                    .status = ERROR,
+                    .message = "The amount should only be max of 2 decimal places"};
+                print_status(status);
+
+                free_result(depositChoice);
+                continue;
+            }
+        }
+
+        // Sending data to deposit()
+        Status status = deposit(accNum, amountNum);
+        if (status.status == ERROR) {
+            print_status(status);
+            load();
+            free_result(depositChoice);
+            continue;
+        }
+
+        save();
+        save_transaction(accNum, amountNum, DEPOSIT, "");
+        print_status(status);
+        free_result(depositChoice);
+        return COMMANDS;
     }
 
     return COMMANDS;
