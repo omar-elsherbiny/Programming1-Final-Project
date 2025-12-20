@@ -1214,6 +1214,14 @@ static MenuIndex trans_withdraw_func() {
             free_result(withdrawChoice);
             continue;
         }
+        int confirmResults = print_confirm("Confirm Withdraw", "Are you sure you want to withdraw the given amount?");
+
+        if (confirmResults == 0) {
+            free_result(withdrawChoice);
+            load();
+
+            continue;
+        }
 
         save();
         save_transaction(accNum, amountNum, WITHDRAW, "");
@@ -1353,11 +1361,197 @@ static MenuIndex trans_deposit_func() {
             free_result(depositChoice);
             continue;
         }
+        
+        int confirmResults = print_confirm("Confirm Deposit", "Are you sure you want to deposit the given amount?");
+
+        if (confirmResults == 0) {
+            free_result(depositChoice);
+            load();
+
+            continue;
+        }
 
         save();
         save_transaction(accNum, amountNum, DEPOSIT, "");
         print_status(status);
         free_result(depositChoice);
+        return COMMANDS;
+    }
+
+    return COMMANDS;
+}
+
+static MenuIndex trans_transfer_func() {
+    enum DialogOptions {
+        DIALOG_FIND,
+        DIALOG_DISCARD,
+        DIALOG_PROCEED,
+        DIALOG_BACK,
+    };
+
+    char sendNum[LINE_LENGTH] = "",receiveNum[LINE_LENGTH] = "", transAmount[LINE_LENGTH] = "";
+    double amountNum = 0;
+
+    while (1) {
+        sprintf(transAmount, "%.2f", amountNum);
+        BoxContent transferAccountPage = {
+            .title = "Transfer",
+            .content = {
+                LINE_DEFAULT("┌" FG_CYAN " Sender Account Number " FG_RESET "─────┐"),
+                LINE_TEXT("│ %s │", 10, 0, "1234567890\b", sendNum),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT("┌" FG_CYAN " Receiver Account Number " FG_RESET "───┐"),
+                LINE_TEXT("│ %s │", 10, 0, "1234567890\b", receiveNum),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT("┌" FG_CYAN " Transfer Amount " FG_RESET "───────────┐"),
+                LINE_TEXT("│ %s " FG_GREEN "($)" FG_RESET " │", 20, 0, ".1234567890\b", transAmount),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT(" "),
+                LINE_DIALOGUE(FG_CYAN "Proceed", DIALOG_PROCEED),
+                LINE_DIALOGUE("Back", DIALOG_BACK),
+            }};
+        PromptInputs transferChoice = display_box_prompt(&transferAccountPage, 0);
+
+        if (transferChoice.dialogueValue == DIALOG_BACK) {
+            free_result(transferChoice);
+            return COMMANDS;
+        }
+
+        strcpy(sendNum, transferChoice.textInputs[0]);
+        strcpy(receiveNum, transferChoice.textInputs[1]);
+        amountNum = strtod(transferChoice.textInputs[2], NULL);
+
+        if (strlen(transferChoice.textInputs[0]) == 0) {
+            Status status = {
+                .status = ERROR,
+                .message = "You should fill out the input field"};
+            print_status(status);
+
+            continue;
+        }
+
+        if (strlen(transferChoice.textInputs[0]) != 10) {
+            Status status = {
+                .status = ERROR,
+                .message = "Sender account Number is not 10 characters"};
+            print_status(status);
+
+            continue;
+        }
+
+        AccountResult searchResult = query(transferChoice.textInputs[0]);
+        if (searchResult.status.status == ERROR) {
+            Status error = searchResult.status;
+            free_result(transferChoice);
+            print_status(error);
+            continue;
+        }
+
+        if (strlen(transferChoice.textInputs[1]) == 0) {
+            Status status = {
+                .status = ERROR,
+                .message = "You should fill out the input field"};
+            print_status(status);
+
+            continue;
+        }
+
+        if (strlen(transferChoice.textInputs[1]) != 10) {
+            Status status = {
+                .status = ERROR,
+                .message = "Receiver account Number is not 10 characters"};
+            print_status(status);
+
+            continue;
+        }
+
+        searchResult = query(transferChoice.textInputs[1]);
+        if (searchResult.status.status == ERROR) {
+            Status error = searchResult.status;
+            free_result(transferChoice);
+            print_status(error);
+            continue;
+        }
+        if (transferChoice.dialogueValue == DIALOG_BACK) {
+            break;
+        }
+        char temp[LINE_LENGTH];
+        // Check if 1st char in amount is a number
+        if (!(transferChoice.textInputs[2][0] >= '0' &&
+                transferChoice.textInputs[2][0] <= '9')) {
+            Status status = {
+                .status = ERROR,
+                .message = "Amount should start with a number"};
+            print_status(status);
+
+            free_result(transferChoice);
+            continue;
+        }
+
+        // Check if last char in amount is a number
+        if (transferChoice.textInputs[2][strlen(transferChoice.textInputs[2]) - 1] == '.') {
+            Status status = {
+                .status = ERROR,
+                .message = "Amount should end with a number"};
+            print_status(status);
+
+            free_result(transferChoice);
+            continue;
+        }
+
+        // Check if there are only 1 decimal point
+        const char* token = transferChoice.textInputs[2];
+        int decimalCount = 0;
+        while ((token = strstr(token, ".")) != NULL)
+            decimalCount++, token++;
+        if (decimalCount > 1) {
+            Status status = {
+                .status = ERROR,
+                .message = "Amount should only have 1 decimal point"};
+            print_status(status);
+
+            free_result(transferChoice);
+            continue;
+        }
+
+        // Check if amount has only 2 decimal places
+        strcpy(temp, transferChoice.textInputs[2]);
+        token = strtok(temp, ".");
+        token = strtok(NULL, ".");
+        if (token != NULL) {
+            if (strlen(token) > 2) {
+                Status status = {
+                    .status = ERROR,
+                    .message = "The amount should only be max of 2 decimal places"};
+                print_status(status);
+
+                free_result(transferChoice);
+                continue;
+            }
+        }
+
+        // Sending data to transfer()
+        Status status = transfer(sendNum, receiveNum, amountNum);
+        if (status.status == ERROR) {
+            print_status(status);
+            load();
+            free_result(transferChoice);
+            continue;
+        }
+        
+        int confirmResults = print_confirm("Confirm Transfer", "Are you sure you want to transfer the given amount?");
+
+        if (confirmResults == 0) {
+            free_result(transferChoice);
+            load();
+
+            continue;
+        }
+
+        save();
+        save_transaction(sendNum, amountNum, TRANSFER, receiveNum);
+        print_status(status);
+        free_result(transferChoice);
         return COMMANDS;
     }
 
@@ -1508,7 +1702,7 @@ void mainloop() {
     // Transactions
     menuFunctions[TRANS_WITHDRAW] = trans_withdraw_func;
     menuFunctions[TRANS_DEPOSIT] = trans_deposit_func;
-    // menuFunctions[TRANS_TRANSFER] = trans_transfer_func;
+    menuFunctions[TRANS_TRANSFER] = trans_transfer_func;
 
     // Others
     // menuFunctions[OTHER_REPORT] = other_report_func;
