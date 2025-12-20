@@ -1205,6 +1205,166 @@ static MenuIndex trans_withdraw_func() {
     return COMMANDS;
 }
 
+static MenuIndex trans_deposit_func() {
+    enum DialogOptions {
+        DIALOG_FIND,
+        DIALOG_DISCARD,
+        DIALOG_PROCEED,
+        DIALOG_BACK,
+    };
+
+    char accNum[LINE_LENGTH] = "", depAmount[LINE_LENGTH] = "";
+
+    while (1) {
+        BoxContent depositAccountPage = {
+            .title = "Deposit",
+            .content = {
+                LINE_DEFAULT("┌ Account Number: ───────────┐"),
+                LINE_TEXT("│ %s │", 10, 0, "1234567890\b", accNum),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT(" "),
+                LINE_DIALOGUE("Find", DIALOG_FIND),
+                LINE_DIALOGUE("Back", DIALOG_BACK),
+            }};
+        PromptInputs depositChoice = display_box_prompt(&depositAccountPage, 0);
+
+        if (depositChoice.dialogueValue == DIALOG_BACK) {
+            free_result(depositChoice);
+            return COMMANDS;
+        }
+
+        strcpy(accNum, depositChoice.textInputs[0]);
+
+        if (strlen(depositChoice.textInputs[0]) == 0) {
+            Status status = {
+                .status = ERROR,
+                .message = "You should fill out the input field"};
+            print_status(status);
+
+            continue;
+        }
+
+        if (strlen(depositChoice.textInputs[0]) != 10) {
+            Status status = {
+                .status = ERROR,
+                .message = "Account Number is not 10 characters"};
+            print_status(status);
+
+            continue;
+        }
+
+        AccountResult searchResult = query(depositChoice.textInputs[0]);
+        if (searchResult.status.status == ERROR) {
+            Status error = searchResult.status;
+            free_result(depositChoice);
+            print_status(error);
+            continue;
+        }
+
+        free_result(depositChoice);
+        double amountNum = 0;
+
+        while (1) {
+            sprintf(depAmount, "%.2f", amountNum);
+            BoxContent depositAmountPage = {
+                .title = "Deposit",
+                .content = {
+                    LINE_DEFAULT("┌ Deposit Amount: ───────────┐"),
+                    LINE_TEXT("│ %s ($) │", 20, 0, ".1234567890\b", depAmount),
+                    LINE_DEFAULT("└────────────────────────────┘"),
+                    LINE_DEFAULT("(Max $10,000 per transaction) "),
+                    LINE_DEFAULT(" "),
+                    LINE_DIALOGUE("Proceed", DIALOG_PROCEED),
+                    LINE_DIALOGUE("Back", DIALOG_BACK),
+                }};
+
+            PromptInputs amountResults = display_box_prompt(&depositAmountPage, 0);
+            amountNum = strtod(amountResults.textInputs[0], NULL);
+            if (amountResults.dialogueValue == DIALOG_BACK) {
+                break;
+            }
+            char temp[LINE_LENGTH];
+            // Check if 1st char in amount is a number
+            if (!(amountResults.textInputs[0][0] >= '0' &&
+                  amountResults.textInputs[0][0] <= '9')) {
+                Status status = {
+                    .status = ERROR,
+                    .message = "Amount should start with a number"};
+                print_status(status);
+
+                free_result(amountResults);
+                continue;
+            }
+
+            // Check if last char in amount is a number
+            if (amountResults.textInputs[0][strlen(amountResults.textInputs[0]) - 1] == '.') {
+                Status status = {
+                    .status = ERROR,
+                    .message = "Amount should end with a number"};
+                print_status(status);
+
+                free_result(amountResults);
+                continue;
+            }
+
+            // Check if there are only 1 decimal point
+            const char* token = amountResults.textInputs[0];
+            int decimalCount = 0;
+            while ((token = strstr(token, ".")) != NULL)
+                decimalCount++, token++;
+            if (decimalCount > 1) {
+                Status status = {
+                    .status = ERROR,
+                    .message = "Amount should only have 1 decimal point"};
+                print_status(status);
+
+                free_result(amountResults);
+                continue;
+            }
+
+            // Check if amount has only 2 decimal places
+            strcpy(temp, amountResults.textInputs[0]);
+            token = strtok(temp, ".");
+            token = strtok(NULL, ".");
+            if (token != NULL) {
+                if (strlen(token) > 2) {
+                    Status status = {
+                        .status = ERROR,
+                        .message = "The amount should only be max of 2 decimal places"};
+                    print_status(status);
+
+                    free_result(amountResults);
+                    continue;
+                }
+            }
+
+            // Sending data to deposit()
+            Status status = deposit(accNum, amountNum);
+            if (status.status == ERROR) {
+                print_status(status);
+                load();
+                free_result(amountResults);
+                continue;
+            }
+            int confirmResults = print_confirm("Confirm Deposit", "Are you sure you want to deposit the given amount?");
+
+            if (confirmResults == 0) {
+                free_result(amountResults);
+                load();
+
+                continue;
+            }
+            save();
+            save_transaction(accNum, amountNum, DEPOSIT, "");
+            print_status(status);
+            free_result(amountResults);
+            return COMMANDS;
+        }
+    }
+
+    return COMMANDS;
+}
+
 static MenuIndex other_print_func() {
     enum DialogOptions { DIALOG_NAME = NAME,
                          DIALOG_BALANCE = BALANCE,
@@ -1347,7 +1507,7 @@ void mainloop() {
 
     // Transactions
     menuFunctions[TRANS_WITHDRAW] = trans_withdraw_func;
-    // menuFunctions[TRANS_DEPOSIT] = trans_deposit_func;
+    menuFunctions[TRANS_DEPOSIT] = trans_deposit_func;
     // menuFunctions[TRANS_TRANSFER] = trans_transfer_func;
 
     // Others
