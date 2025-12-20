@@ -180,7 +180,7 @@ static MenuIndex commands_func() {
             LINE_DIALOGUE("  %sTransfer to an Account%s", TRANS_TRANSFER),
             LINE_DEFAULT(" "),
             LINE_DEFAULT(FG_CYAN "Others:"),
-            LINE_DIALOGUE("  %sReport last transactions%s", OTHER_REPORT),
+            LINE_DIALOGUE("  %sReport last 5 transactions%s", OTHER_REPORT),
             LINE_DIALOGUE("  %sPrint all Accounts%s", OTHER_PRINT),
             LINE_DEFAULT(" "),
             LINE_DIALOGUE(FG_RED "Logout", LOGIN)}};
@@ -1406,6 +1406,113 @@ static MenuIndex trans_deposit_func() {
     return COMMANDS;
 }
 
+static MenuIndex other_report_func() {
+    enum DialogOptions { DIALOG_NAME = NAME,
+                         DIALOG_BALANCE = BALANCE,
+                         DIALOG_DATE = DATE,
+                         DIALOG_STATUS = STATUS,
+                         DIALOG_PRINT,
+                         DIALOG_BACK,
+                         DIALOG_FIND
+    };
+
+    char accNum[LINE_LENGTH] = "";
+
+    while (1) {
+        BoxContent reportPage = {
+            .title = "Report",
+            .content = {
+                LINE_DEFAULT("┌" FG_CYAN " Account Number " FG_RESET "────────────┐"),
+                LINE_TEXT("│ %s │", 10, 0, "1234567890\b", accNum),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT(" "),
+                LINE_DIALOGUE(FG_CYAN "Find", DIALOG_FIND),
+                LINE_DIALOGUE("Back", DIALOG_BACK),
+            }};
+        PromptInputs reportPageResult = display_box_prompt(&reportPage, 0);
+
+        if (reportPageResult.dialogueValue == DIALOG_BACK) {
+            free_result(reportPageResult);
+            return COMMANDS;
+        }
+
+        strcpy(accNum, reportPageResult.textInputs[0]);
+        free_result(reportPageResult);
+
+        if (strlen(accNum) == 0) {
+            Status status = {
+                .status = ERROR,
+                .message = "You should fill out the input field"};
+            print_status(status);
+
+            continue;
+        }
+
+        if (strlen(accNum) != 10) {
+            Status status = {
+                .status = ERROR,
+                .message = "Account Number is not 10 characters"};
+            print_status(status);
+
+            continue;
+        }
+
+        AccountResult searchResult = query(accNum);
+        if (searchResult.status.status == ERROR) {
+            Status error = searchResult.status;
+            print_status(error);
+            continue;
+        }
+        // Validated account exits
+
+        ReportResult reportResult = report(accNum);
+        if (reportResult.status.status == ERROR) {
+            print_status(reportResult.status);
+            continue;
+        }   
+        // Validated account has transactions
+
+        char amount[5][LINE_LENGTH];
+        char type[5][LINE_LENGTH];
+        char party[5][LINE_LENGTH];
+        char date[5][LINE_LENGTH];
+        
+        for (int i = 0; i < reportResult.n; i++) {
+            sprintf(amount[i],
+                (reportResult.transactions[i].amount >= 0 ? FG_GREEN "Amount: %.2f" : FG_RED "Amount: %.2f"),reportResult.transactions[i].amount);
+            sprintf(type[i], "Type:   %s" ,reportResult.transactions[i].type);
+            sprintf(party[i], (reportResult.transactions[i].type[10] == 'S') ? "To: %s" : "From: %s") ,reportResult.transactions[i].partyId);
+            sprintf(date[i], "Date:   %d/%d/%d %s:%02d:%02d %s" ,reportResult.transactions[i].date.day, 
+                                                    reportResult.transactions[i].date.month,
+                                                    reportResult.transactions[i].date.year,
+                                                    reportResult.transactions[i].date.hour-(12*(reportResult.transactions[i].date.hour>12))+12*(reportResult.transactions[i].date.hour==0),
+                                                    reportResult.transactions[i].date.minute,
+                                                    reportResult.transactions[i].date.second,
+                                                    reportResult.transactions[i].date.hour>11?"pm":"am");
+
+            
+        }
+
+        BoxContent reportPage = { .title = "Report", .content = {LINE_DEFAULT(" ")}};
+
+        int l = 0;
+        for (int i = 0; i < reportResult.n; i++) {
+            reportPage.content[l++] = LINE_DEFAULT(amount[i]);
+            reportPage.content[l++] = LINE_DEFAULT(type[i]);
+            if (reportResult.transactions[i].partyId[0] != '\0') reportPage.content[l++] = LINE_DEFAULT(party[i]);
+            reportPage.content[l++] = LINE_DEFAULT(date[i]);
+        }
+        
+
+        PromptInputs reportPageResult = display_box_prompt(&reportPage, 0);
+
+        if (reportPageResult.dialogueValue == DIALOG_BACK) {
+            free_result(reportPageResult);
+            return COMMANDS;
+        }
+    }
+}
+
 static MenuIndex other_print_func() {
     enum DialogOptions { DIALOG_NAME = NAME,
                          DIALOG_BALANCE = BALANCE,
@@ -1444,7 +1551,6 @@ static MenuIndex other_print_func() {
         results = display_box_prompt(&printPage, (int)selectedOption - 1);
     }
 
-    // load();  // TODO: DELETE
     AccountResult accountResult = print((SortMethod)selectedOption);
 
     if (accountResult.status.status == ERROR) {
@@ -1553,7 +1659,7 @@ void mainloop() {
     // menuFunctions[TRANS_TRANSFER] = trans_transfer_func;
 
     // Others
-    // menuFunctions[OTHER_REPORT] = other_report_func;
+    menuFunctions[OTHER_REPORT] = other_report_func;
     menuFunctions[OTHER_PRINT] = other_print_func;
 
     // Runs the main looping
