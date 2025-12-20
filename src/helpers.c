@@ -273,7 +273,7 @@ void save_transaction(char *id,double amount,TransactionType type,char *t){
     if(type==WITHDRAW||type==DEPOSIT){
         strcpy(to,"");
     }
-    fprintf(accountFile, "%s,%s,%.2f,%d-%d-%d %d:%s%d:%s%d %s%s%s\n", id, (type==WITHDRAW?"withdraw":(type==DEPOSIT?"deposit":"send")), amount, now.day, now.month, now.year,now.hour-(12*(now.hour>12))+12*(now.hour==0),(now.minute<10?"0":""),now.minute,(now.second<10?"0":""),now.second,(now.hour>11?"pm":"am"),(type==TRANSFER?",":""),to);
+    fprintf(accountFile, "%s,%s,%.2f,%d-%d-%d %d:%s%d:%s%d %s%s%s\n", id, (type==WITHDRAW?"Withdraw":(type==DEPOSIT?"Deposit":"Send")), amount, now.day, now.month, now.year,now.hour-(12*(now.hour>12))+12*(now.hour==0),(now.minute<10?"0":""),now.minute,(now.second<10?"0":""),now.second,(now.hour>11?"pm":"am"),(type==TRANSFER?",":""),to);
     fclose(accountFile);
     if(type==TRANSFER){
         strcpy(fileName, "files/accounts/");
@@ -287,7 +287,7 @@ void save_transaction(char *id,double amount,TransactionType type,char *t){
         }
         fclose(accountFile);
         accountFile = fopen(fileName, "a");
-        fprintf(accountFile, "%s,receive,%.2f,%d-%d-%d %d:%s%d:%s%d %s,%s\n", to, amount, now.day, now.month, now.year,now.hour-(12*(now.hour>12))+12*(now.hour==0),(now.minute<10?"0":""),now.minute,(now.second<10?"0":""),now.second,(now.hour>11?"pm":"am"),id);
+        fprintf(accountFile, "%s,Receive,%.2f,%d-%d-%d %d:%s%d:%s%d %s,%s\n", to, amount, now.day, now.month, now.year,now.hour-(12*(now.hour>12))+12*(now.hour==0),(now.minute<10?"0":""),now.minute,(now.second<10?"0":""),now.second,(now.hour>11?"pm":"am"),id);
         fclose(accountFile);
     }
 }
