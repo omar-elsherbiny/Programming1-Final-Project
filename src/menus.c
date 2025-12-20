@@ -1153,7 +1153,7 @@ static MenuIndex trans_withdraw_func() {
         char temp[LINE_LENGTH];
         // Check if 1st char in amount is a number
         if (!(withdrawChoice.textInputs[1][0] >= '0' &&
-                withdrawChoice.textInputs[1][0] <= '9')) {
+              withdrawChoice.textInputs[1][0] <= '9')) {
             Status status = {
                 .status = ERROR,
                 .message = "Amount should start with a number"};
@@ -1300,7 +1300,7 @@ static MenuIndex trans_deposit_func() {
         char temp[LINE_LENGTH];
         // Check if 1st char in amount is a number
         if (!(depositChoice.textInputs[1][0] >= '0' &&
-                depositChoice.textInputs[1][0] <= '9')) {
+              depositChoice.textInputs[1][0] <= '9')) {
             Status status = {
                 .status = ERROR,
                 .message = "Amount should start with a number"};
@@ -1360,7 +1360,7 @@ static MenuIndex trans_deposit_func() {
             free_result(depositChoice);
             continue;
         }
-        
+
         int confirmResults = print_confirm("Confirm Deposit", "Are you sure you want to deposit the given amount?");
 
         if (confirmResults == 0) {
@@ -1388,7 +1388,7 @@ static MenuIndex trans_transfer_func() {
         DIALOG_BACK,
     };
 
-    char sendNum[LINE_LENGTH] = "",receiveNum[LINE_LENGTH] = "", transAmount[LINE_LENGTH] = "";
+    char sendNum[LINE_LENGTH] = "", receiveNum[LINE_LENGTH] = "", transAmount[LINE_LENGTH] = "";
     double amountNum = 0;
 
     while (1) {
@@ -1477,7 +1477,7 @@ static MenuIndex trans_transfer_func() {
         char temp[LINE_LENGTH];
         // Check if 1st char in amount is a number
         if (!(transferChoice.textInputs[2][0] >= '0' &&
-                transferChoice.textInputs[2][0] <= '9')) {
+              transferChoice.textInputs[2][0] <= '9')) {
             Status status = {
                 .status = ERROR,
                 .message = "Amount should start with a number"};
@@ -1537,7 +1537,7 @@ static MenuIndex trans_transfer_func() {
             free_result(transferChoice);
             continue;
         }
-        
+
         int confirmResults = print_confirm("Confirm Transfer", "Are you sure you want to transfer the given amount?");
 
         if (confirmResults == 0) {
@@ -1629,7 +1629,8 @@ static MenuIndex other_report_func() {
         char date[5][LINE_LENGTH];
 
         for (int i = 0; i < reportResult.n; i++) {
-            sprintf(amount[i], (reportResult.transactions[i].amount >= 0 ? FG_CYAN "Amount: " FG_GREEN "%.2f" FG_RESET : FG_CYAN "Amount: " FG_RED "%.2f" FG_RESET), reportResult.transactions[i].amount);
+            _Bool isPositive = (reportResult.transactions[i].type[0] == 'D' || reportResult.transactions[i].type[10] == 'R');
+            sprintf(amount[i], (isPositive ? FG_CYAN "Amount: " FG_GREEN "+%.2f" FG_RESET : FG_CYAN "Amount: " FG_RED "-%.2f" FG_RESET), reportResult.transactions[i].amount);
             sprintf(type[i], FG_CYAN "Type:   " FG_RESET "%s", reportResult.transactions[i].type);
             sprintf(party[i], (reportResult.transactions[i].type[10] == 'S' ? FG_CYAN "To:     " FG_RESET "%s" : FG_CYAN "From:   " FG_RESET "%s"), reportResult.transactions[i].partyId);
             sprintf(date[i], FG_CYAN "Date:   " FG_RESET "%d/%d/%d %d:%02d:%02d %s", reportResult.transactions[i].date.day,
@@ -1641,9 +1642,14 @@ static MenuIndex other_report_func() {
                     reportResult.transactions[i].date.hour > 11 ? "pm" : "am");
         }
 
-        BoxContent reportPageEntries = {.title = "Report", .content = {LINE_DEFAULT(" ")}};
+        BoxContent reportPageEntries = {
+            .title = "Report", 
+            .content = {
+                LINE_DEFAULT(FG_CYAN"(Most recent transaction first)"),
+                LINE_DEFAULT(" ")
+            }};
 
-        int l = 0;
+        int l = 2;
         for (int i = 0; i < reportResult.n; i++) {
             reportPageEntries.content[l++] = LINE_DEFAULT(amount[i]);
             reportPageEntries.content[l++] = LINE_DEFAULT(type[i]);
@@ -1817,3 +1823,8 @@ void mainloop() {
         prevIndex = tempIndex;
     }
 }
+
+/*TODO:
+-> logical error (no delete)
+-> transaction order broken
+*/
