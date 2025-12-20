@@ -287,7 +287,7 @@ void save_transaction(char *id,double amount,TransactionType type,char *t){
         }
         fclose(accountFile);
         accountFile = fopen(fileName, "a");
-        fprintf(accountFile, "%s,receive,%.2f,%d-%d-%d %d:%s%d:%s%d %s,%s\n", to, amount, now.day, now.month, now.year,now.hour-(12*(now.hour>12))+12*(now.hour==0),(now.minute<10?" ":""),now.minute,(now.second<10?" ":""),now.second,(now.hour>11?"pm":"am"),(type==TRANSFER?",":""),id);
+        fprintf(accountFile, "%s,receive,%.2f,%d-%d-%d %d:%s%d:%s%d %s,%s\n", to, amount, now.day, now.month, now.year,now.hour-(12*(now.hour>12))+12*(now.hour==0),(now.minute<10?"0":""),now.minute,(now.second<10?"0":""),now.second,(now.hour>11?"pm":"am"),id);
         fclose(accountFile);
     }
 }
