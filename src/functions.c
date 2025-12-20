@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 Status login(char *username, char *password) {
     FILE *f = fopen("files/users.txt", "r");
@@ -117,8 +118,19 @@ AccountResult advanced_search(char *keyword) {
     AccountResult ret;
     ret.n = 0;
     int i;
+    char key[N];
+    for(i=0;keyword[i];i++){
+        key[i]=tolower(keyword[i]);
+    }
+    key[i]='\0';
     for (i = 0; i < accountCnt; i++) {
-        if (strstr(accounts[i].name, keyword) != NULL) {
+        char name[N];
+        int j;
+        for(j=0;accounts[i].name[j];j++){
+            name[j]=tolower(accounts[i].name[j]);
+        }
+        name[j]='\0';
+        if (strstr(name, key) != NULL) {
             ret.status.status = SUCCESS;
             strcpy(ret.status.message, "Account(s) with keyword found successfully!");
             ret.accounts[ret.n] = accounts[i];
