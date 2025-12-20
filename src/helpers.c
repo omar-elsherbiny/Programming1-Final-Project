@@ -236,7 +236,7 @@ void save_transaction(char *id,double amount,TransactionType type,char *to){
     if(type==WITHDRAW||type==DEPOSIT){
         strcpy(to,"");
     }
-    fprintf(accountFile, "%s,%s,%.2f,%d-%d-%d,%s\n", id, (type==WITHDRAW?"withdraw":(type==DEPOSIT?"deposit":"send")), amount, get_today().day, get_today().month, get_today().year,to);
+    fprintf(accountFile, "%s,%s,%.2f,%d-%d-%d%s%s\n", id, (type==WITHDRAW?"withdraw":(type==DEPOSIT?"deposit":"send")), amount, get_today().day, get_today().month, get_today().year,(type==TRANSFER?",":""),to);
     fclose(accountFile);
     if(type==TRANSFER){
         strcpy(fileName, "files/accounts/");
