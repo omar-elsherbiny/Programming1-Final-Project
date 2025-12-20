@@ -498,10 +498,10 @@ ReportResult report(char *id) {
         strcpy(ufaccountId, strtok(line, ","));
         strcpy(uftype, strtok(NULL, ","));
         strcpy(ufamount, strtok(NULL, ","));
-        strcpy(ufdate, strtok(NULL, ","));
+        strcpy(ufdate, strtok(NULL, ",\n"));
         strcpy(ufpartyId,"");
         if(!strcmp(uftype,"Send")||!strcmp(uftype,"Receive")){
-            strcpy(ufpartyId, strtok(NULL, ","));
+            strcpy(ufpartyId, strtok(NULL, "\n"));
             strcpy(transactions[i].partyId, ufpartyId);
         }
         strcpy(transactions[i].accountId, ufaccountId);
