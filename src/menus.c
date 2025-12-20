@@ -785,6 +785,7 @@ static MenuIndex acc_search_func() {
     free_result(searchChoice);
     return ACC_SEARCH;
 }
+
 static MenuIndex acc_advancesearch_status(){
     enum DialogOptions
     {
@@ -896,10 +897,12 @@ static MenuIndex acc_advancesearch_status(){
         }
         return COMMANDS;
 }
+
 static MenuIndex other_print_func() {
     enum DialogOptions { DIALOG_NAME = NAME,
                          DIALOG_BALANCE = BALANCE,
                          DIALOG_DATE = DATE,
+                         DIALOG_STATUS = STATUS,
                          DIALOG_PRINT,
                          DIALOG_BACK,
                          DIALOG_UP,
@@ -915,6 +918,7 @@ static MenuIndex other_print_func() {
                     LINE_DIALOGUE("│ %s(x) Name%s                   │", DIALOG_NAME),
                     LINE_DIALOGUE("│ %s( ) Balance%s                │", DIALOG_BALANCE),
                     LINE_DIALOGUE("│ %s( ) Date Opened%s            │", DIALOG_DATE),
+                    LINE_DIALOGUE("│ %s( ) Status%s                 │", DIALOG_STATUS),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT(" "), LINE_DIALOGUE("Print", DIALOG_PRINT),
                     LINE_DIALOGUE("Back", DIALOG_BACK)}};
@@ -927,6 +931,7 @@ static MenuIndex other_print_func() {
         printPage.content[4] = LINE_DIALOGUE((selectedOption == DIALOG_NAME ? "│ %s(x) Name%s                   │" : "│ %s( ) Name%s                   │"), DIALOG_NAME);
         printPage.content[5] = LINE_DIALOGUE((selectedOption == DIALOG_BALANCE ? "│ %s(x) Balance%s                │" : "│ %s( ) Balance%s                │"), DIALOG_BALANCE);
         printPage.content[6] = LINE_DIALOGUE((selectedOption == DIALOG_DATE ? "│ %s(x) Date Opened%s            │" : "│ %s( ) Date Opened%s            │"), DIALOG_DATE);
+        printPage.content[6] = LINE_DIALOGUE((selectedOption == DIALOG_STATUS ? "│ %s(x) Status%s                 │" : "│ %s( ) Status%s                 │"), DIALOG_STATUS);
         results = display_box_prompt(&printPage, (int)selectedOption - 1);
     }
 
