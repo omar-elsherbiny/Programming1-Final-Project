@@ -402,108 +402,179 @@ static MenuIndex acc_delete_func() {
                     LINE_DIALOGUE("│ %sMultiple with a criteria%s   │", DIALOG_DEL_MULTI),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT(" "),
-                    LINE_DIALOGUE("Discard", DIALOG_DISCARD)}};
+                    LINE_DIALOGUE("Back", DIALOG_DISCARD)}};
 
     PromptInputs results = display_box_prompt(&deletePage, 2);
 
     if (results.dialogueValue == DIALOG_DISCARD) {
-        free_result(results);
         return COMMANDS;
     }
 
     if (results.dialogueValue == DIALOG_DEL_ONE) {
-        BoxContent deleteOnePage = {
-            .title = FG_RED "Delete Account",
-            .content = {LINE_DEFAULT("┌ Account Number ────────────┐"),
-                        LINE_TEXT("│ %s │", 10, 0, "1234567890\b", ""),
-                        LINE_DEFAULT("└────────────────────────────┘"),
-                        LINE_DEFAULT(" "),
-                        LINE_DIALOGUE(FG_RED "Delete", DIALOG_YES),
-                        LINE_DIALOGUE("Discard", DIALOG_NO)}};
+        char accNum[LINE_LENGTH] = "";
 
-        PromptInputs delOneResults = display_box_prompt(&deleteOnePage, 2);
+        while (1) {
+            BoxContent deleteOnePage = {
+                .title = FG_RED "Delete Account",
+                .content = {LINE_DEFAULT("┌ Account Number ────────────┐"),
+                            LINE_TEXT("│ %s │", 10, 0, "1234567890\b", accNum),
+                            LINE_DEFAULT("└────────────────────────────┘"),
+                            LINE_DEFAULT(" "),
+                            LINE_DIALOGUE(FG_RED "Delete", DIALOG_YES),
+                            LINE_DIALOGUE("Discard", DIALOG_NO)}};
+    
+            PromptInputs delOneResults = display_box_prompt(&deleteOnePage, 2);
+    
+            if (delOneResults.dialogueValue == DIALOG_NO) {
+                free_result(delOneResults);
+                return ACC_DELETE;
+            }
 
-        if (delOneResults.dialogueValue == DIALOG_NO) {
-            free_result(results);
-            return ACC_DELETE;
-        } else if (delOneResults.dialogueValue == DIALOG_YES) {
+            strcpy(accNum, delOneResults.textInputs[0]);
+
+            // Check if the field is empty
+            if (strlen(delOneResults.textInputs[0]) == 0) {
+                Status status = {
+                    .status = ERROR,
+                    .message = "You should fill out the input field"};
+                print_status(status);
+
+                free_result(delOneResults);
+                continue;
+            }
+
+            // Acc number number 10 characters
+            if (strlen(delOneResults.textInputs[0]) != 10) {
+                Status status = {
+                    .status = ERROR,
+                    .message = "Account Number is not 10 characters"};
+                print_status(status);
+
+                free_result(delOneResults);
+                continue;
+            }
+
             char *toDel = delOneResults.textInputs[0];
+            
+            int confirmResults = print_confirm("Confirm Delete", "Are you sure you want to proceed in the deletion");
+            
+            if (confirmResults == 0) {
+                continue;
+            }
+
             Status deletionStatus = delete(toDel);
+            save();
+
             print_status(deletionStatus);
-            free_result(results);
+
+            free_result(delOneResults);
             return ACC_DELETE;
         }
     } else if (results.dialogueValue == DIALOG_DEL_MULTI) {
-        // Status delete_multiple(DeleteMethod method,Date date);
-        BoxContent deleteMultiPage = {
-            .title = FG_RED "Delete Account",
-            .content = {
-                LINE_DEFAULT("┌ Multiple criteria ─────────┐"),
-                LINE_DIALOGUE("│ %sAccounts created on a Date%s │", DIALOG_DELETEGIVENDATE),
-                LINE_DIALOGUE("│ %sAccounts inactive 90 days%s  │", DIALOG_LESSTHAN3MONTH),
-                LINE_DEFAULT("└────────────────────────────┘"),
-                LINE_DEFAULT(" "),
-                LINE_DIALOGUE("Discard", DIALOG_DISCARD)}};
+        while (1) {
+            // Status delete_multiple(DeleteMethod method,Date date);
+            BoxContent deleteMultiPage = {
+                .title = FG_RED "Delete Account",
+                .content = {
+                    LINE_DEFAULT("┌ Multiple criteria ─────────┐"),
+                    LINE_DIALOGUE("│ %sAccounts created on a Date%s │", DIALOG_DELETEGIVENDATE),
+                    LINE_DIALOGUE("│ %sAccounts inactive 90 days%s  │", DIALOG_LESSTHAN3MONTH),
+                    LINE_DEFAULT("└────────────────────────────┘"),
+                    LINE_DEFAULT(" "),
+                    LINE_DIALOGUE("Back", DIALOG_DISCARD)}};
 
-        PromptInputs delMultiChoice = display_box_prompt(&deleteMultiPage, 2);
+            PromptInputs delMultiChoice = display_box_prompt(&deleteMultiPage, 2);
 
-        if (delMultiChoice.dialogueValue == DIALOG_DISCARD) {
-            free_result(results);
-            return ACC_DELETE;
-        }
+            if (delMultiChoice.dialogueValue == DIALOG_DISCARD) {
+                free_result(results);
+                return ACC_DELETE;
+            }
 
-        if (delMultiChoice.dialogueValue == DIALOG_DELETEGIVENDATE) {
-            while (1) {
-                BoxContent deleteGivenDate = {
-                    .title = FG_RED "Delete Account",
-                    .content = {LINE_DEFAULT(FG_RED "Delete all accounts created on"),
-                                LINE_DEFAULT(FG_RED "the given date below"),
-                                LINE_DEFAULT("          ┌ Month ─┐          "),
-                                LINE_TEXT("          │ %s │          ", 2, 0, "1234567890\b", ""),
-                                LINE_DEFAULT("          └────────┘          "),
-                                LINE_DEFAULT("          ┌ Year ──┐          "),
-                                LINE_TEXT("          │ %s │          ", 4, 0, "1234567890\b", ""),
-                                LINE_DEFAULT("          └────────┘          "),
-                                LINE_DEFAULT(" "),
-                                LINE_DIALOGUE(FG_RED "Delete", DIALOG_YES),
-                                LINE_DIALOGUE("Discard", DIALOG_DISCARD)}};
+            if (delMultiChoice.dialogueValue == DIALOG_DELETEGIVENDATE) {
+                char monthField[LINE_LENGTH] = "";
+                char yearField[LINE_LENGTH] = "";
 
-                PromptInputs delDateResults = display_box_prompt(&deleteGivenDate, 3);
+                while (1) {
+                    BoxContent deleteGivenDate = {
+                        .title = FG_RED "Delete Account",
+                        .content = {LINE_DEFAULT(FG_RED "Delete all accounts created on"),
+                                    LINE_DEFAULT(FG_RED "the given date below"),
+                                    LINE_DEFAULT("          ┌ Month ─┐          "),
+                                    LINE_TEXT("          │ %s │          ", 2, 0, "1234567890\b", monthField),
+                                    LINE_DEFAULT("          └────────┘          "),
+                                    LINE_DEFAULT("          ┌ Year ──┐          "),
+                                    LINE_TEXT("          │ %s │          ", 4, 0, "1234567890\b", yearField),
+                                    LINE_DEFAULT("          └────────┘          "),
+                                    LINE_DEFAULT(" "),
+                                    LINE_DIALOGUE(FG_RED "Delete", DIALOG_YES),
+                                    LINE_DIALOGUE("Discard", DIALOG_DISCARD)}};
 
-                int month = atoi(delDateResults.textInputs[0]);
-                int year = atoi(delDateResults.textInputs[1]);
-                free_result(delDateResults);
+                    PromptInputs delDateResults = display_box_prompt(&deleteGivenDate, 3);
 
-                if (delDateResults.dialogueValue == DIALOG_DISCARD) {
-                    free_result(results);
-                    return ACC_DELETE;
-                }
+                    strcpy(monthField, delDateResults.textInputs[0]);
+                    strcpy(yearField, delDateResults.textInputs[1]);
 
-                if (month > 12) {
-                    Status status = {
-                        .status = ERROR,
-                        .message = "Invalid month inputted. make sure that month is less 12."};
+                    int month = atoi(delDateResults.textInputs[0]);
+                    int year = atoi(delDateResults.textInputs[1]);
+                    free_result(delDateResults);
+
+                    if (delDateResults.dialogueValue == DIALOG_DISCARD) {
+                        return ACC_DELETE;
+                    }
+
+                    if (strlen(monthField) == 0 || 
+                        strlen(yearField) == 0) {
+                        Status status = {
+                            .status = ERROR,
+                            .message = "You should fill out all the input fields"};
+                        print_status(status);
+
+                        continue;
+
+                    }
+
+                    if (month > 12) {
+                        Status status = {
+                            .status = ERROR,
+                            .message = "Invalid month inputted. make sure that month is less 12."};
+                        print_status(status);
+                        continue;
+                    }
+                    Date date = {
+                        date.month = month,
+                        date.year = year};
+                        
+                    int confirmResults = print_confirm("Confirm Delete", "Are you sure you want to proceed in the deletion");
+                    
+                    if (confirmResults == 0) {
+                        continue;
+                    }
+
+                    Status status = delete_multiple(MONTH, date);
+                    save();
+                    
                     print_status(status);
+
+                    if (status.status == SUCCESS) return COMMANDS;
+                }
+            } else if (delMultiChoice.dialogueValue == DIALOG_LESSTHAN3MONTH) {
+                Date date;
+
+                int confirmResults = print_confirm("Confirm Delete", "Are you sure you want to proceed in the deletion");
+                
+                if (confirmResults == 0) {
                     continue;
                 }
-                Date date = {
-                    date.month = month,
-                    date.year = year};
-                Status status = delete_multiple(MONTH, date);
 
-                print_status(status);
-
-                if (status.status == SUCCESS) break;
+                Status deleteStatus = delete_multiple(INACTIVITY, date);
+                save();
+                
+                print_status(deleteStatus);
+                return COMMANDS;
             }
-        } else if (delMultiChoice.dialogueValue == DIALOG_LESSTHAN3MONTH) {
-            Date date;
-            Status deleteStatus = delete_multiple(INACTIVITY, date);
-            print_status(deleteStatus);
-            return COMMANDS;
         }
     }
 
-    free_result(results);
     return COMMANDS;
 }
 
@@ -726,63 +797,90 @@ static MenuIndex acc_search_func() {
         DIALOG_BACK,
     };
 
-    BoxContent searchPage = {
-        .title = "Search Account",
-        .content = {
-            LINE_DEFAULT("┌ Account Number ────────────┐"),
-            LINE_TEXT("│ %s │", 10, 0, "1234567890\b", ""),
-            LINE_DEFAULT("└────────────────────────────┘"),
-            LINE_DEFAULT(" "),
-            LINE_DIALOGUE("Find", DIALOG_FIND),
-            LINE_DIALOGUE("Discard", DIALOG_DISCARD),
-        }};
-    PromptInputs searchChoice = display_box_prompt(&searchPage, 0);
+    char accNum[LINE_LENGTH] = "";
 
-    if (searchChoice.dialogueValue == DIALOG_DISCARD) {
+    while (1) {
+        BoxContent searchPage = {
+            .title = "Search Account",
+            .content = {
+                LINE_DEFAULT("┌ Account Number ────────────┐"),
+                LINE_TEXT("│ %s │", 10, 0, "1234567890\b", accNum),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT(" "),
+                LINE_DIALOGUE("Find", DIALOG_FIND),
+                LINE_DIALOGUE("Discard", DIALOG_DISCARD),
+            }};
+        PromptInputs searchChoice = display_box_prompt(&searchPage, 0);
+    
+        if (searchChoice.dialogueValue == DIALOG_DISCARD) {
+            free_result(searchChoice);
+            return COMMANDS;
+        }
+        
+        strcpy(accNum ,searchChoice.textInputs[0]);
+        
+        if (strlen(searchChoice.textInputs[0]) == 0) {
+            Status status = {
+                .status = ERROR,
+                .message = "You should fill out all the input fields"};
+            print_status(status);
+
+            continue;
+        }
+
+        if (strlen(searchChoice.textInputs[0]) != 10) {
+            Status status = {
+                .status = ERROR,
+                .message = "Account Number is not 10 characters"};
+            print_status(status);
+
+            continue;
+        }
+        
+        AccountResult searchResult = query(searchChoice.textInputs[0]);
+        if (searchResult.status.status == ERROR) {
+            Status error = searchResult.status;
+            free_result(searchChoice);
+            print_status(error);
+           continue;
+        }
+    
         free_result(searchChoice);
-        return COMMANDS;
+    
+        Account foundAccount = searchResult.accounts[0];
+        char account1[LINE_LENGTH],
+            name1[LINE_LENGTH],
+            email1[LINE_LENGTH],
+            balance1[LINE_LENGTH],
+            mobile1[LINE_LENGTH],
+            date1[LINE_LENGTH],
+            status1[LINE_LENGTH];
+    
+        sprintf(account1, FG_CYAN "Account #:   " FG_RESET "%s", foundAccount.id);
+        sprintf(name1, FG_CYAN "Name:       " FG_RESET " %s", foundAccount.name);
+        sprintf(email1, FG_CYAN "E-mail:      " FG_RESET "%s", foundAccount.email);
+        sprintf(balance1, FG_CYAN "Balance:     " FG_RESET "%.2f", foundAccount.balance);
+        sprintf(mobile1, FG_CYAN "Mobile:      " FG_RESET "%s", foundAccount.mobile);
+        sprintf(date1, FG_CYAN "Date Opened: " FG_RESET "%d-%d", foundAccount.date.month, foundAccount.date.year);
+        sprintf(status1, FG_CYAN "Status:      " FG_RESET "%s", foundAccount.status ? "active" : "inactive");
+        BoxContent accountDetails = {
+            .title = "Search Account",
+            .content = {
+                LINE_DEFAULT(" "),
+                LINE_DEFAULT(account1),
+                LINE_DEFAULT(name1),
+                LINE_DEFAULT(email1),
+                LINE_DEFAULT(balance1),
+                LINE_DEFAULT(mobile1),
+                LINE_DEFAULT(date1),
+                LINE_DEFAULT(status1),
+                LINE_DEFAULT(" "),
+                LINE_DIALOGUE("Back", DIALOG_BACK)}};
+        display_box_prompt(&accountDetails, 0);
+
+        continue;
     }
 
-    char *id = searchChoice.textInputs[0];
-    AccountResult searchResult = query(id);
-    if (searchResult.status.status == ERROR) {
-        Status error = searchResult.status;
-        free_result(searchChoice);
-        print_status(error);
-        return ACC_SEARCH;
-    }
-
-    Account foundAccount = searchResult.accounts[0];
-    char account1[LINE_LENGTH],
-        name1[LINE_LENGTH],
-        email1[LINE_LENGTH],
-        balance1[LINE_LENGTH],
-        mobile1[LINE_LENGTH],
-        date1[LINE_LENGTH],
-        status1[LINE_LENGTH];
-
-    sprintf(account1, FG_CYAN "Account #:   " FG_RESET "%s", foundAccount.id);
-    sprintf(name1, FG_CYAN "Name:       " FG_RESET " %s", foundAccount.name);
-    sprintf(email1, FG_CYAN "E-mail:      " FG_RESET "%s", foundAccount.email);
-    sprintf(balance1, FG_CYAN "Balance:     " FG_RESET "%.2f", foundAccount.balance);
-    sprintf(mobile1, FG_CYAN "Mobile:      " FG_RESET "%s", foundAccount.mobile);
-    sprintf(date1, FG_CYAN "Date Opened: " FG_RESET "%d-%d", foundAccount.date.month, foundAccount.date.year);
-    sprintf(status1, FG_CYAN "Status:      " FG_RESET "%s", foundAccount.status ? "active" : "inactive");
-    BoxContent accountDetails = {
-        .title = "Search Account",
-        .content = {
-            LINE_DEFAULT(account1),
-            LINE_DEFAULT(name1),
-            LINE_DEFAULT(email1),
-            LINE_DEFAULT(balance1),
-            LINE_DEFAULT(mobile1),
-            LINE_DEFAULT(date1),
-            LINE_DEFAULT(status1),
-            LINE_DEFAULT(" "),
-            LINE_DIALOGUE("Back", DIALOG_BACK)}};
-    display_box_prompt(&accountDetails, 0);
-
-    free_result(searchChoice);
     return ACC_SEARCH;
 }
 
