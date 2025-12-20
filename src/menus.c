@@ -46,7 +46,7 @@ static void free_result(PromptInputs results) {
     results.textInputs = NULL;
 }
 
-static void remove_all_chars(char *str, char c) {
+static void remove_all_chars(char* str, char c) {
     char *pRead = str, *pWrite = str;
     while (*pRead) {
         *pWrite = *pRead++;
@@ -57,7 +57,7 @@ static void remove_all_chars(char *str, char c) {
 
 static void print_status(Status status) {
     int lineCount;
-    Line *statusMsgLines = MULTI_LINE_DEFAULT(status.message, (status.status == ERROR ? FG_RED : (status.status == WARNING ? FG_YELLOW : FG_GREEN)), 30, &lineCount);
+    Line* statusMsgLines = MULTI_LINE_DEFAULT(status.message, (status.status == ERROR ? FG_RED : (status.status == WARNING ? FG_YELLOW : FG_GREEN)), 30, &lineCount);
 
     BoxContent statusPage = {0};
     strcpy(statusPage.title, (status.status == ERROR ? FG_RED "ERROR" : (status.status == WARNING ? FG_YELLOW "WARNING" : FG_GREEN "SUCCESS")));
@@ -74,7 +74,7 @@ static void print_status(Status status) {
 
 static int print_confirm(char title[], char message[]) {
     int lineCount;
-    Line *messageLines = MULTI_LINE_DEFAULT(message, "", 30, &lineCount);
+    Line* messageLines = MULTI_LINE_DEFAULT(message, "", 30, &lineCount);
 
     BoxContent confirmPage = {0};
     strcpy(confirmPage.title, title);
@@ -305,7 +305,7 @@ static MenuIndex acc_new_func() {
         }
 
         // Check if there are only 1 decimal point
-        const char *token = results.textInputs[3];
+        const char* token = results.textInputs[3];
         int decimalCount = 0;
         while ((token = strstr(token, ".")) != NULL)
             decimalCount++, token++;
@@ -422,9 +422,9 @@ static MenuIndex acc_delete_func() {
                             LINE_DEFAULT(" "),
                             LINE_DIALOGUE(FG_RED "Delete", DIALOG_YES),
                             LINE_DIALOGUE("Discard", DIALOG_NO)}};
-    
+
             PromptInputs delOneResults = display_box_prompt(&deleteOnePage, 2);
-    
+
             if (delOneResults.dialogueValue == DIALOG_NO) {
                 free_result(delOneResults);
                 return ACC_DELETE;
@@ -454,10 +454,10 @@ static MenuIndex acc_delete_func() {
                 continue;
             }
 
-            char *toDel = delOneResults.textInputs[0];
-            
+            char* toDel = delOneResults.textInputs[0];
+
             int confirmResults = print_confirm("Confirm Delete", "Are you sure you want to proceed in the deletion");
-            
+
             if (confirmResults == 0) {
                 continue;
             }
@@ -522,7 +522,7 @@ static MenuIndex acc_delete_func() {
                         return ACC_DELETE;
                     }
 
-                    if (strlen(monthField) == 0 || 
+                    if (strlen(monthField) == 0 ||
                         strlen(yearField) == 0) {
                         Status status = {
                             .status = ERROR,
@@ -530,7 +530,6 @@ static MenuIndex acc_delete_func() {
                         print_status(status);
 
                         continue;
-
                     }
 
                     if (month > 12) {
@@ -543,16 +542,16 @@ static MenuIndex acc_delete_func() {
                     Date date = {
                         date.month = month,
                         date.year = year};
-                        
+
                     int confirmResults = print_confirm("Confirm Delete", "Are you sure you want to proceed in the deletion");
-                    
+
                     if (confirmResults == 0) {
                         continue;
                     }
 
                     Status status = delete_multiple(MONTH, date);
                     save();
-                    
+
                     print_status(status);
 
                     if (status.status == SUCCESS) return COMMANDS;
@@ -561,14 +560,14 @@ static MenuIndex acc_delete_func() {
                 Date date;
 
                 int confirmResults = print_confirm("Confirm Delete", "Are you sure you want to proceed in the deletion");
-                
+
                 if (confirmResults == 0) {
                     continue;
                 }
 
                 Status deleteStatus = delete_multiple(INACTIVITY, date);
                 save();
-                
+
                 print_status(deleteStatus);
                 return COMMANDS;
             }
@@ -608,7 +607,7 @@ static MenuIndex acc_status_func() {
             free_result(statusResult);
             return COMMANDS;
         }
-        
+
         strcpy(accNum, statusResult.textInputs[0]);
 
         if (strlen(statusResult.textInputs[0]) == 0) {
@@ -628,7 +627,7 @@ static MenuIndex acc_status_func() {
 
             continue;
         }
-        
+
         free_result(statusResult);
 
         AccountResult accountResult = query(accNum);
@@ -637,7 +636,7 @@ static MenuIndex acc_status_func() {
 
             while (1) {
                 BoxContent changeStatusPage = {
-    
+
                     .title = "Account Status",
                     .content = {
                         LINE_DEFAULT(FG_CYAN "Account is currently active   " FG_RESET),
@@ -654,7 +653,7 @@ static MenuIndex acc_status_func() {
                 // return RETURN; uncomment those and observe the status of the user to see the bug
                 sprintf(changeStatusPage.content[0].text, FG_CYAN "Account is currently %sactive" FG_RESET, (selectedOption == 0 ? "in" : ""));
                 PromptInputs results = display_box_prompt(&changeStatusPage, (int)!selectedOption);  // !not just adjusts index
-                
+
                 while (results.dialogueValue != DIALOG_CHANGE && results.dialogueValue != DIALOG_DISCARD) {
                     selectedOption = results.dialogueValue;
                     changeStatusPage.content[3] = LINE_DIALOGUE((selectedOption == DIALOG_ACTIVE ? "│ %s(x) Active%s                 │" : "│ %s( ) Active%s                 │"), DIALOG_ACTIVE);
@@ -665,14 +664,14 @@ static MenuIndex acc_status_func() {
                 if (results.dialogueValue == DIALOG_DISCARD) {
                     break;
                 }
-    
+
                 if ((int)selectedOption != accountResult.accounts[0].status) {
                     int confirmResults = print_confirm("Confirm Status", "Are you sure you want to change status");
-    
+
                     if (confirmResults == 0) {
                         continue;
                     }
-    
+
                     Status changeStatus = change_status(accNum);
                     save();
 
@@ -719,7 +718,7 @@ static MenuIndex acc_modify_func() {
     PromptInputs results = display_box_prompt(&modifyPage, 0);
 
     // Checking if account exists
-    AccountResult accountResult = query(results.textInputs[0]); 
+    AccountResult accountResult = query(results.textInputs[0]);
 
     // Making a dummy account an initializing it with the query result
     Account account = accountResult.accounts[0];
@@ -739,17 +738,17 @@ static MenuIndex acc_modify_func() {
         BoxContent modifySubPage = {
             .title = "Modify Account",
             .content = {LINE_DEFAULT("┌ Name ──────────────────────┐"),
-                LINE_TEXT("│ %s │", 25, 0, "", account.name),
-                LINE_DEFAULT("└────────────────────────────┘"),
-                LINE_DEFAULT("┌ E-mail ────────────────────┐"),
-                LINE_TEXT("│ %s │", 25, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`@.\b ", account.email),
-                LINE_DEFAULT("└────────────────────────────┘"),
-                LINE_DEFAULT("┌ Mobile ────────────────────┐"),
-                LINE_TEXT("│ +20 %s │", 10, 0, "0123456789\b", account.mobile + 1),
-                LINE_DEFAULT("└────────────────────────────┘"),
-                LINE_DEFAULT(" "),
-                LINE_DIALOGUE("Modify", DIALOG_YES),
-                LINE_DIALOGUE("Back", DIALOG_DISCARD)}};
+                        LINE_TEXT("│ %s │", 25, 0, "", account.name),
+                        LINE_DEFAULT("└────────────────────────────┘"),
+                        LINE_DEFAULT("┌ E-mail ────────────────────┐"),
+                        LINE_TEXT("│ %s │", 25, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`@.\b ", account.email),
+                        LINE_DEFAULT("└────────────────────────────┘"),
+                        LINE_DEFAULT("┌ Mobile ────────────────────┐"),
+                        LINE_TEXT("│ +20 %s │", 10, 0, "0123456789\b", account.mobile + 1),
+                        LINE_DEFAULT("└────────────────────────────┘"),
+                        LINE_DEFAULT(" "),
+                        LINE_DIALOGUE("Modify", DIALOG_YES),
+                        LINE_DIALOGUE("Back", DIALOG_DISCARD)}};
 
         PromptInputs results = display_box_prompt(&modifySubPage, 0);
 
@@ -820,7 +819,7 @@ static MenuIndex acc_modify_func() {
         }
 
         save();
-        print_status(status); 
+        print_status(status);
 
         break;
     }
@@ -850,14 +849,14 @@ static MenuIndex acc_search_func() {
                 LINE_DIALOGUE("Discard", DIALOG_DISCARD),
             }};
         PromptInputs searchChoice = display_box_prompt(&searchPage, 0);
-    
+
         if (searchChoice.dialogueValue == DIALOG_DISCARD) {
             free_result(searchChoice);
             return COMMANDS;
         }
-        
-        strcpy(accNum ,searchChoice.textInputs[0]);
-        
+
+        strcpy(accNum, searchChoice.textInputs[0]);
+
         if (strlen(searchChoice.textInputs[0]) == 0) {
             Status status = {
                 .status = ERROR,
@@ -875,17 +874,17 @@ static MenuIndex acc_search_func() {
 
             continue;
         }
-        
+
         AccountResult searchResult = query(searchChoice.textInputs[0]);
         if (searchResult.status.status == ERROR) {
             Status error = searchResult.status;
             free_result(searchChoice);
             print_status(error);
-           continue;
+            continue;
         }
-    
+
         free_result(searchChoice);
-    
+
         Account foundAccount = searchResult.accounts[0];
         char account1[LINE_LENGTH],
             name1[LINE_LENGTH],
@@ -894,7 +893,7 @@ static MenuIndex acc_search_func() {
             mobile1[LINE_LENGTH],
             date1[LINE_LENGTH],
             status1[LINE_LENGTH];
-    
+
         sprintf(account1, FG_CYAN "Account #:   " FG_RESET "%s", foundAccount.id);
         sprintf(name1, FG_CYAN "Name:       " FG_RESET " %s", foundAccount.name);
         sprintf(email1, FG_CYAN "E-mail:      " FG_RESET "%s", foundAccount.email);
@@ -923,31 +922,30 @@ static MenuIndex acc_search_func() {
     return ACC_SEARCH;
 }
 
-static MenuIndex acc_advancesearch_status(){
-    enum DialogOptions
-    {
+static MenuIndex acc_advancesearch_status() {
+    enum DialogOptions {
         DIALOG_FIND,
         DIALOG_DISCARD,
         DIALOG_BACK,
         DIALOG_UP,
         DIALOG_DOWN,
     };
-    
+
     char keywordText[LINE_LENGTH] = "";
 
     while (1) {
-    BoxContent searchPage = {
-        .title = "Search Accounts",
-        .content = {
-            LINE_DEFAULT("┌ Keyword ───────────────────┐"),
-            LINE_TEXT("│ %s │", 25, 0, "", keywordText),
-            LINE_DEFAULT("└────────────────────────────┘"),
-            LINE_DEFAULT(" "),
-            LINE_DIALOGUE("Find", DIALOG_FIND),
-            LINE_DIALOGUE("Discard", DIALOG_DISCARD),
-        }};
-        PromptInputs searchForName = display_box_prompt(&searchPage,0);
-        if(searchForName.dialogueValue == DIALOG_DISCARD){
+        BoxContent searchPage = {
+            .title = "Search Accounts",
+            .content = {
+                LINE_DEFAULT("┌ Keyword ───────────────────┐"),
+                LINE_TEXT("│ %s │", 25, 0, "", keywordText),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT(" "),
+                LINE_DIALOGUE("Find", DIALOG_FIND),
+                LINE_DIALOGUE("Discard", DIALOG_DISCARD),
+            }};
+        PromptInputs searchForName = display_box_prompt(&searchPage, 0);
+        if (searchForName.dialogueValue == DIALOG_DISCARD) {
             free_result(searchForName);
             return COMMANDS;
         }
@@ -965,11 +963,10 @@ static MenuIndex acc_advancesearch_status(){
 
         char* name = searchForName.textInputs[0];
         AccountResult searchResult = advanced_search(name);
-        if(searchResult.status.status == ERROR){
+        if (searchResult.status.status == ERROR) {
             print_status(searchResult.status);
             continue;
-        }
-        else{
+        } else {
             int currIndex = 0;
             int lastScroll = 0;
             PromptInputs advancedSearchResults = {.dialogueValue = -1};
@@ -988,8 +985,8 @@ static MenuIndex acc_advancesearch_status(){
                 mobile2[LINE_LENGTH],
                 date2[LINE_LENGTH],
                 status2[LINE_LENGTH];
-            while(advancedSearchResults.dialogueValue != DIALOG_BACK){
-                Account *acc1 = &searchResult.accounts[currIndex];
+            while (advancedSearchResults.dialogueValue != DIALOG_BACK) {
+                Account* acc1 = &searchResult.accounts[currIndex];
                 sprintf(account1, FG_CYAN "Account #:   " FG_RESET "%s", acc1->id);
                 sprintf(name1, FG_CYAN "Name:       " FG_RESET " %s", acc1->name);
                 sprintf(email1, FG_CYAN "E-mail:      " FG_RESET "%s", acc1->email);
@@ -998,9 +995,8 @@ static MenuIndex acc_advancesearch_status(){
                 sprintf(date1, FG_CYAN "Date Opened: " FG_RESET "%d-%d", acc1->date.month, acc1->date.year);
                 sprintf(status1, FG_CYAN "Status:      " FG_RESET "%s", acc1->status ? "active" : "inactive");
                 _Bool isSecond = currIndex + 1 < searchResult.n;
-                if (isSecond)
-                {
-                    Account *acc2 = &searchResult.accounts[currIndex + 1];
+                if (isSecond) {
+                    Account* acc2 = &searchResult.accounts[currIndex + 1];
                     sprintf(account2, FG_CYAN "Account #:   " FG_RESET "%s", acc2->id);
                     sprintf(name2, FG_CYAN "Name:       " FG_RESET " %s", acc2->name);
                     sprintf(email2, FG_CYAN "E-mail:      " FG_RESET "%s", acc2->email);
@@ -1033,13 +1029,10 @@ static MenuIndex acc_advancesearch_status(){
                         LINE_DIALOGUE("Back", DIALOG_BACK)}};
 
                 advancedSearchResults = display_box_prompt(&advancedSearchResultsPage, lastScroll);
-                if (advancedSearchResults.dialogueValue == DIALOG_UP)
-                {
+                if (advancedSearchResults.dialogueValue == DIALOG_UP) {
                     currIndex = (currIndex - 2 >= 0) ? currIndex - 2 : 0;
                     lastScroll = 0;
-                }
-                else if (advancedSearchResults.dialogueValue == DIALOG_DOWN)
-                {
+                } else if (advancedSearchResults.dialogueValue == DIALOG_DOWN) {
                     currIndex = (currIndex + 2 < searchResult.n) ? currIndex + 2 : searchResult.n - 1;
                     lastScroll = 1;
                 }
@@ -1048,11 +1041,11 @@ static MenuIndex acc_advancesearch_status(){
             continue;
         }
     }
-    
+
     return COMMANDS;
 }
 
-static MenuIndex acc_withdraw() {
+static MenuIndex trans_withdraw_func() {
     enum DialogOptions {
         DIALOG_FIND,
         DIALOG_DISCARD,
@@ -1060,7 +1053,7 @@ static MenuIndex acc_withdraw() {
         DIALOG_BACK,
     };
 
-    char accNum[LINE_LENGTH] = "",withAmount[LINE_LENGTH] = "";
+    char accNum[LINE_LENGTH] = "", withAmount[LINE_LENGTH] = "";
 
     while (1) {
         BoxContent withdrawAccountPage = {
@@ -1074,14 +1067,14 @@ static MenuIndex acc_withdraw() {
                 LINE_DIALOGUE("Back", DIALOG_BACK),
             }};
         PromptInputs withdrawChoice = display_box_prompt(&withdrawAccountPage, 0);
-    
+
         if (withdrawChoice.dialogueValue == DIALOG_BACK) {
             free_result(withdrawChoice);
             return COMMANDS;
         }
-        
-        strcpy(accNum ,withdrawChoice.textInputs[0]);
-        
+
+        strcpy(accNum, withdrawChoice.textInputs[0]);
+
         if (strlen(withdrawChoice.textInputs[0]) == 0) {
             Status status = {
                 .status = ERROR,
@@ -1099,41 +1092,41 @@ static MenuIndex acc_withdraw() {
 
             continue;
         }
-        
+
         AccountResult searchResult = query(withdrawChoice.textInputs[0]);
         if (searchResult.status.status == ERROR) {
             Status error = searchResult.status;
             free_result(withdrawChoice);
             print_status(error);
-           continue;
+            continue;
         }
-    
+
         free_result(withdrawChoice);
         double amountNum = 0;
-    
-        while(1){
+
+        while (1) {
             sprintf(withAmount, "%.2f", amountNum);
             BoxContent withdrawAmountPage = {
-            .title = "Withdraw",
-            .content = {
-                LINE_DEFAULT("┌ Withdraw Amount: ──────────┐"),
-                LINE_TEXT("│ %s ($) │", 20, 0, ".1234567890\b", withAmount),
-                LINE_DEFAULT("└────────────────────────────┘"),
-                LINE_DEFAULT("(Max $10,000 per transaction) "),
-                LINE_DEFAULT(" "),
-                LINE_DIALOGUE("Proceed", DIALOG_PROCEED),
-                LINE_DIALOGUE("Back", DIALOG_BACK),
-            }};
+                .title = "Withdraw",
+                .content = {
+                    LINE_DEFAULT("┌ Withdraw Amount: ──────────┐"),
+                    LINE_TEXT("│ %s ($) │", 20, 0, ".1234567890\b", withAmount),
+                    LINE_DEFAULT("└────────────────────────────┘"),
+                    LINE_DEFAULT("(Max $10,000 per transaction) "),
+                    LINE_DEFAULT(" "),
+                    LINE_DIALOGUE("Proceed", DIALOG_PROCEED),
+                    LINE_DIALOGUE("Back", DIALOG_BACK),
+                }};
 
-            PromptInputs amountResults=display_box_prompt(&withdrawAmountPage,0);
-            amountNum=strtod(amountResults.textInputs[0],NULL);
+            PromptInputs amountResults = display_box_prompt(&withdrawAmountPage, 0);
+            amountNum = strtod(amountResults.textInputs[0], NULL);
             if (amountResults.dialogueValue == DIALOG_BACK) {
                 break;
             }
             char temp[LINE_LENGTH];
-                // Check if 1st char in amount is a number
+            // Check if 1st char in amount is a number
             if (!(amountResults.textInputs[0][0] >= '0' &&
-                amountResults.textInputs[0][0] <= '9')) {
+                  amountResults.textInputs[0][0] <= '9')) {
                 Status status = {
                     .status = ERROR,
                     .message = "Amount should start with a number"};
@@ -1155,7 +1148,7 @@ static MenuIndex acc_withdraw() {
             }
 
             // Check if there are only 1 decimal point
-            const char *token = amountResults.textInputs[0];
+            const char* token = amountResults.textInputs[0];
             int decimalCount = 0;
             while ((token = strstr(token, ".")) != NULL)
                 decimalCount++, token++;
@@ -1185,10 +1178,9 @@ static MenuIndex acc_withdraw() {
                 }
             }
 
-
             // Sending data to withdraw()
-            Status status = withdraw(accNum,amountNum);
-            if(status.status == ERROR){
+            Status status = withdraw(accNum, amountNum);
+            if (status.status == ERROR) {
                 print_status(status);
                 load();
                 free_result(amountResults);
@@ -1203,12 +1195,11 @@ static MenuIndex acc_withdraw() {
                 continue;
             }
             save();
-            save_transaction(accNum,amountNum,WITHDRAW,"");
+            save_transaction(accNum, amountNum, WITHDRAW, "");
             print_status(status);
             free_result(amountResults);
             return COMMANDS;
         }
-        
     }
 
     return COMMANDS;
@@ -1282,7 +1273,7 @@ static MenuIndex other_print_func() {
         status2[LINE_LENGTH];
 
     while (reportResults.dialogueValue != DIALOG_BACK) {
-        Account *acc1 = &accountResult.accounts[currIndex];
+        Account* acc1 = &accountResult.accounts[currIndex];
         sprintf(account1, FG_CYAN "Account #:   " FG_RESET "%s", acc1->id);
         sprintf(name1, FG_CYAN "Name:       " FG_RESET " %s", acc1->name);
         sprintf(email1, FG_CYAN "E-mail:      " FG_RESET "%s", acc1->email);
@@ -1292,7 +1283,7 @@ static MenuIndex other_print_func() {
         sprintf(status1, FG_CYAN "Status:      " FG_RESET "%s", acc1->status ? "active" : "inactive");
         _Bool isSecond = currIndex + 1 < accountResult.n;
         if (isSecond) {
-            Account *acc2 = &accountResult.accounts[currIndex + 1];
+            Account* acc2 = &accountResult.accounts[currIndex + 1];
             sprintf(account2, FG_CYAN "Account #:   " FG_RESET "%s", acc2->id);
             sprintf(name2, FG_CYAN "Name:       " FG_RESET " %s", acc2->name);
             sprintf(email2, FG_CYAN "E-mail:      " FG_RESET "%s", acc2->email);
@@ -1339,8 +1330,7 @@ static MenuIndex other_print_func() {
 
 // -
 
-void mainloop()
-{
+void mainloop() {
     // Put functions in the menuFunctions Array
     menuFunctions[ENTRY] = entry_func;
     menuFunctions[LOGIN] = login_func;
@@ -1354,10 +1344,9 @@ void mainloop()
     menuFunctions[ACC_SEARCH] = acc_search_func;
     menuFunctions[ACC_ADVANCESEARCH] = acc_advancesearch_status;
     menuFunctions[ACC_STATUS] = acc_status_func;
-    menuFunctions[TRANS_WITHDRAW] = acc_withdraw;
 
     // Transactions
-    // menuFunctions[TRANS_WITHDRAW] = trans_withdraw_func;
+    menuFunctions[TRANS_WITHDRAW] = trans_withdraw_func;
     // menuFunctions[TRANS_DEPOSIT] = trans_deposit_func;
     // menuFunctions[TRANS_TRANSFER] = trans_transfer_func;
 
