@@ -1052,6 +1052,168 @@ static MenuIndex acc_advancesearch_status(){
     return COMMANDS;
 }
 
+static MenuIndex acc_withdraw() {
+    enum DialogOptions {
+        DIALOG_FIND,
+        DIALOG_DISCARD,
+        DIALOG_PROCEED,
+        DIALOG_BACK,
+    };
+
+    char accNum[LINE_LENGTH] = "",withAmount[LINE_LENGTH] = "";
+
+    while (1) {
+        BoxContent withdrawAccountPage = {
+            .title = "Withdraw",
+            .content = {
+                LINE_DEFAULT("┌ Account Number: ───────────┐"),
+                LINE_TEXT("│ %s │", 10, 0, "1234567890\b", accNum),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT(" "),
+                LINE_DIALOGUE("Find", DIALOG_FIND),
+                LINE_DIALOGUE("Back", DIALOG_BACK),
+            }};
+        PromptInputs withdrawChoice = display_box_prompt(&withdrawAccountPage, 0);
+    
+        if (withdrawChoice.dialogueValue == DIALOG_BACK) {
+            free_result(withdrawChoice);
+            return COMMANDS;
+        }
+        
+        strcpy(accNum ,withdrawChoice.textInputs[0]);
+        
+        if (strlen(withdrawChoice.textInputs[0]) == 0) {
+            Status status = {
+                .status = ERROR,
+                .message = "You should fill out the input field"};
+            print_status(status);
+
+            continue;
+        }
+
+        if (strlen(withdrawChoice.textInputs[0]) != 10) {
+            Status status = {
+                .status = ERROR,
+                .message = "Account Number is not 10 characters"};
+            print_status(status);
+
+            continue;
+        }
+        
+        AccountResult searchResult = query(withdrawChoice.textInputs[0]);
+        if (searchResult.status.status == ERROR) {
+            Status error = searchResult.status;
+            free_result(withdrawChoice);
+            print_status(error);
+           continue;
+        }
+    
+        free_result(withdrawChoice);
+        double amountNum = 0;
+    
+        while(1){
+            sprintf(withAmount, "%.2f", amountNum);
+            BoxContent withdrawAmountPage = {
+            .title = "Withdraw",
+            .content = {
+                LINE_DEFAULT("┌ Withdraw Amount: ──────────┐"),
+                LINE_TEXT("│ %s ($) │", 20, 0, ".1234567890\b", withAmount),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT("(Max $10,000 per transaction) "),
+                LINE_DEFAULT(" "),
+                LINE_DIALOGUE("Proceed", DIALOG_PROCEED),
+                LINE_DIALOGUE("Back", DIALOG_BACK),
+            }};
+
+            PromptInputs amountResults=display_box_prompt(&withdrawAmountPage,0);
+            amountNum=strtod(amountResults.textInputs[0],NULL);
+            if (amountResults.dialogueValue == DIALOG_BACK) {
+                break;
+            }
+            char temp[LINE_LENGTH];
+                // Check if 1st char in amount is a number
+            if (!(amountResults.textInputs[0][0] >= '0' &&
+                amountResults.textInputs[0][0] <= '9')) {
+                Status status = {
+                    .status = ERROR,
+                    .message = "Amount should start with a number"};
+                print_status(status);
+
+                free_result(amountResults);
+                continue;
+            }
+
+            // Check if last char in amount is a number
+            if (amountResults.textInputs[0][strlen(amountResults.textInputs[0]) - 1] == '.') {
+                Status status = {
+                    .status = ERROR,
+                    .message = "Amount should end with a number"};
+                print_status(status);
+
+                free_result(amountResults);
+                continue;
+            }
+
+            // Check if there are only 1 decimal point
+            const char *token = amountResults.textInputs[0];
+            int decimalCount = 0;
+            while ((token = strstr(token, ".")) != NULL)
+                decimalCount++, token++;
+            if (decimalCount > 1) {
+                Status status = {
+                    .status = ERROR,
+                    .message = "Amount should only have 1 decimal point"};
+                print_status(status);
+
+                free_result(amountResults);
+                continue;
+            }
+
+            // Check if amount has only 2 decimal places
+            strcpy(temp, amountResults.textInputs[0]);
+            token = strtok(temp, ".");
+            token = strtok(NULL, ".");
+            if (token != NULL) {
+                if (strlen(token) > 2) {
+                    Status status = {
+                        .status = ERROR,
+                        .message = "The amount should only be max of 2 decimal places"};
+                    print_status(status);
+
+                    free_result(amountResults);
+                    continue;
+                }
+            }
+
+
+            // Sending data to withdraw()
+            Status status = withdraw(accNum,amountNum);
+            if(status.status == ERROR){
+                print_status(status);
+                load();
+                free_result(amountResults);
+                continue;
+            }
+            int confirmResults = print_confirm("Confirm Withdraw", "Are you sure you want to withdraw the given amount?");
+
+            if (confirmResults == 0) {
+                free_result(amountResults);
+                load();
+
+                continue;
+            }
+            save();
+            save_transaction(accNum,amountNum,WITHDRAW,"");
+            print_status(status);
+            free_result(amountResults);
+            return COMMANDS;
+        }
+        
+    }
+
+    return COMMANDS;
+}
+
 static MenuIndex other_print_func() {
     enum DialogOptions { DIALOG_NAME = NAME,
                          DIALOG_BALANCE = BALANCE,
@@ -1192,6 +1354,7 @@ void mainloop()
     menuFunctions[ACC_SEARCH] = acc_search_func;
     menuFunctions[ACC_ADVANCESEARCH] = acc_advancesearch_status;
     menuFunctions[ACC_STATUS] = acc_status_func;
+    menuFunctions[TRANS_WITHDRAW] = acc_withdraw;
 
     // Transactions
     // menuFunctions[TRANS_WITHDRAW] = trans_withdraw_func;
