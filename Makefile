@@ -16,3 +16,5 @@ src/%.o: src/%.c
 
 clean:
 	rm -f src/*.o $(TARGET)
+	rm -f files/*.txt files/accounts/*.txt
+	$(MAKE)
