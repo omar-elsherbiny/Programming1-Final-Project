@@ -506,6 +506,12 @@ ReportResult report(char *id) {
         }
         strcpy(transactions[i].accountId, ufaccountId);
         strcpy(transactions[i].type, uftype);
+        if(!strcmp(uftype,"Send")){
+            strcpy(transactions[i].type, "Transfer (Send)");
+        }
+        if(!strcmp(uftype,"Receive")){
+            strcpy(transactions[i].type, "Transfer (Receive)");
+        }
         transactions[i].amount = strtod(ufamount, NULL);
         transactions[i].date.day = atoi(strtok(ufdate, "-"));
         transactions[i].date.month = atoi(strtok(NULL, "-"));
