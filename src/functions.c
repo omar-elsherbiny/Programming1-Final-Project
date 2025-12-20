@@ -30,7 +30,8 @@ Status login(char *username, char *password) {
 }
 
 Account accounts[N];
-int accountCnt;
+int accountCnt,filesDeleteCnt;
+char filesDelete[N][N];
 
 Status load() {
     FILE *f = fopen("files/accounts.txt", "r");
@@ -43,6 +44,10 @@ Status load() {
     char line[7 * N], ufid[N], ufname[N], ufemail[N], ufbalance[N], ufmobile[N], ufdate[N], ufstatus[N];
     int i;
     accountCnt = 0;
+    for(i=0;i<filesDeleteCnt;i++){
+        strcpy(filesDelete[i],"");
+    }
+    filesDeleteCnt=0;
     for (i = 0; fgets(line, sizeof(line), f); i++) {  // copy file data into array
         // splitting the line
         strcpy(ufid, strtok(line, ","));
@@ -190,6 +195,12 @@ Status delete(char *id) {
     for (i = 0; i < accountCnt; i++) {
         if (!strcmp(id, accounts[i].id)) {
             found = 1;
+            char fileName[N];
+            strcpy(fileName, "files/accounts/");
+            strcat(fileName, id);
+            strcat(fileName, ".txt");
+            strcpy(filesDelete[filesDeleteCnt],fileName);
+            filesDeleteCnt++;
         }
     }
     if (!found) {
@@ -342,6 +353,11 @@ void save() {
         fprintf(f, "%s,%s,%s,%.2f,%s,%d-%d, %s\n", accounts[i].id, accounts[i].name, accounts[i].email, accounts[i].balance, accounts[i].mobile, accounts[i].date.month, accounts[i].date.year, (accounts[i].status ? "active" : "inactive"));
     }
     fclose(f);
+    for(i=0;i<filesDeleteCnt;i++){
+        remove(filesDelete[i]);
+        strcpy(filesDelete[i],"");
+    }
+    filesDeleteCnt=0;
 }
 
 Status deposit(char *id, double amount) {
@@ -528,7 +544,7 @@ ReportResult report(char *id) {
     transaction_merge_sort(transactions,0,i-1);
     for (i = 0; i<transCnt; i++) {
         DateDay now=transactions[i].date;
-        fprintf(accountFile,"%s,%s,%.2f,%d-%d-%d %d:%s%d:%s%d %s%s%s\n", id, transactions[i].type, transactions[i].amount, now.day, now.month, now.year,now.hour-(12*(now.hour>12))+12*(now.hour==0),(now.minute<10?"0":""),now.minute,(now.second<10?"0":""),now.second,(now.hour>11?"pm":"am"),((!strcmp(transactions[i].type,"Send")||!strcmp(transactions[i].type,"Receive"))?",":""),transactions[i].partyId);
+        fprintf(accountFile,"%s,%s,%.2f,%d-%d-%d %d:%s%d:%s%d %s%s%s\n", id, (!strcmp(transactions[i].type,"Transfer (Send)")?"Send":(!strcmp(transactions[i].type,"Transfer (Receive)")?"Receive":transactions[i].type)), transactions[i].amount, now.day, now.month, now.year,now.hour-(12*(now.hour>12))+12*(now.hour==0),(now.minute<10?"0":""),now.minute,(now.second<10?"0":""),now.second,(now.hour>11?"pm":"am"),((!strcmp(transactions[i].type,"Transfer (Send)")||!strcmp(transactions[i].type,"Transfer (Receive)"))?",":""),transactions[i].partyId);
         if (ret.n<5) {
             ret.transactions[ret.n] = transactions[transCnt-i-1];
             ret.n++;
@@ -579,6 +595,12 @@ Status delete_multiple(DeleteMethod method, Date date) {
         for (i = 0; i < accountCnt; i++) {
             if (accounts[i].date.month == date.month && accounts[i].date.year == date.year) {
                 found++;
+                char fileName[N];
+                strcpy(fileName, "files/accounts/");
+                strcat(fileName, accounts[i].id);
+                strcat(fileName, ".txt");
+                strcpy(filesDelete[filesDeleteCnt],fileName);
+                filesDeleteCnt++;
             } else {
                 temp[idx] = accounts[i];
                 idx++;
@@ -604,6 +626,12 @@ Status delete_multiple(DeleteMethod method, Date date) {
     } else {
         for (i = 0; i < accountCnt; i++) {
             if (month_diff(get_month(), accounts[i].date) > 3 && accounts[i].balance == 0) {
+                char fileName[N];
+                strcpy(fileName, "files/accounts/");
+                strcat(fileName, accounts[i].id);
+                strcat(fileName, ".txt");
+                strcpy(filesDelete[filesDeleteCnt],fileName);
+                filesDeleteCnt++;
                 found++;
             } else {
                 temp[idx] = accounts[i];
