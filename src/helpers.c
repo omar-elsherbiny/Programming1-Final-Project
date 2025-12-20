@@ -129,7 +129,7 @@ double day_withdrawals(DateDay day, char *id) {
         cur.day = atoi(strtok(ufdaydate, "-"));
         cur.month = atoi(strtok(NULL, "-"));
         cur.year = atoi(strtok(NULL, "-"));
-        if (cur.day == day.day && cur.month == day.month && cur.year == day.year && !strcmp(uftype, "withdraw")) {
+        if (cur.day == day.day && cur.month == day.month && cur.year == day.year && !strcmp(uftype, "Withdraw")) {
             sm += strtod(ufamount, NULL);
         }
     }
