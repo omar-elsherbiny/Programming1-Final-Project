@@ -103,13 +103,13 @@ static MenuIndex login_func() {
 
     BoxContent loginPage = {
         .title = "Login",
-        .content = {LINE_DEFAULT("┌ "FG_CYAN "Username " FG_RESET "──────────────────┐"),
+        .content = {LINE_DEFAULT("┌ " FG_CYAN "Username " FG_RESET "──────────────────┐"),
                     LINE_TEXT("│ %s │", 25, 0, "", ""),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT("┌" FG_CYAN " Password " FG_RESET "──────────────────┐"),
                     LINE_TEXT("│ %s │", 50, 1, "", ""),
                     LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT(" "), 
+                    LINE_DEFAULT(" "),
                     LINE_DIALOGUE("Login", DIALOG_LOGIN),
                     LINE_DIALOGUE(FG_RED "Quit", DIALOG_QUIT)}};
 
@@ -210,7 +210,7 @@ static MenuIndex acc_new_func() {
 
         BoxContent addAccountPage = {
             .title = "Add Account",
-            .content = {LINE_DEFAULT("┌" FG_CYAN " Account Number "FG_RESET"────────────┐"),
+            .content = {LINE_DEFAULT("┌" FG_CYAN " Account Number " FG_RESET "────────────┐"),
                         LINE_TEXT("│ %s │", 10, 0, "0123456789\b", account.id),
                         LINE_DEFAULT("└────────────────────────────┘"),
                         LINE_DEFAULT("┌" FG_CYAN " Name " FG_RESET "──────────────────────┐"),
@@ -225,7 +225,7 @@ static MenuIndex acc_new_func() {
                         LINE_DEFAULT("┌" FG_CYAN " Mobile " FG_RESET "────────────────────┐"),
                         LINE_TEXT("│ + 20 %s │", 10, 0, "0123456789\b", account.mobile + 1),
                         LINE_DEFAULT("└────────────────────────────┘"),
-                        LINE_DEFAULT(" "), 
+                        LINE_DEFAULT(" "),
                         LINE_DIALOGUE(FG_CYAN "Add", DIALOG_ADD),
                         LINE_DIALOGUE("Discard", DIALOG_DISCARD)}};
 
@@ -502,10 +502,10 @@ static MenuIndex acc_delete_func() {
                         .content = {LINE_DEFAULT("Delete all accounts created on"),
                                     LINE_DEFAULT("the given date below"),
                                     LINE_DEFAULT(" "),
-                                    LINE_DEFAULT("          ┌" FG_RED " Month " FG_RESET"─┐          "),
+                                    LINE_DEFAULT("          ┌" FG_RED " Month " FG_RESET "─┐          "),
                                     LINE_TEXT("          │ %s │          ", 2, 0, "1234567890\b", monthField),
                                     LINE_DEFAULT("          └────────┘          "),
-                                    LINE_DEFAULT("          ┌" FG_RED " Year " FG_RESET"──┐          "),
+                                    LINE_DEFAULT("          ┌" FG_RED " Year " FG_RESET "──┐          "),
                                     LINE_TEXT("          │ %s │          ", 4, 0, "1234567890\b", yearField),
                                     LINE_DEFAULT("          └────────┘          "),
                                     LINE_DEFAULT(" "),
@@ -599,13 +599,13 @@ static MenuIndex acc_modify_func() {
                         LINE_DEFAULT(" "),
                         LINE_DIALOGUE(FG_CYAN "Find", DIALOG_PROCEED),
                         LINE_DIALOGUE("Back", DIALOG_DISCARD)}};
-    
+
         PromptInputs results = display_box_prompt(&modifyPage, 0);
-    
+
         strcpy(accNum, results.textInputs[0]);
         free_result(results);
 
-        if (results.dialogueValue == DIALOG_DISCARD)  {
+        if (results.dialogueValue == DIALOG_DISCARD) {
             return COMMANDS;
         }
 
@@ -615,35 +615,35 @@ static MenuIndex acc_modify_func() {
                 .status = ERROR,
                 .message = "You should fill out all the input fields"};
             print_status(status);
-    
+
             continue;
         }
-    
+
         // Acc number number 10 characters
         if (strlen(accNum) != 10) {
             Status status = {
                 .status = ERROR,
                 .message = "Account Number is not 10 characters"};
             print_status(status);
-    
+
             continue;
-        }    
-    
+        }
+
         // Checking if account exists
         AccountResult accountResult = query(accNum);
-    
+
         // Making a dummy account an initializing it with the query result
         Account account = accountResult.accounts[0];
-    
+
         if (results.dialogueValue == DIALOG_DISCARD) {
             return COMMANDS;
         }
-    
+
         if (accountResult.status.status == ERROR) {
             print_status(accountResult.status);
             continue;
         }
-    
+
         // Here we are looping over modify sub menu until it succeeded or user chose to go back
         while (1) {
             BoxContent modifySubPage = {
@@ -660,19 +660,19 @@ static MenuIndex acc_modify_func() {
                             LINE_DEFAULT(" "),
                             LINE_DIALOGUE(FG_CYAN "Modify", DIALOG_YES),
                             LINE_DIALOGUE("Back", DIALOG_DISCARD)}};
-    
+
             PromptInputs results = display_box_prompt(&modifySubPage, 0);
-    
+
             if (results.dialogueValue == DIALOG_DISCARD) {
                 free_result(results);
                 break;
             }
-    
+
             // Copying the input fields values of the account variable
             strcpy(account.name, results.textInputs[0]);
             strcpy(account.email, results.textInputs[1]);
             sprintf(account.mobile, "0%s", results.textInputs[2]);
-    
+
             // Check if any field is empty
             if ((strlen(results.textInputs[0]) == 0) ||
                 (strlen(results.textInputs[1]) == 0) ||
@@ -681,42 +681,41 @@ static MenuIndex acc_modify_func() {
                     .status = ERROR,
                     .message = "You should fill out all the input fields"};
                 print_status(status);
-    
+
                 free_result(results);
                 continue;
             }
-    
+
             // email validation
             if (!valid_email(results.textInputs[1])) {
                 Status status = {
                     .status = ERROR,
                     .message = "Email is not valid"};
                 print_status(status);
-    
+
                 free_result(results);
                 continue;
             }
-    
+
             // phone number must be 10 characters (excluding the "+ 20")
             if (strlen(results.textInputs[2]) != 10) {
                 Status status = {
                     .status = ERROR,
                     .message = "Phone Number is not valid"};
                 print_status(status);
-    
+
                 continue;
             }
 
             if (strcmp(account.name, accountResult.accounts[0].name) == 0 &&
                 strcmp(account.email, accountResult.accounts[0].email) == 0 &&
                 strcmp(account.mobile, accountResult.accounts[0].mobile) == 0) {
-                    Status status = {
-                        .status = WARNING,
-                        .message = "There is nothing changed to apply"};
-                    print_status(status);
+                Status status = {
+                    .status = WARNING,
+                    .message = "There is nothing changed to apply"};
+                print_status(status);
 
-                    continue;
-
+                continue;
             }
 
             // Sending data to apply modification to modify()
@@ -725,23 +724,23 @@ static MenuIndex acc_modify_func() {
                 print_status(status);
                 free_result(results);
                 load();
-    
+
                 continue;
             }
-    
+
             // Checking if for confirmation
             int confirmResults = print_confirm("Confirm Modify", "Are you sure you want to modify this account?");
-    
+
             if (confirmResults == 0) {
                 free_result(results);
                 load();
-    
+
                 continue;
             }
-    
+
             save();
             print_status(status);
-    
+
             return COMMANDS;
         }
     }
@@ -1469,48 +1468,45 @@ static MenuIndex other_report_func() {
         if (reportResult.status.status == ERROR) {
             print_status(reportResult.status);
             continue;
-        }   
+        }
         // Validated account has transactions
 
         char amount[5][LINE_LENGTH];
         char type[5][LINE_LENGTH];
         char party[5][LINE_LENGTH];
         char date[5][LINE_LENGTH];
-        
-        for (int i = 0; i < reportResult.n; i++) {
-            sprintf(amount[i],
-                (reportResult.transactions[i].amount >= 0 ? FG_GREEN "Amount: %.2f" : FG_RED "Amount: %.2f"),reportResult.transactions[i].amount);
-            sprintf(type[i], "Type:   %s" ,reportResult.transactions[i].type);
-            sprintf(party[i], (reportResult.transactions[i].type[10] == 'S') ? "To: %s" : "From: %s") ,reportResult.transactions[i].partyId);
-            sprintf(date[i], "Date:   %d/%d/%d %s:%02d:%02d %s" ,reportResult.transactions[i].date.day, 
-                                                    reportResult.transactions[i].date.month,
-                                                    reportResult.transactions[i].date.year,
-                                                    reportResult.transactions[i].date.hour-(12*(reportResult.transactions[i].date.hour>12))+12*(reportResult.transactions[i].date.hour==0),
-                                                    reportResult.transactions[i].date.minute,
-                                                    reportResult.transactions[i].date.second,
-                                                    reportResult.transactions[i].date.hour>11?"pm":"am");
 
-            
+        for (int i = 0; i < reportResult.n; i++) {
+            sprintf(amount[i], (reportResult.transactions[i].amount >= 0 ? FG_CYAN "Amount: " FG_GREEN "%.2f" FG_RESET : FG_CYAN "Amount: " FG_RED "%.2f" FG_RESET), reportResult.transactions[i].amount);
+            sprintf(type[i], FG_CYAN "Type:   " FG_RESET "%s", reportResult.transactions[i].type);
+            sprintf(party[i], (reportResult.transactions[i].type[10] == 'S' ? FG_CYAN "To:     " FG_RESET "%s" : FG_CYAN "From:   " FG_RESET "%s"), reportResult.transactions[i].partyId);
+            sprintf(date[i], FG_CYAN "Date:   " FG_RESET "%d/%d/%d %d:%02d:%02d %s", reportResult.transactions[i].date.day,
+                    reportResult.transactions[i].date.month,
+                    reportResult.transactions[i].date.year,
+                    reportResult.transactions[i].date.hour - (12 * (reportResult.transactions[i].date.hour > 12)) + 12 * (reportResult.transactions[i].date.hour == 0),
+                    reportResult.transactions[i].date.minute,
+                    reportResult.transactions[i].date.second,
+                    reportResult.transactions[i].date.hour > 11 ? "pm" : "am");
         }
 
-        BoxContent reportPage = { .title = "Report", .content = {LINE_DEFAULT(" ")}};
+        BoxContent reportPageEntries = {.title = "Report", .content = {LINE_DEFAULT(" ")}};
 
         int l = 0;
         for (int i = 0; i < reportResult.n; i++) {
-            reportPage.content[l++] = LINE_DEFAULT(amount[i]);
-            reportPage.content[l++] = LINE_DEFAULT(type[i]);
-            if (reportResult.transactions[i].partyId[0] != '\0') reportPage.content[l++] = LINE_DEFAULT(party[i]);
-            reportPage.content[l++] = LINE_DEFAULT(date[i]);
+            reportPageEntries.content[l++] = LINE_DEFAULT(amount[i]);
+            reportPageEntries.content[l++] = LINE_DEFAULT(type[i]);
+            if (reportResult.transactions[i].partyId[0] != '\0') reportPageEntries.content[l++] = LINE_DEFAULT(party[i]);
+            reportPageEntries.content[l++] = LINE_DEFAULT(date[i]);
+            reportPageEntries.content[l++] = LINE_DEFAULT(" ");
         }
-        
+        reportPageEntries.content[l++] = LINE_DIALOGUE("Back", DIALOG_BACK);
 
-        PromptInputs reportPageResult = display_box_prompt(&reportPage, 0);
+        display_box_prompt(&reportPageEntries, 0);
 
-        if (reportPageResult.dialogueValue == DIALOG_BACK) {
-            free_result(reportPageResult);
-            return COMMANDS;
-        }
+        return COMMANDS;
     }
+
+    return COMMANDS;
 }
 
 static MenuIndex other_print_func() {
@@ -1535,7 +1531,7 @@ static MenuIndex other_print_func() {
                     LINE_DIALOGUE("│ %s( ) Date Opened%s            │", DIALOG_DATE),
                     LINE_DIALOGUE("│ %s( ) Status%s                 │", DIALOG_STATUS),
                     LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT(" "), 
+                    LINE_DEFAULT(" "),
                     LINE_DIALOGUE(FG_CYAN "Print", DIALOG_PRINT),
                     LINE_DIALOGUE("Back", DIALOG_BACK)}};
 
