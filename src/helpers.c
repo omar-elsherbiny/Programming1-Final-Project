@@ -173,7 +173,7 @@ void transaction_merge_sort(Transaction transactions[], int l, int r) {
         }
         int p1 = 0, p2 = 0, idx = l;
         while (p1 < mid - l + 1 && p2 < r - mid) {
-            if (cmp_transactions(la[p1], ra[p2]) >= 0) {
+            if (cmp_transactions(la[p1], ra[p2]) <= 0) {
                 transactions[idx++] = la[p1++];
             } else {
                 transactions[idx++] = ra[p2++];

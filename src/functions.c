@@ -491,7 +491,7 @@ ReportResult report(char *id) {
         fclose(createAccountFile);
         accountFile = fopen(fileName, "r");
     }
-    char line[5 * N], ufaccountId[N], ufpartyId[N], uftype[N], ufamount[N], ufdate[N];
+    char line[5 * N], ufaccountId[N], ufpartyId[N], uftype[N], ufamount[N], ufdate[N], ufdur[N];
     Transaction transactions[N];
     int transCnt=0;
     for (i = 0; fgets(line, sizeof(line), accountFile); i++) {
@@ -509,7 +509,12 @@ ReportResult report(char *id) {
         transactions[i].amount = strtod(ufamount, NULL);
         transactions[i].date.day = atoi(strtok(ufdate, "-"));
         transactions[i].date.month = atoi(strtok(NULL, "-"));
-        transactions[i].date.year = atoi(strtok(NULL, "-"));
+        transactions[i].date.year = atoi(strtok(NULL, " "));
+        transactions[i].date.hour = atoi(strtok(NULL, ":"));
+        transactions[i].date.minute = atoi(strtok(NULL, ":"));
+        transactions[i].date.second = atoi(strtok(NULL, " "));
+        strcpy(ufdur, strtok(NULL, " "));
+        transactions[i].date.hour += -12*((!strcmp(ufdur,"am")&&transactions[i].date.hour==12))+12*((!strcmp(ufdur,"pm")&&transactions[i].date.hour<12));
         transCnt++;
     }
     fclose(accountFile);
@@ -518,8 +523,8 @@ ReportResult report(char *id) {
     for (i = 0; i<transCnt; i++) {
         DateDay now=transactions[i].date;
         fprintf(accountFile,"%s,%s,%.2f,%d-%d-%d %d:%s%d:%s%d %s%s%s\n", id, transactions[i].type, transactions[i].amount, now.day, now.month, now.year,now.hour-(12*(now.hour>12))+12*(now.hour==0),(now.minute<10?"0":""),now.minute,(now.second<10?"0":""),now.second,(now.hour>11?"pm":"am"),((!strcmp(transactions[i].type,"Send")||!strcmp(transactions[i].type,"Receive"))?",":""),transactions[i].partyId);
-        if (ret.n < 5) {
-            ret.transactions[ret.n] = transactions[i];
+        if (ret.n<5) {
+            ret.transactions[ret.n] = transactions[transCnt-i-1];
             ret.n++;
         }
     }
