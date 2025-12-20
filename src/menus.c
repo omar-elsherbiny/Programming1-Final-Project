@@ -84,7 +84,7 @@ static int print_confirm(char title[], char message[]) {
     }
 
     confirmPage.content[lineCount] = LINE_DEFAULT(" ");
-    confirmPage.content[lineCount + 1] = LINE_DIALOGUE("Yes", 1);
+    confirmPage.content[lineCount + 1] = LINE_DIALOGUE(FG_CYAN "Yes", 1);
     confirmPage.content[lineCount + 2] = LINE_DIALOGUE("No", 0);
     free(messageLines);
 
@@ -103,13 +103,14 @@ static MenuIndex login_func() {
 
     BoxContent loginPage = {
         .title = "Login",
-        .content = {LINE_DEFAULT("┌ Username ──────────────────┐"),
+        .content = {LINE_DEFAULT("┌ "FG_CYAN "Username " FG_RESET "──────────────────┐"),
                     LINE_TEXT("│ %s │", 25, 0, "", ""),
                     LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT("┌ Password ──────────────────┐"),
+                    LINE_DEFAULT("┌" FG_CYAN " Password " FG_RESET "──────────────────┐"),
                     LINE_TEXT("│ %s │", 50, 1, "", ""),
                     LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT(" "), LINE_DIALOGUE("Login", DIALOG_LOGIN),
+                    LINE_DEFAULT(" "), 
+                    LINE_DIALOGUE("Login", DIALOG_LOGIN),
                     LINE_DIALOGUE(FG_RED "Quit", DIALOG_QUIT)}};
 
     PromptInputs results = display_box_prompt(&loginPage, 0);
@@ -209,22 +210,23 @@ static MenuIndex acc_new_func() {
 
         BoxContent addAccountPage = {
             .title = "Add Account",
-            .content = {LINE_DEFAULT("┌ Account Number ────────────┐"),
+            .content = {LINE_DEFAULT("┌" FG_CYAN " Account Number "FG_RESET"────────────┐"),
                         LINE_TEXT("│ %s │", 10, 0, "0123456789\b", account.id),
                         LINE_DEFAULT("└────────────────────────────┘"),
-                        LINE_DEFAULT("┌ Name ──────────────────────┐"),
+                        LINE_DEFAULT("┌" FG_CYAN " Name " FG_RESET "──────────────────────┐"),
                         LINE_TEXT("│ %s │", 25, 0, "", account.name),
                         LINE_DEFAULT("└────────────────────────────┘"),
-                        LINE_DEFAULT("┌ E-mail ────────────────────┐"),
+                        LINE_DEFAULT("┌" FG_CYAN " E-mail " FG_RESET "────────────────────┐"),
                         LINE_TEXT("│ %s │", 25, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`@.\b ", account.email),
                         LINE_DEFAULT("└────────────────────────────┘"),
-                        LINE_DEFAULT("┌ Balance ───────────────────┐"),
-                        LINE_TEXT("│ %s ($) │", 20, 0, ",.0123456789\b", temp),
+                        LINE_DEFAULT("┌" FG_CYAN " Balance " FG_RESET "───────────────────┐"),
+                        LINE_TEXT("│ %s " FG_GREEN "($)" FG_RESET " │", 20, 0, ",.0123456789\b", temp),
                         LINE_DEFAULT("└────────────────────────────┘"),
-                        LINE_DEFAULT("┌ Mobile ────────────────────┐"),
+                        LINE_DEFAULT("┌" FG_CYAN " Mobile " FG_RESET "────────────────────┐"),
                         LINE_TEXT("│ + 20 %s │", 10, 0, "0123456789\b", account.mobile + 1),
                         LINE_DEFAULT("└────────────────────────────┘"),
-                        LINE_DEFAULT(" "), LINE_DIALOGUE("Add", DIALOG_ADD),
+                        LINE_DEFAULT(" "), 
+                        LINE_DIALOGUE(FG_CYAN "Add", DIALOG_ADD),
                         LINE_DIALOGUE("Discard", DIALOG_DISCARD)}};
 
         PromptInputs results = display_box_prompt(&addAccountPage, 0);
@@ -397,7 +399,7 @@ static MenuIndex acc_delete_func() {
 
     BoxContent deletePage = {
         .title = FG_RED "Delete Account",
-        .content = {LINE_DEFAULT("┌ Delete Option ─────────────┐"),
+        .content = {LINE_DEFAULT("┌" FG_RED " Delete Option " FG_RESET "─────────────┐"),
                     LINE_DIALOGUE("│ %sOne with an Account number%s │", DIALOG_DEL_ONE),
                     LINE_DIALOGUE("│ %sMultiple with a criteria%s   │", DIALOG_DEL_MULTI),
                     LINE_DEFAULT("└────────────────────────────┘"),
@@ -416,7 +418,7 @@ static MenuIndex acc_delete_func() {
         while (1) {
             BoxContent deleteOnePage = {
                 .title = FG_RED "Delete Account",
-                .content = {LINE_DEFAULT("┌ Account Number ────────────┐"),
+                .content = {LINE_DEFAULT("┌" FG_RED " Account Number " FG_RESET "────────────┐"),
                             LINE_TEXT("│ %s │", 10, 0, "1234567890\b", accNum),
                             LINE_DEFAULT("└────────────────────────────┘"),
                             LINE_DEFAULT(" "),
@@ -476,7 +478,7 @@ static MenuIndex acc_delete_func() {
             BoxContent deleteMultiPage = {
                 .title = FG_RED "Delete Account",
                 .content = {
-                    LINE_DEFAULT("┌ Multiple criteria ─────────┐"),
+                    LINE_DEFAULT("┌" FG_RED " Multiple criteria " FG_RESET "─────────┐"),
                     LINE_DIALOGUE("│ %sAccounts created on a Date%s │", DIALOG_DELETEGIVENDATE),
                     LINE_DIALOGUE("│ %sAccounts inactive 90 days%s  │", DIALOG_LESSTHAN3MONTH),
                     LINE_DEFAULT("└────────────────────────────┘"),
@@ -497,12 +499,13 @@ static MenuIndex acc_delete_func() {
                 while (1) {
                     BoxContent deleteGivenDate = {
                         .title = FG_RED "Delete Account",
-                        .content = {LINE_DEFAULT(FG_RED "Delete all accounts created on"),
-                                    LINE_DEFAULT(FG_RED "the given date below"),
-                                    LINE_DEFAULT("          ┌ Month ─┐          "),
+                        .content = {LINE_DEFAULT("Delete all accounts created on"),
+                                    LINE_DEFAULT("the given date below"),
+                                    LINE_DEFAULT(" "),
+                                    LINE_DEFAULT("          ┌" FG_RED " Month " FG_RESET"─┐          "),
                                     LINE_TEXT("          │ %s │          ", 2, 0, "1234567890\b", monthField),
                                     LINE_DEFAULT("          └────────┘          "),
-                                    LINE_DEFAULT("          ┌ Year ──┐          "),
+                                    LINE_DEFAULT("          ┌" FG_RED " Year " FG_RESET"──┐          "),
                                     LINE_TEXT("          │ %s │          ", 4, 0, "1234567890\b", yearField),
                                     LINE_DEFAULT("          └────────┘          "),
                                     LINE_DEFAULT(" "),
@@ -577,127 +580,6 @@ static MenuIndex acc_delete_func() {
     return COMMANDS;
 }
 
-static MenuIndex acc_status_func() {
-    enum DialogOptions {
-        DIALOG_FIND,
-        DIALOG_BACK,
-        DIALOG_CHANGE,
-        DIALOG_DISCARD,
-        DIALOG_ACTIVE = 1,
-        DIALOG_INACTIVE = 0,
-        DIALOG_OKAY,
-    };
-
-    char accNum[LINE_LENGTH] = "";
-
-    while (1) {
-        BoxContent statusPage = {
-            .title = "Account Status",
-            .content = {
-                LINE_DEFAULT("┌ Account Number ────────────┐"),
-                LINE_TEXT("│ %s │", 10, 0, "1234567890\b", accNum),
-                LINE_DEFAULT("└────────────────────────────┘"),
-                LINE_DEFAULT(" "),
-                LINE_DIALOGUE("Find", DIALOG_FIND),
-                LINE_DIALOGUE("Back", DIALOG_BACK),
-            }};
-        PromptInputs statusResult = display_box_prompt(&statusPage, 0);
-
-        if (statusResult.dialogueValue == DIALOG_BACK) {
-            free_result(statusResult);
-            return COMMANDS;
-        }
-
-        strcpy(accNum, statusResult.textInputs[0]);
-
-        if (strlen(statusResult.textInputs[0]) == 0) {
-            Status status = {
-                .status = ERROR,
-                .message = "You should fill out the input field"};
-            print_status(status);
-
-            continue;
-        }
-
-        if (strlen(statusResult.textInputs[0]) != 10) {
-            Status status = {
-                .status = ERROR,
-                .message = "Account Number is not 10 characters"};
-            print_status(status);
-
-            continue;
-        }
-
-        free_result(statusResult);
-
-        AccountResult accountResult = query(accNum);
-        if (accountResult.status.status == SUCCESS) {
-            enum DialogOptions selectedOption = accountResult.accounts[0].status;
-
-            while (1) {
-                BoxContent changeStatusPage = {
-
-                    .title = "Account Status",
-                    .content = {
-                        LINE_DEFAULT(FG_CYAN "Account is currently active   " FG_RESET),
-                        LINE_DEFAULT(" "),
-                        LINE_DEFAULT("┌ Change account status ─────┐"),
-                        LINE_DIALOGUE(selectedOption ? "│ %s(x) Active%s                 │" : "│ %s( ) Active%s                 │", DIALOG_ACTIVE),
-                        LINE_DIALOGUE(selectedOption ? "│ %s( ) Inactive%s               │" : "│ %s(x) Inactive%s               │", DIALOG_INACTIVE),
-                        LINE_DEFAULT("└────────────────────────────┘"),
-                        LINE_DEFAULT(" "),
-                        LINE_DIALOGUE("Change", DIALOG_CHANGE),
-                        LINE_DIALOGUE("Back", DIALOG_DISCARD),
-                    }};
-                // printf("%s %d",accountResult.accounts[0].name,selectedOption);
-                // return RETURN; uncomment those and observe the status of the user to see the bug
-                sprintf(changeStatusPage.content[0].text, FG_CYAN "Account is currently %sactive" FG_RESET, (selectedOption == 0 ? "in" : ""));
-                PromptInputs results = display_box_prompt(&changeStatusPage, (int)!selectedOption);  // !not just adjusts index
-
-                while (results.dialogueValue != DIALOG_CHANGE && results.dialogueValue != DIALOG_DISCARD) {
-                    selectedOption = results.dialogueValue;
-                    changeStatusPage.content[3] = LINE_DIALOGUE((selectedOption == DIALOG_ACTIVE ? "│ %s(x) Active%s                 │" : "│ %s( ) Active%s                 │"), DIALOG_ACTIVE);
-                    changeStatusPage.content[4] = LINE_DIALOGUE((selectedOption == DIALOG_INACTIVE ? "│ %s(x) Inactive%s               │" : "│ %s( ) Inactive%s               │"), DIALOG_INACTIVE);
-                    results = display_box_prompt(&changeStatusPage, (int)!selectedOption);
-                }
-
-                if (results.dialogueValue == DIALOG_DISCARD) {
-                    break;
-                }
-
-                if ((int)selectedOption != accountResult.accounts[0].status) {
-                    int confirmResults = print_confirm("Confirm Status", "Are you sure you want to change status");
-
-                    if (confirmResults == 0) {
-                        continue;
-                    }
-
-                    Status changeStatus = change_status(accNum);
-                    save();
-
-                    print_status(changeStatus);
-                    return COMMANDS;
-                } else {
-                    Status status = {
-                        .status = WARNING,
-                        .message = "Account status is already set to that option."};
-                    print_status(status);
-
-                    continue;
-                }
-            }
-
-            continue;
-        } else if (accountResult.status.status == ERROR) {
-            print_status(accountResult.status);
-
-            continue;
-        }
-    }
-
-    return COMMANDS;
-}
-
 static MenuIndex acc_modify_func() {
     enum DialogOptions {
         DIALOG_PROCEED,
@@ -711,17 +593,21 @@ static MenuIndex acc_modify_func() {
     while (1) {
         BoxContent modifyPage = {
             .title = "Modify Account",
-            .content = {LINE_DEFAULT("┌ Account Number ────────────┐"),
+            .content = {LINE_DEFAULT("┌" FG_CYAN " Account Number " FG_RESET "────────────┐"),
                         LINE_TEXT("│ %s │", 10, 0, "0123456789\b", accNum),
                         LINE_DEFAULT("└────────────────────────────┘"),
                         LINE_DEFAULT(" "),
-                        LINE_DIALOGUE("Find", DIALOG_PROCEED),
+                        LINE_DIALOGUE(FG_CYAN "Find", DIALOG_PROCEED),
                         LINE_DIALOGUE("Back", DIALOG_DISCARD)}};
     
         PromptInputs results = display_box_prompt(&modifyPage, 0);
     
         strcpy(accNum, results.textInputs[0]);
         free_result(results);
+
+        if (results.dialogueValue == DIALOG_DISCARD)  {
+            return COMMANDS;
+        }
 
         // Check if the field is empty
         if (strlen(accNum) == 0) {
@@ -762,17 +648,17 @@ static MenuIndex acc_modify_func() {
         while (1) {
             BoxContent modifySubPage = {
                 .title = "Modify Account",
-                .content = {LINE_DEFAULT("┌ Name ──────────────────────┐"),
+                .content = {LINE_DEFAULT("┌" FG_CYAN " Name " FG_RESET "──────────────────────┐"),
                             LINE_TEXT("│ %s │", 25, 0, "", account.name),
                             LINE_DEFAULT("└────────────────────────────┘"),
-                            LINE_DEFAULT("┌ E-mail ────────────────────┐"),
+                            LINE_DEFAULT("┌" FG_CYAN " E-mail " FG_RESET "────────────────────┐"),
                             LINE_TEXT("│ %s │", 25, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`@.\b ", account.email),
                             LINE_DEFAULT("└────────────────────────────┘"),
-                            LINE_DEFAULT("┌ Mobile ────────────────────┐"),
+                            LINE_DEFAULT("┌" FG_CYAN " Mobile " FG_RESET "────────────────────┐"),
                             LINE_TEXT("│ +20 %s │", 10, 0, "0123456789\b", account.mobile + 1),
                             LINE_DEFAULT("└────────────────────────────┘"),
                             LINE_DEFAULT(" "),
-                            LINE_DIALOGUE("Modify", DIALOG_YES),
+                            LINE_DIALOGUE(FG_CYAN "Modify", DIALOG_YES),
                             LINE_DIALOGUE("Back", DIALOG_DISCARD)}};
     
             PromptInputs results = display_box_prompt(&modifySubPage, 0);
@@ -875,11 +761,11 @@ static MenuIndex acc_search_func() {
         BoxContent searchPage = {
             .title = "Search Account",
             .content = {
-                LINE_DEFAULT("┌ Account Number ────────────┐"),
+                LINE_DEFAULT("┌" FG_CYAN " Account Number " FG_RESET "────────────┐"),
                 LINE_TEXT("│ %s │", 10, 0, "1234567890\b", accNum),
                 LINE_DEFAULT("└────────────────────────────┘"),
                 LINE_DEFAULT(" "),
-                LINE_DIALOGUE("Find", DIALOG_FIND),
+                LINE_DIALOGUE(FG_CYAN "Find", DIALOG_FIND),
                 LINE_DIALOGUE("Discard", DIALOG_DISCARD),
             }};
         PromptInputs searchChoice = display_box_prompt(&searchPage, 0);
@@ -971,11 +857,11 @@ static MenuIndex acc_advancesearch_status() {
         BoxContent searchPage = {
             .title = "Search Accounts",
             .content = {
-                LINE_DEFAULT("┌ Keyword ───────────────────┐"),
+                LINE_DEFAULT("┌" FG_CYAN " Keyword " FG_RESET "───────────────────┐"),
                 LINE_TEXT("│ %s │", 25, 0, "", keywordText),
                 LINE_DEFAULT("└────────────────────────────┘"),
                 LINE_DEFAULT(" "),
-                LINE_DIALOGUE("Find", DIALOG_FIND),
+                LINE_DIALOGUE(FG_CYAN "Find", DIALOG_FIND),
                 LINE_DIALOGUE("Discard", DIALOG_DISCARD),
             }};
         PromptInputs searchForName = display_box_prompt(&searchPage, 0);
@@ -1079,6 +965,127 @@ static MenuIndex acc_advancesearch_status() {
     return COMMANDS;
 }
 
+static MenuIndex acc_status_func() {
+    enum DialogOptions {
+        DIALOG_FIND,
+        DIALOG_BACK,
+        DIALOG_CHANGE,
+        DIALOG_DISCARD,
+        DIALOG_ACTIVE = 1,
+        DIALOG_INACTIVE = 0,
+        DIALOG_OKAY,
+    };
+
+    char accNum[LINE_LENGTH] = "";
+
+    while (1) {
+        BoxContent statusPage = {
+            .title = "Account Status",
+            .content = {
+                LINE_DEFAULT("┌" FG_CYAN " Account Number " FG_RESET "────────────┐"),
+                LINE_TEXT("│ %s │", 10, 0, "1234567890\b", accNum),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT(" "),
+                LINE_DIALOGUE(FG_CYAN "Find", DIALOG_FIND),
+                LINE_DIALOGUE("Back", DIALOG_BACK),
+            }};
+        PromptInputs statusResult = display_box_prompt(&statusPage, 0);
+
+        if (statusResult.dialogueValue == DIALOG_BACK) {
+            free_result(statusResult);
+            return COMMANDS;
+        }
+
+        strcpy(accNum, statusResult.textInputs[0]);
+
+        if (strlen(statusResult.textInputs[0]) == 0) {
+            Status status = {
+                .status = ERROR,
+                .message = "You should fill out the input field"};
+            print_status(status);
+
+            continue;
+        }
+
+        if (strlen(statusResult.textInputs[0]) != 10) {
+            Status status = {
+                .status = ERROR,
+                .message = "Account Number is not 10 characters"};
+            print_status(status);
+
+            continue;
+        }
+
+        free_result(statusResult);
+
+        AccountResult accountResult = query(accNum);
+        if (accountResult.status.status == SUCCESS) {
+            enum DialogOptions selectedOption = accountResult.accounts[0].status;
+
+            while (1) {
+                BoxContent changeStatusPage = {
+
+                    .title = "Account Status",
+                    .content = {
+                        LINE_DEFAULT(FG_CYAN "Account is currently active   " FG_RESET),
+                        LINE_DEFAULT(" "),
+                        LINE_DEFAULT("┌" FG_CYAN " Change account status " FG_RESET "─────┐"),
+                        LINE_DIALOGUE(selectedOption ? "│ %s(x) Active%s                 │" : "│ %s( ) Active%s                 │", DIALOG_ACTIVE),
+                        LINE_DIALOGUE(selectedOption ? "│ %s( ) Inactive%s               │" : "│ %s(x) Inactive%s               │", DIALOG_INACTIVE),
+                        LINE_DEFAULT("└────────────────────────────┘"),
+                        LINE_DEFAULT(" "),
+                        LINE_DIALOGUE(FG_CYAN "Change", DIALOG_CHANGE),
+                        LINE_DIALOGUE("Back", DIALOG_DISCARD),
+                    }};
+                // printf("%s %d",accountResult.accounts[0].name,selectedOption);
+                // return RETURN; uncomment those and observe the status of the user to see the bug
+                sprintf(changeStatusPage.content[0].text, FG_CYAN "Account is currently %sactive" FG_RESET, (selectedOption == 0 ? "in" : ""));
+                PromptInputs results = display_box_prompt(&changeStatusPage, (int)!selectedOption);  // !not just adjusts index
+
+                while (results.dialogueValue != DIALOG_CHANGE && results.dialogueValue != DIALOG_DISCARD) {
+                    selectedOption = results.dialogueValue;
+                    changeStatusPage.content[3] = LINE_DIALOGUE((selectedOption == DIALOG_ACTIVE ? "│ %s(x) Active%s                 │" : "│ %s( ) Active%s                 │"), DIALOG_ACTIVE);
+                    changeStatusPage.content[4] = LINE_DIALOGUE((selectedOption == DIALOG_INACTIVE ? "│ %s(x) Inactive%s               │" : "│ %s( ) Inactive%s               │"), DIALOG_INACTIVE);
+                    results = display_box_prompt(&changeStatusPage, (int)!selectedOption);
+                }
+
+                if (results.dialogueValue == DIALOG_DISCARD) {
+                    break;
+                }
+
+                if ((int)selectedOption != accountResult.accounts[0].status) {
+                    int confirmResults = print_confirm("Confirm Status", "Are you sure you want to change status");
+
+                    if (confirmResults == 0) {
+                        continue;
+                    }
+
+                    Status changeStatus = change_status(accNum);
+                    save();
+
+                    print_status(changeStatus);
+                    return COMMANDS;
+                } else {
+                    Status status = {
+                        .status = WARNING,
+                        .message = "Account status is already set to that option."};
+                    print_status(status);
+
+                    continue;
+                }
+            }
+
+            continue;
+        } else if (accountResult.status.status == ERROR) {
+            print_status(accountResult.status);
+
+            continue;
+        }
+    }
+
+    return COMMANDS;
+}
+
 static MenuIndex trans_withdraw_func() {
     enum DialogOptions {
         DIALOG_FIND,
@@ -1093,11 +1100,11 @@ static MenuIndex trans_withdraw_func() {
         BoxContent withdrawAccountPage = {
             .title = "Withdraw",
             .content = {
-                LINE_DEFAULT("┌ Account Number: ───────────┐"),
+                LINE_DEFAULT("┌" FG_CYAN " Account Number " FG_RESET "────────────┐"),
                 LINE_TEXT("│ %s │", 10, 0, "1234567890\b", accNum),
                 LINE_DEFAULT("└────────────────────────────┘"),
                 LINE_DEFAULT(" "),
-                LINE_DIALOGUE("Find", DIALOG_FIND),
+                LINE_DIALOGUE(FG_CYAN "Find", DIALOG_FIND),
                 LINE_DIALOGUE("Back", DIALOG_BACK),
             }};
         PromptInputs withdrawChoice = display_box_prompt(&withdrawAccountPage, 0);
@@ -1143,12 +1150,12 @@ static MenuIndex trans_withdraw_func() {
             BoxContent withdrawAmountPage = {
                 .title = "Withdraw",
                 .content = {
-                    LINE_DEFAULT("┌ Withdraw Amount: ──────────┐"),
-                    LINE_TEXT("│ %s ($) │", 20, 0, ".1234567890\b", withAmount),
+                    LINE_DEFAULT("┌" FG_CYAN " Withdraw Amount " FG_RESET "───────────┐"),
+                    LINE_TEXT("│ %s " FG_GREEN "($)" FG_RESET " │", 20, 0, ".1234567890\b", withAmount),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT("(Max $10,000 per transaction) "),
                     LINE_DEFAULT(" "),
-                    LINE_DIALOGUE("Proceed", DIALOG_PROCEED),
+                    LINE_DIALOGUE(FG_CYAN "Proceed", DIALOG_PROCEED),
                     LINE_DIALOGUE("Back", DIALOG_BACK),
                 }};
 
@@ -1253,11 +1260,11 @@ static MenuIndex trans_deposit_func() {
         BoxContent depositAccountPage = {
             .title = "Deposit",
             .content = {
-                LINE_DEFAULT("┌ Account Number: ───────────┐"),
+                LINE_DEFAULT("┌" FG_CYAN " Account Number " FG_RESET "────────────┐"),
                 LINE_TEXT("│ %s │", 10, 0, "1234567890\b", accNum),
                 LINE_DEFAULT("└────────────────────────────┘"),
                 LINE_DEFAULT(" "),
-                LINE_DIALOGUE("Find", DIALOG_FIND),
+                LINE_DIALOGUE(FG_CYAN "Find", DIALOG_FIND),
                 LINE_DIALOGUE("Back", DIALOG_BACK),
             }};
         PromptInputs depositChoice = display_box_prompt(&depositAccountPage, 0);
@@ -1303,12 +1310,12 @@ static MenuIndex trans_deposit_func() {
             BoxContent depositAmountPage = {
                 .title = "Deposit",
                 .content = {
-                    LINE_DEFAULT("┌ Deposit Amount: ───────────┐"),
-                    LINE_TEXT("│ %s ($) │", 20, 0, ".1234567890\b", depAmount),
+                    LINE_DEFAULT("┌" FG_CYAN " Deposit Amount " FG_RESET "────────────┐"),
+                    LINE_TEXT("│ %s " FG_GREEN "($)" FG_RESET " │", 20, 0, ".1234567890\b", depAmount),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT("(Max $10,000 per transaction) "),
                     LINE_DEFAULT(" "),
-                    LINE_DIALOGUE("Proceed", DIALOG_PROCEED),
+                    LINE_DIALOGUE(FG_CYAN "Proceed", DIALOG_PROCEED),
                     LINE_DIALOGUE("Back", DIALOG_BACK),
                 }};
 
@@ -1415,13 +1422,14 @@ static MenuIndex other_print_func() {
         .content = {LINE_DEFAULT("Choose how you want the       "),
                     LINE_DEFAULT("printing be sorted by         "),
                     LINE_DEFAULT(" "),
-                    LINE_DEFAULT("┌ Sort by ───────────────────┐"),
+                    LINE_DEFAULT("┌" FG_CYAN " Sort by " FG_RESET "───────────────────┐"),
                     LINE_DIALOGUE("│ %s(x) Name%s                   │", DIALOG_NAME),
                     LINE_DIALOGUE("│ %s( ) Balance%s                │", DIALOG_BALANCE),
                     LINE_DIALOGUE("│ %s( ) Date Opened%s            │", DIALOG_DATE),
                     LINE_DIALOGUE("│ %s( ) Status%s                 │", DIALOG_STATUS),
                     LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT(" "), LINE_DIALOGUE("Print", DIALOG_PRINT),
+                    LINE_DEFAULT(" "), 
+                    LINE_DIALOGUE(FG_CYAN "Print", DIALOG_PRINT),
                     LINE_DIALOGUE("Back", DIALOG_BACK)}};
 
     // selection loop
