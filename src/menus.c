@@ -222,7 +222,7 @@ static MenuIndex acc_new_func() {
                         LINE_TEXT("│ %s ($) │", 20, 0, ",.0123456789\b", temp),
                         LINE_DEFAULT("└────────────────────────────┘"),
                         LINE_DEFAULT("┌ Mobile ────────────────────┐"),
-                        LINE_TEXT("│ + 20 %s │", 10, 0, "0123456789\b", account.mobile),
+                        LINE_TEXT("│ + 20 %s │", 10, 0, "0123456789\b", account.mobile + 1),
                         LINE_DEFAULT("└────────────────────────────┘"),
                         LINE_DEFAULT(" "), LINE_DIALOGUE("Add", DIALOG_ADD),
                         LINE_DIALOGUE("Discard", DIALOG_DISCARD)}};
@@ -234,13 +234,14 @@ static MenuIndex acc_new_func() {
             return COMMANDS;
         }
 
+        // Copying the input fields values of the account variable
         strcpy(account.id, results.textInputs[0]);
         strcpy(account.name, results.textInputs[1]);
         strcpy(account.email, results.textInputs[2]);
         account.balance = strtod(results.textInputs[3], NULL);
-        sprintf(account.mobile, "%s", results.textInputs[4]);
+        sprintf(account.mobile, "0%s", results.textInputs[4]);
 
-        // removing all commas from balance input field
+        // Removing all commas from balance input field
         remove_all_chars(results.textInputs[3], ',');
 
         // Check if any field is empty
@@ -355,7 +356,6 @@ static MenuIndex acc_new_func() {
         // Sending the data to add() to check if possible
         Status status = add(account);
         if (status.status == ERROR) {
-            sprintf(account.mobile, "%s", results.textInputs[4]);
             print_status(status);
             load();
 
@@ -369,7 +369,6 @@ static MenuIndex acc_new_func() {
         int confirmResults = print_confirm("Confirm Add", "Are you sure you want to add this account?");
 
         if (confirmResults == 0) {
-            sprintf(account.mobile, "%s", results.textInputs[4]);
             free_result(results);
             load();
 
@@ -608,40 +607,74 @@ static MenuIndex acc_modify_func() {
                     LINE_DIALOGUE("Back", DIALOG_DISCARD)}};
 
     PromptInputs results = display_box_prompt(&modifyPage, 0);
-    AccountResult accountResults = query(results.textInputs[0]);
+
+    // Checking if account exists
+    AccountResult accountResult = query(results.textInputs[0]); 
+
+    // Making a dummy account an initializing it with the query result
+    Account account = accountResult.accounts[0];
 
     if (results.dialogueValue == DIALOG_DISCARD) {
         free_result(results);
         return COMMANDS;
     }
 
-    BoxContent modifySubPage = {
-        .title = "Modify Account",
-        .content = {LINE_DEFAULT("┌ Name ──────────────────────┐"),
-                    LINE_TEXT("│ %s │", 25, 0, "", accountResults.accounts[0].name),
-                    LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT("┌ E-mail ────────────────────┐"),
-                    LINE_TEXT("│ %s │", 25, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`@.\b ", accountResults.accounts[0].email),
-                    LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT("┌ Mobile ────────────────────┐"),
-                    LINE_TEXT("│ +20 %s │", 10, 0, "0123456789\b", accountResults.accounts[0].mobile + 1),
-                    LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT(" "),
-                    LINE_DIALOGUE("Modify", DIALOG_YES),
-                    LINE_DIALOGUE("Back", DIALOG_DISCARD)}};
-
-    if (accountResults.status.status == ERROR) {
-        print_status(accountResults.status);
+    if (accountResult.status.status == ERROR) {
+        print_status(accountResult.status);
         return ACC_MODIFY;
     }
 
     // Here we are looping over modify sub menu until it succeeded or user chose to go back
     while (1) {
+        BoxContent modifySubPage = {
+            .title = "Modify Account",
+            .content = {LINE_DEFAULT("┌ Name ──────────────────────┐"),
+                LINE_TEXT("│ %s │", 25, 0, "", account.name),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT("┌ E-mail ────────────────────┐"),
+                LINE_TEXT("│ %s │", 25, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`@.\b ", account.email),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT("┌ Mobile ────────────────────┐"),
+                LINE_TEXT("│ +20 %s │", 10, 0, "0123456789\b", account.mobile + 1),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT(" "),
+                LINE_DIALOGUE("Modify", DIALOG_YES),
+                LINE_DIALOGUE("Back", DIALOG_DISCARD)}};
+
         PromptInputs results = display_box_prompt(&modifySubPage, 0);
 
         if (results.dialogueValue == DIALOG_DISCARD) {
             free_result(results);
             return ACC_MODIFY;
+        }
+
+        // Copying the input fields values of the account variable
+        strcpy(account.name, results.textInputs[0]);
+        strcpy(account.email, results.textInputs[1]);
+        sprintf(account.mobile, "%s", results.textInputs[2]);
+
+        // Check if any field is empty
+        if ((strlen(results.textInputs[0]) == 0) ||
+            (strlen(results.textInputs[1]) == 0) ||
+            (strlen(results.textInputs[2]) == 0)) {
+            Status status = {
+                .status = ERROR,
+                .message = "You should fill out all the input fields"};
+            print_status(status);
+
+            free_result(results);
+            continue;
+        }
+
+        // email validation
+        if (!valid_email(results.textInputs[1])) {
+            Status status = {
+                .status = ERROR,
+                .message = "Email is not valid"};
+            print_status(status);
+
+            free_result(results);
+            continue;
         }
 
         // phone number must be 10 characters (excluding the "+ 20")
@@ -654,20 +687,32 @@ static MenuIndex acc_modify_func() {
             continue;
         }
 
-        // Making a dummy Account variable
-        Account account;
-        strcpy(account.id, accountResults.accounts[0].id);
-        strcpy(account.name, results.textInputs[0]);
-        strcpy(account.email, results.textInputs[1]);
-        account.balance = accountResults.accounts[0].balance;
-        // Adding the 0 at the beginning of the phone number
+        // Fixing phone number formating before sending it the the modify function
         sprintf(account.mobile, "0%s", results.textInputs[2]);
-
         // Sending data to apply modification to modify()
         Status status = modify(account.id, account.name, account.mobile, account.email);
-        print_status(status);
+        if (status.status == ERROR) {
+            print_status(status);
+            free_result(results);
+            load();
 
-        if (status.status == SUCCESS) break;
+            continue;
+        }
+
+        // Checking if for confirmation
+        int confirmResults = print_confirm("Confirm Modify", "Are you sure you want to modify this account?");
+
+        if (confirmResults == 0) {
+            free_result(results);
+            load();
+
+            continue;
+        }
+
+        save();
+        print_status(status); 
+
+        break;
     }
 
     free_result(results);
