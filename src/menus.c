@@ -588,75 +588,114 @@ static MenuIndex acc_status_func() {
         DIALOG_INACTIVE = 0,
         DIALOG_OKAY,
     };
-    BoxContent statusPage = {
-        .title = "Account Status",
-        .content = {
-            LINE_DEFAULT("┌ Account Number ────────────┐"),
-            LINE_TEXT("│ %s │", 10, 0, "1234567890\b", ""),
-            LINE_DEFAULT("└────────────────────────────┘"),
-            LINE_DEFAULT(" "),
-            LINE_DIALOGUE("Find", DIALOG_FIND),
-            LINE_DIALOGUE("Back", DIALOG_BACK),
-        }};
-    PromptInputs statusResult = display_box_prompt(&statusPage, 0);
-    if (statusResult.dialogueValue == DIALOG_BACK) {
-        free_result(statusResult);
-        return COMMANDS;
-    } else if (statusResult.dialogueValue == DIALOG_FIND) {
-        char *id = statusResult.textInputs[0];
 
-        AccountResult accountResult = query(id);
+    char accNum[LINE_LENGTH] = "";
+
+    while (1) {
+        BoxContent statusPage = {
+            .title = "Account Status",
+            .content = {
+                LINE_DEFAULT("┌ Account Number ────────────┐"),
+                LINE_TEXT("│ %s │", 10, 0, "1234567890\b", accNum),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT(" "),
+                LINE_DIALOGUE("Find", DIALOG_FIND),
+                LINE_DIALOGUE("Back", DIALOG_BACK),
+            }};
+        PromptInputs statusResult = display_box_prompt(&statusPage, 0);
+
+        if (statusResult.dialogueValue == DIALOG_BACK) {
+            free_result(statusResult);
+            return COMMANDS;
+        }
+        
+        strcpy(accNum, statusResult.textInputs[0]);
+
+        if (strlen(statusResult.textInputs[0]) == 0) {
+            Status status = {
+                .status = ERROR,
+                .message = "You should fill out the input field"};
+            print_status(status);
+
+            continue;
+        }
+
+        if (strlen(statusResult.textInputs[0]) != 10) {
+            Status status = {
+                .status = ERROR,
+                .message = "Account Number is not 10 characters"};
+            print_status(status);
+
+            continue;
+        }
+        
+        free_result(statusResult);
+
+        AccountResult accountResult = query(accNum);
         if (accountResult.status.status == SUCCESS) {
             enum DialogOptions selectedOption = accountResult.accounts[0].status;
-            BoxContent changeStatusPage = {
 
-                .title = "Account Status",
-                .content = {
-                    LINE_DEFAULT(FG_CYAN "Account is currently active   " FG_RESET),
-                    LINE_DEFAULT(" "),
-                    LINE_DEFAULT("┌ Change account status ─────┐"),
-                    LINE_DIALOGUE(selectedOption ? "│ %s(x) Active%s                 │" : "│ %s( ) Active%s                 │", DIALOG_ACTIVE),
-                    LINE_DIALOGUE(selectedOption ? "│ %s( ) Inactive%s               │" : "│ %s(x) Inactive%s               │", DIALOG_INACTIVE),
-                    LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT(" "),
-                    LINE_DIALOGUE("Change", DIALOG_CHANGE),
-                    LINE_DIALOGUE("Discard", DIALOG_DISCARD),
-                }};
-            // printf("%s %d",accountResult.accounts[0].name,selectedOption);
-            // return RETURN; uncomment those and observe the status of the user to see the bug
-            sprintf(changeStatusPage.content[0].text, FG_CYAN "Account is currently %sactive" FG_RESET, (selectedOption == 0 ? "in" : ""));
-            PromptInputs results = display_box_prompt(&changeStatusPage, (int)!selectedOption);  // !not just adjusts index
-            while (results.dialogueValue != DIALOG_CHANGE && results.dialogueValue != DIALOG_DISCARD) {
-                selectedOption = results.dialogueValue;
-                changeStatusPage.content[3] = LINE_DIALOGUE((selectedOption == DIALOG_ACTIVE ? "│ %s(x) Active%s                 │" : "│ %s( ) Active%s                 │"), DIALOG_ACTIVE);
-                changeStatusPage.content[4] = LINE_DIALOGUE((selectedOption == DIALOG_INACTIVE ? "│ %s(x) Inactive%s               │" : "│ %s( ) Inactive%s               │"), DIALOG_INACTIVE);
-                results = display_box_prompt(&changeStatusPage, (int)!selectedOption);
+            while (1) {
+                BoxContent changeStatusPage = {
+    
+                    .title = "Account Status",
+                    .content = {
+                        LINE_DEFAULT(FG_CYAN "Account is currently active   " FG_RESET),
+                        LINE_DEFAULT(" "),
+                        LINE_DEFAULT("┌ Change account status ─────┐"),
+                        LINE_DIALOGUE(selectedOption ? "│ %s(x) Active%s                 │" : "│ %s( ) Active%s                 │", DIALOG_ACTIVE),
+                        LINE_DIALOGUE(selectedOption ? "│ %s( ) Inactive%s               │" : "│ %s(x) Inactive%s               │", DIALOG_INACTIVE),
+                        LINE_DEFAULT("└────────────────────────────┘"),
+                        LINE_DEFAULT(" "),
+                        LINE_DIALOGUE("Change", DIALOG_CHANGE),
+                        LINE_DIALOGUE("Back", DIALOG_DISCARD),
+                    }};
+                // printf("%s %d",accountResult.accounts[0].name,selectedOption);
+                // return RETURN; uncomment those and observe the status of the user to see the bug
+                sprintf(changeStatusPage.content[0].text, FG_CYAN "Account is currently %sactive" FG_RESET, (selectedOption == 0 ? "in" : ""));
+                PromptInputs results = display_box_prompt(&changeStatusPage, (int)!selectedOption);  // !not just adjusts index
+                
+                while (results.dialogueValue != DIALOG_CHANGE && results.dialogueValue != DIALOG_DISCARD) {
+                    selectedOption = results.dialogueValue;
+                    changeStatusPage.content[3] = LINE_DIALOGUE((selectedOption == DIALOG_ACTIVE ? "│ %s(x) Active%s                 │" : "│ %s( ) Active%s                 │"), DIALOG_ACTIVE);
+                    changeStatusPage.content[4] = LINE_DIALOGUE((selectedOption == DIALOG_INACTIVE ? "│ %s(x) Inactive%s               │" : "│ %s( ) Inactive%s               │"), DIALOG_INACTIVE);
+                    results = display_box_prompt(&changeStatusPage, (int)!selectedOption);
+                }
+
+                if (results.dialogueValue == DIALOG_DISCARD) {
+                    break;
+                }
+    
+                if ((int)selectedOption != accountResult.accounts[0].status) {
+                    int confirmResults = print_confirm("Confirm Status", "Are you sure you want to change status");
+    
+                    if (confirmResults == 0) {
+                        continue;
+                    }
+    
+                    Status changeStatus = change_status(accNum);
+                    save();
+
+                    print_status(changeStatus);
+                    return COMMANDS;
+                } else {
+                    Status status = {
+                        .status = WARNING,
+                        .message = "Account status is already set to that option."};
+                    print_status(status);
+
+                    continue;
+                }
             }
 
-            if ((int)selectedOption != accountResult.accounts[0].status) {
-                Status changeStatus = change_status(id);
-                print_status(changeStatus);
-                free_result(statusResult);
-                return COMMANDS;
-            } else {
-                Status status = {
-                    .status = WARNING,
-                    .message = "Account status is already set to that option."};
-                print_status(status);
-
-                free_result(statusResult);
-                return COMMANDS;
-            }
-
+            continue;
         } else if (accountResult.status.status == ERROR) {
             print_status(accountResult.status);
 
-            free_result(statusResult);
-            return ACC_STATUS;
+            continue;
         }
     }
 
-    free_result(statusResult);
     return COMMANDS;
 }
 
@@ -1138,7 +1177,7 @@ static MenuIndex other_print_func() {
 
 // -
 
-    void mainloop()
+void mainloop()
 {
     // Put functions in the menuFunctions Array
     menuFunctions[ENTRY] = entry_func;
