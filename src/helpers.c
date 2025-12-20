@@ -189,7 +189,7 @@ int valid_email(char *str){
     char s[N];
     strcpy(s,str);
     int at=0,i;
-    if(s[0]=='@'){
+    if(s[0]=='@'||s[strlen(s)-1]=='@'){
         return 0;
     }
     for(i=0;s[i];i++){
@@ -204,14 +204,27 @@ int valid_email(char *str){
         return 0;
     }
     char *a=strtok(s,"@"),*b=strtok(NULL,"@");
+    if(strlen(b)<5){
+        return 0;
+    }
+    int dot=0;
     for(i=0;b[i];i++){
-        if(i>2){
-            if(b[i]=='.'&&(b[i-1]=='.'||b[i-2]=='.'||b[i-3]=='.')){
+        dot+=(b[i]=='.');
+        if(i>1){
+            if(b[i]=='.'&&(b[i-1]=='.'||b[i-2]=='.')){
+                return 0;
+            }
+        }
+        else{
+            if(b[i]=='.'){
                 return 0;
             }
         }
     }
-    if(strlen(a)==0||strlen(b)==0){
+    if(b[strlen(b)-2]=='.'){
+        return 0;
+    }
+    if(strlen(a)==0||dot==0){
         return 0;
     }
     if(a[0]=='.'||a[strlen(a)-1]=='.'||b[0]=='.'||b[strlen(b)-1]=='.'){
