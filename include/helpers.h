@@ -1,7 +1,7 @@
 // helpers.h
 #ifndef HELPERS_H
 #define HELPERS_H
-#define N 200
+#define N 300
 
 typedef enum {
     SUCCESS,
