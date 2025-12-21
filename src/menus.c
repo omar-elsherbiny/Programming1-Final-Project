@@ -660,7 +660,7 @@ static MenuIndex acc_modify_func() {
                             LINE_DEFAULT("└────────────────────────────┘"),
                             LINE_DEFAULT(" "),
                             LINE_DIALOGUE(FG_CYAN "Modify", DIALOG_YES),
-                            LINE_DIALOGUE("Back", DIALOG_DISCARD)}};
+                            LINE_DIALOGUE("Discard", DIALOG_DISCARD)}};
 
             PromptInputs results = display_box_prompt(&modifySubPage, 0);
 
@@ -766,11 +766,11 @@ static MenuIndex acc_search_func() {
                 LINE_DEFAULT("└────────────────────────────┘"),
                 LINE_DEFAULT(" "),
                 LINE_DIALOGUE(FG_CYAN "Find", DIALOG_FIND),
-                LINE_DIALOGUE("Discard", DIALOG_DISCARD),
+                LINE_DIALOGUE("Back", DIALOG_BACK),
             }};
         PromptInputs searchChoice = display_box_prompt(&searchPage, 0);
 
-        if (searchChoice.dialogueValue == DIALOG_DISCARD) {
+        if (searchChoice.dialogueValue == DIALOG_BACK) {
             free_result(&searchChoice);
             return COMMANDS;
         }
@@ -862,10 +862,10 @@ static MenuIndex acc_advancesearch_status() {
                 LINE_DEFAULT("└────────────────────────────┘"),
                 LINE_DEFAULT(" "),
                 LINE_DIALOGUE(FG_CYAN "Find", DIALOG_FIND),
-                LINE_DIALOGUE("Discard", DIALOG_DISCARD),
+                LINE_DIALOGUE("Back", DIALOG_BACK),
             }};
         PromptInputs searchForName = display_box_prompt(&searchPage, 0);
-        if (searchForName.dialogueValue == DIALOG_DISCARD) {
+        if (searchForName.dialogueValue == DIALOG_BACK) {
             free_result(&searchForName);
             return COMMANDS;
         }
@@ -925,8 +925,11 @@ static MenuIndex acc_advancesearch_status() {
                     sprintf(date2, FG_CYAN "Date Opened: " FG_RESET "%d-%d", acc2->date.month, acc2->date.year);
                     sprintf(status2, FG_CYAN "Status:      " FG_RESET "%s", acc2->status ? "active" : "inactive");
                 }
+                char footerMsg[LINE_LENGTH];
+                sprintf(footerMsg, "Page (%d/%d)", currIndex/2 + 1, searchResult.n/2 + 1);
+
                 BoxContent advancedSearchResultsPage = {
-                    .title = "Report",
+                    .title = "Search Accounts",
                     .content = {
                         currIndex - 2 >= 0 ? LINE_DIALOGUE("%s↑ ...%s                         ", DIALOG_UP) : LINE_DEFAULT(" "),
                         LINE_DEFAULT(account1),
@@ -948,6 +951,7 @@ static MenuIndex acc_advancesearch_status() {
                         LINE_DEFAULT(" "),
                         LINE_DIALOGUE("Back", DIALOG_BACK)}};
 
+                strcpy(advancedSearchResultsPage.footer, footerMsg);
                 advancedSearchResults = display_box_prompt(&advancedSearchResultsPage, lastScroll);
                 if (advancedSearchResults.dialogueValue == DIALOG_UP) {
                     currIndex = (currIndex - 2 >= 0) ? currIndex - 2 : 0;
@@ -1035,7 +1039,7 @@ static MenuIndex acc_status_func() {
                         LINE_DEFAULT("└────────────────────────────┘"),
                         LINE_DEFAULT(" "),
                         LINE_DIALOGUE(FG_CYAN "Change", DIALOG_CHANGE),
-                        LINE_DIALOGUE("Back", DIALOG_DISCARD),
+                        LINE_DIALOGUE("Discard", DIALOG_DISCARD),
                     }};
                 // printf("%s %d",accountResult.accounts[0].name,selectedOption);
                 // return RETURN; uncomment those and observe the status of the user to see the bug
@@ -1111,13 +1115,13 @@ static MenuIndex trans_withdraw_func() {
                 LINE_DEFAULT("(Max $10,000 per transaction) "),
                 LINE_DEFAULT(" "),
                 LINE_DIALOGUE(FG_CYAN "Proceed", DIALOG_PROCEED),
-                LINE_DIALOGUE("Back", DIALOG_BACK),
+                LINE_DIALOGUE("Discard", DIALOG_DISCARD),
             }};
         PromptInputs withdrawChoice = display_box_prompt(&withdrawAccountPage, 0);
 
-        if (withdrawChoice.dialogueValue == DIALOG_BACK) {
+        if (withdrawChoice.dialogueValue == DIALOG_DISCARD) {
             free_result(&withdrawChoice);
-            return COMMANDS;
+            break;
         }
 
         strcpy(accNum, withdrawChoice.textInputs[0]);
@@ -1148,9 +1152,7 @@ static MenuIndex trans_withdraw_func() {
             print_status(error);
             continue;
         }
-        if (withdrawChoice.dialogueValue == DIALOG_BACK) {
-            break;
-        }
+
         char temp[LINE_LENGTH];
         // Check if 1st char in amount is a number
         if (!(withdrawChoice.textInputs[1][0] >= '0' &&
@@ -1258,13 +1260,13 @@ static MenuIndex trans_deposit_func() {
                 LINE_DEFAULT("(Max $10,000 per transaction) "),
                 LINE_DEFAULT(" "),
                 LINE_DIALOGUE(FG_CYAN "Proceed", DIALOG_PROCEED),
-                LINE_DIALOGUE("Back", DIALOG_BACK),
+                LINE_DIALOGUE("Discard", DIALOG_DISCARD),
             }};
         PromptInputs depositChoice = display_box_prompt(&depositAccountPage, 0);
 
-        if (depositChoice.dialogueValue == DIALOG_BACK) {
+        if (depositChoice.dialogueValue == DIALOG_DISCARD) {
             free_result(&depositChoice);
-            return COMMANDS;
+            break;;
         }
 
         strcpy(accNum, depositChoice.textInputs[0]);
@@ -1295,9 +1297,7 @@ static MenuIndex trans_deposit_func() {
             print_status(error);
             continue;
         }
-        if (depositChoice.dialogueValue == DIALOG_BACK) {
-            break;
-        }
+
         char temp[LINE_LENGTH];
         // Check if 1st char in amount is a number
         if (!(depositChoice.textInputs[1][0] >= '0' &&
@@ -1408,13 +1408,13 @@ static MenuIndex trans_transfer_func() {
                 LINE_DEFAULT("└────────────────────────────┘"),
                 LINE_DEFAULT(" "),
                 LINE_DIALOGUE(FG_CYAN "Proceed", DIALOG_PROCEED),
-                LINE_DIALOGUE("Back", DIALOG_BACK),
+                LINE_DIALOGUE("Discard", DIALOG_DISCARD),
             }};
         PromptInputs transferChoice = display_box_prompt(&transferAccountPage, 0);
 
-        if (transferChoice.dialogueValue == DIALOG_BACK) {
+        if (transferChoice.dialogueValue == DIALOG_DISCARD) {
             free_result(&transferChoice);
-            return COMMANDS;
+            break;
         }
 
         strcpy(sendNum, transferChoice.textInputs[0]);
@@ -1443,6 +1443,9 @@ static MenuIndex trans_transfer_func() {
         if (searchResult.status.status == ERROR) {
             Status error = searchResult.status;
             free_result(&transferChoice);
+            
+            strcpy(error.message, "Sender Account not found!");
+
             print_status(error);
             continue;
         }
@@ -1469,12 +1472,13 @@ static MenuIndex trans_transfer_func() {
         if (searchResult.status.status == ERROR) {
             Status error = searchResult.status;
             free_result(&transferChoice);
+
+            strcpy(error.message, "Receiver Account not found!");
+
             print_status(error);
             continue;
         }
-        if (transferChoice.dialogueValue == DIALOG_BACK) {
-            break;
-        }
+        
         char temp[LINE_LENGTH];
         // Check if 1st char in amount is a number
         if (!(transferChoice.textInputs[2][0] >= '0' &&
@@ -1661,7 +1665,7 @@ static MenuIndex other_report_func() {
 
         display_box_prompt(&reportPageEntries, 0);
 
-        return COMMANDS;
+        continue;
     }
 
     return COMMANDS;
@@ -1678,116 +1682,139 @@ static MenuIndex other_print_func() {
                          DIALOG_DOWN,
     };
 
-    BoxContent printPage = {
-        .title = "Print Accounts",
-        .content = {LINE_DEFAULT("Choose how you want the       "),
-                    LINE_DEFAULT("printing be sorted by         "),
-                    LINE_DEFAULT(" "),
-                    LINE_DEFAULT("┌" FG_CYAN " Sort by " FG_RESET "───────────────────┐"),
-                    LINE_DIALOGUE("│ %s(x) Name%s                   │", DIALOG_NAME),
-                    LINE_DIALOGUE("│ %s( ) Balance%s                │", DIALOG_BALANCE),
-                    LINE_DIALOGUE("│ %s( ) Date Opened%s            │", DIALOG_DATE),
-                    LINE_DIALOGUE("│ %s( ) Status%s                 │", DIALOG_STATUS),
-                    LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT(" "),
-                    LINE_DIALOGUE(FG_CYAN "Print", DIALOG_PRINT),
-                    LINE_DIALOGUE("Back", DIALOG_BACK)}};
-
-    // selection loop
     enum DialogOptions selectedOption = DIALOG_NAME;
-    PromptInputs results = display_box_prompt(&printPage, (int)selectedOption - 1);  //-1 adjust index based on position in yasseens enum
-    while (results.dialogueValue != DIALOG_PRINT && results.dialogueValue != DIALOG_BACK) {
-        selectedOption = results.dialogueValue;
-        printPage.content[4] = LINE_DIALOGUE((selectedOption == DIALOG_NAME ? "│ %s(x) Name%s                   │" : "│ %s( ) Name%s                   │"), DIALOG_NAME);
-        printPage.content[5] = LINE_DIALOGUE((selectedOption == DIALOG_BALANCE ? "│ %s(x) Balance%s                │" : "│ %s( ) Balance%s                │"), DIALOG_BALANCE);
-        printPage.content[6] = LINE_DIALOGUE((selectedOption == DIALOG_DATE ? "│ %s(x) Date Opened%s            │" : "│ %s( ) Date Opened%s            │"), DIALOG_DATE);
-        printPage.content[7] = LINE_DIALOGUE((selectedOption == DIALOG_STATUS ? "│ %s(x) Status%s                 │" : "│ %s( ) Status%s                 │"), DIALOG_STATUS);
-        results = display_box_prompt(&printPage, (int)selectedOption - 1);
-    }
 
-    AccountResult accountResult = print((SortMethod)selectedOption);
+    while (1) {
+            BoxContent printPage = {
+            .title = "Print Accounts",
+            .content = {LINE_DEFAULT("Choose how you want the       "),
+                        LINE_DEFAULT("printing be sorted by         "),
+                        LINE_DEFAULT(" "),
+                        LINE_DEFAULT("┌" FG_CYAN " Sort by " FG_RESET "───────────────────┐"),
+                        LINE_DIALOGUE("│ %s(x) Name%s                   │", DIALOG_NAME),
+                        LINE_DIALOGUE("│ %s( ) Balance%s                │", DIALOG_BALANCE),
+                        LINE_DIALOGUE("│ %s( ) Date Opened%s            │", DIALOG_DATE),
+                        LINE_DIALOGUE("│ %s( ) Status%s                 │", DIALOG_STATUS),
+                        LINE_DEFAULT("└────────────────────────────┘"),
+                        LINE_DEFAULT(" "),
+                        LINE_DIALOGUE(FG_CYAN "Print", DIALOG_PRINT),
+                        LINE_DIALOGUE("Back", DIALOG_BACK)}};
 
-    if (accountResult.status.status == ERROR) {
-        print_status(accountResult.status);
-        return OTHER_PRINT;
-    }
+        // selection loop
+        PromptInputs results = {.dialogueValue = selectedOption};
+        do {
+            selectedOption = results.dialogueValue;
+            printPage.content[4] = LINE_DIALOGUE((selectedOption == DIALOG_NAME ? "│ %s(x) Name%s                   │" : "│ %s( ) Name%s                   │"), DIALOG_NAME);
+            printPage.content[5] = LINE_DIALOGUE((selectedOption == DIALOG_BALANCE ? "│ %s(x) Balance%s                │" : "│ %s( ) Balance%s                │"), DIALOG_BALANCE);
+            printPage.content[6] = LINE_DIALOGUE((selectedOption == DIALOG_DATE ? "│ %s(x) Date Opened%s            │" : "│ %s( ) Date Opened%s            │"), DIALOG_DATE);
+            printPage.content[7] = LINE_DIALOGUE((selectedOption == DIALOG_STATUS ? "│ %s(x) Status%s                 │" : "│ %s( ) Status%s                 │"), DIALOG_STATUS);
+            results = display_box_prompt(&printPage, (int)selectedOption - 1);
+        } while (results.dialogueValue != DIALOG_PRINT && results.dialogueValue != DIALOG_BACK);
 
-    if (results.dialogueValue == DIALOG_BACK) return COMMANDS;
+        AccountResult accountResult = print((SortMethod)selectedOption);
 
-    // report
-    int currIndex = 0;
-    int lastScroll = 0;
-    PromptInputs reportResults = {.dialogueValue = -1};
-    char account1[LINE_LENGTH],
-        name1[LINE_LENGTH],
-        email1[LINE_LENGTH],
-        balance1[LINE_LENGTH],
-        mobile1[LINE_LENGTH],
-        date1[LINE_LENGTH],
-        status1[LINE_LENGTH],
-
-        account2[LINE_LENGTH],
-        name2[LINE_LENGTH],
-        email2[LINE_LENGTH],
-        balance2[LINE_LENGTH],
-        mobile2[LINE_LENGTH],
-        date2[LINE_LENGTH],
-        status2[LINE_LENGTH];
-
-    while (reportResults.dialogueValue != DIALOG_BACK) {
-        Account* acc1 = &accountResult.accounts[currIndex];
-        sprintf(account1, FG_CYAN "Account #:   " FG_RESET "%s", acc1->id);
-        sprintf(name1, FG_CYAN "Name:       " FG_RESET " %s", acc1->name);
-        sprintf(email1, FG_CYAN "E-mail:      " FG_RESET "%s", acc1->email);
-        sprintf(balance1, FG_CYAN "Balance:     " FG_RESET "%.2f", acc1->balance);
-        sprintf(mobile1, FG_CYAN "Mobile:      " FG_RESET "%s", acc1->mobile);
-        sprintf(date1, FG_CYAN "Date Opened: " FG_RESET "%d-%d", acc1->date.month, acc1->date.year);
-        sprintf(status1, FG_CYAN "Status:      " FG_RESET "%s", acc1->status ? "active" : "inactive");
-        _Bool isSecond = currIndex + 1 < accountResult.n;
-        if (isSecond) {
-            Account* acc2 = &accountResult.accounts[currIndex + 1];
-            sprintf(account2, FG_CYAN "Account #:   " FG_RESET "%s", acc2->id);
-            sprintf(name2, FG_CYAN "Name:       " FG_RESET " %s", acc2->name);
-            sprintf(email2, FG_CYAN "E-mail:      " FG_RESET "%s", acc2->email);
-            sprintf(balance2, FG_CYAN "Balance:     " FG_RESET "%.2f", acc2->balance);
-            sprintf(mobile2, FG_CYAN "Mobile:      " FG_RESET "%s", acc2->mobile);
-            sprintf(date2, FG_CYAN "Date Opened: " FG_RESET "%d-%d", acc2->date.month, acc2->date.year);
-            sprintf(status2, FG_CYAN "Status:      " FG_RESET "%s", acc2->status ? "active" : "inactive");
+        if (accountResult.status.status == ERROR) {
+            print_status(accountResult.status);
+            return OTHER_PRINT;
         }
-        BoxContent reportPage = {
-            .title = "Report",
-            .content = {
-                currIndex - 2 >= 0 ? LINE_DIALOGUE("%s↑ ...%s                         ", DIALOG_UP) : LINE_DEFAULT(" "),
-                LINE_DEFAULT(account1),
-                LINE_DEFAULT(name1),
-                LINE_DEFAULT(email1),
-                LINE_DEFAULT(balance1),
-                LINE_DEFAULT(mobile1),
-                LINE_DEFAULT(date1),
-                LINE_DEFAULT(status1),
-                LINE_DEFAULT(" "),
-                isSecond ? LINE_DEFAULT(account2) : LINE_DEFAULT(" "),
-                isSecond ? LINE_DEFAULT(name2) : LINE_DEFAULT(" "),
-                isSecond ? LINE_DEFAULT(email2) : LINE_DEFAULT(" "),
-                isSecond ? LINE_DEFAULT(balance2) : LINE_DEFAULT(" "),
-                isSecond ? LINE_DEFAULT(mobile2) : LINE_DEFAULT(" "),
-                isSecond ? LINE_DEFAULT(date2) : LINE_DEFAULT(" "),
-                isSecond ? LINE_DEFAULT(status2) : LINE_DEFAULT(" "),
-                currIndex + 2 < accountResult.n ? LINE_DIALOGUE("%s↓ ...%s                         ", DIALOG_DOWN) : LINE_DEFAULT(" "),
-                LINE_DEFAULT(" "),
-                LINE_DIALOGUE("Back", DIALOG_BACK)}};
 
-        reportResults = display_box_prompt(&reportPage, lastScroll);
-        if (reportResults.dialogueValue == DIALOG_UP) {
-            currIndex = (currIndex - 2 >= 0) ? currIndex - 2 : 0;
-            lastScroll = 0;
-        } else if (reportResults.dialogueValue == DIALOG_DOWN) {
-            currIndex = (currIndex + 2 < accountResult.n) ? currIndex + 2 : accountResult.n - 1;
-            lastScroll = 1;
+        if (results.dialogueValue == DIALOG_BACK) return COMMANDS;
+
+        // report
+        int currIndex = 0;
+        int lastScroll = 0;
+        PromptInputs reportResults = {.dialogueValue = -1};
+        char account1[LINE_LENGTH],
+            name1[LINE_LENGTH],
+            email1[LINE_LENGTH],
+            balance1[LINE_LENGTH],
+            mobile1[LINE_LENGTH],
+            date1[LINE_LENGTH],
+            status1[LINE_LENGTH],
+
+            account2[LINE_LENGTH],
+            name2[LINE_LENGTH],
+            email2[LINE_LENGTH],
+            balance2[LINE_LENGTH],
+            mobile2[LINE_LENGTH],
+            date2[LINE_LENGTH],
+            status2[LINE_LENGTH];
+
+        while (reportResults.dialogueValue != DIALOG_BACK) {
+            Account* acc1 = &accountResult.accounts[currIndex];
+            sprintf(account1, FG_CYAN "Account #:   " FG_RESET "%s", acc1->id);
+            sprintf(name1, FG_CYAN "Name:       " FG_RESET " %s", acc1->name);
+            sprintf(email1, FG_CYAN "E-mail:      " FG_RESET "%s", acc1->email);
+            sprintf(balance1, FG_CYAN "Balance:     " FG_RESET "%.2f", acc1->balance);
+            sprintf(mobile1, FG_CYAN "Mobile:      " FG_RESET "%s", acc1->mobile);
+            sprintf(date1, FG_CYAN "Date Opened: " FG_RESET "%d-%d", acc1->date.month, acc1->date.year);
+            sprintf(status1, FG_CYAN "Status:      " FG_RESET "%s", acc1->status ? "active" : "inactive");
+            _Bool isSecond = currIndex + 1 < accountResult.n;
+            if (isSecond) {
+                Account* acc2 = &accountResult.accounts[currIndex + 1];
+                sprintf(account2, FG_CYAN "Account #:   " FG_RESET "%s", acc2->id);
+                sprintf(name2, FG_CYAN "Name:       " FG_RESET " %s", acc2->name);
+                sprintf(email2, FG_CYAN "E-mail:      " FG_RESET "%s", acc2->email);
+                sprintf(balance2, FG_CYAN "Balance:     " FG_RESET "%.2f", acc2->balance);
+                sprintf(mobile2, FG_CYAN "Mobile:      " FG_RESET "%s", acc2->mobile);
+                sprintf(date2, FG_CYAN "Date Opened: " FG_RESET "%d-%d", acc2->date.month, acc2->date.year);
+                sprintf(status2, FG_CYAN "Status:      " FG_RESET "%s", acc2->status ? "active" : "inactive");
+            }
+
+            char reportNote[LINE_LENGTH];
+            if (selectedOption == DIALOG_NAME) {
+                sprintf(reportNote, FG_CYAN "(Name (A-Z) first)");
+            } else if (selectedOption == DIALOG_BALANCE) {
+                sprintf(reportNote, FG_CYAN "(Highest account balance first)");
+            } else if (selectedOption == DIALOG_DATE) {
+                sprintf(reportNote, FG_CYAN "(Earliest account opened first)");
+            } else if (selectedOption == DIALOG_STATUS) {
+                sprintf(reportNote, FG_CYAN "(Active accounts first)");
+            }
+
+            char footerMsg[LINE_LENGTH];
+            sprintf(footerMsg, "Page (%d/%d)", currIndex/2 + 1, accountResult.n/2 + 1);
+
+            BoxContent reportPage = {
+                .title = "Report",
+                .content = {
+                    LINE_DEFAULT(reportNote),
+                    currIndex - 2 >= 0 ? LINE_DIALOGUE("%s↑ ...%s                         ", DIALOG_UP) : LINE_DEFAULT(" "),
+                    LINE_DEFAULT(account1),
+                    LINE_DEFAULT(name1),
+                    LINE_DEFAULT(email1),
+                    LINE_DEFAULT(balance1),
+                    LINE_DEFAULT(mobile1),
+                    LINE_DEFAULT(date1),
+                    LINE_DEFAULT(status1),
+                    LINE_DEFAULT(" "),
+                    isSecond ? LINE_DEFAULT(account2) : LINE_DEFAULT(" "),
+                    isSecond ? LINE_DEFAULT(name2) : LINE_DEFAULT(" "),
+                    isSecond ? LINE_DEFAULT(email2) : LINE_DEFAULT(" "),
+                    isSecond ? LINE_DEFAULT(balance2) : LINE_DEFAULT(" "),
+                    isSecond ? LINE_DEFAULT(mobile2) : LINE_DEFAULT(" "),
+                    isSecond ? LINE_DEFAULT(date2) : LINE_DEFAULT(" "),
+                    isSecond ? LINE_DEFAULT(status2) : LINE_DEFAULT(" "),
+                    currIndex + 2 < accountResult.n ? LINE_DIALOGUE("%s↓ ...%s                         ", DIALOG_DOWN) : LINE_DEFAULT(" "),
+                    LINE_DEFAULT(" "),
+                    LINE_DIALOGUE("Back", DIALOG_BACK)}};
+                
+            strcpy(reportPage.footer, footerMsg);
+
+            reportResults = display_box_prompt(&reportPage, lastScroll);
+            if (reportResults.dialogueValue == DIALOG_UP) {
+                currIndex = (currIndex - 2 >= 0) ? currIndex - 2 : 0;
+                lastScroll = 0;
+            } else if (reportResults.dialogueValue == DIALOG_DOWN) {
+                currIndex = (currIndex + 2 < accountResult.n) ? currIndex + 2 : accountResult.n - 1;
+                lastScroll = 1;
+            }
         }
+
+        continue;
     }
 
-    return OTHER_PRINT;
+    return COMMANDS;
 }
 
 // -
@@ -1823,8 +1850,3 @@ void mainloop() {
         prevIndex = tempIndex;
     }
 }
-
-/*TODO:
--> logical error (no delete)
--> transaction order broken
-*/

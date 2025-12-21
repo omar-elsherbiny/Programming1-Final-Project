@@ -375,9 +375,9 @@ PromptInputs display_box_prompt(BoxContent *box, int initialSelected) {
         display_draw_box(&resultBox);
         while (1) {
             ch = _getch();
-            if (ch == K_ESC)
-                exit(1);
-            else if (ch == K_ENTER)
+            if (ch == K_ESC){
+                // exit(1); // remove before prod
+            } else if (ch == K_ENTER)
                 return (PromptInputs){0};
         }
     }
