@@ -64,8 +64,8 @@ Line LINE_TEXT(const char text[], int maxLen, _Bool hidden, const char validChar
     return res;
 }
 
-Line *MULTI_LINE_DEFAULT(const char text[], const char linePrefix[], int width, int *lineCnt) {
-    Line *multiLines = malloc(LINE_COUNT * sizeof(Line));
+Line* MULTI_LINE_DEFAULT(const char text[], const char linePrefix[], int width, int* lineCnt) {
+    Line* multiLines = malloc(LINE_COUNT * sizeof(Line));
     int curLen = 0;
     int lines = 0;
 
@@ -73,7 +73,7 @@ Line *MULTI_LINE_DEFAULT(const char text[], const char linePrefix[], int width, 
     strncpy(textCpy, text, LINE_LENGTH - 1);
     textCpy[LINE_LENGTH - 1] = '\0';
 
-    char *word = strtok(textCpy, " ");
+    char* word = strtok(textCpy, " ");
     multiLines[lines].text[0] = '\0';
     strcat(multiLines[lines].text, linePrefix);
     multiLines[lines].type = DEFAULT;
@@ -129,7 +129,7 @@ static int utf8_strlen(const char str[]) {
 
 static int utf8_strcnt(const char str[], int char_cnt, _Bool extend) {
     int bytes = 0;
-    const unsigned char *p = (const unsigned char *)str;
+    const unsigned char* p = (const unsigned char*)str;
 
     while (*p && char_cnt > 0) {
         // skip ANSI
@@ -190,7 +190,7 @@ static int calc_max_offset(const char template[], const char str[], int width) {
 }
 
 void format_string(const char template[], const char str[], int width, int offset, char dest[]) {
-    const char *placeholder = strstr(template, "%s");
+    const char* placeholder = strstr(template, "%s");
     if (!placeholder) return;
 
     int prefixLenB = placeholder - template;
@@ -206,7 +206,7 @@ void format_string(const char template[], const char str[], int width, int offse
     memcpy(result, template, prefixLenB);
 
     // put formatted content
-    char *content = result + prefixLenB;
+    char* content = result + prefixLenB;
     int strLenC = utf8_strlen(str);
     int strLenB = strlen(str);
     if (strLenC <= contentWidthC) {
@@ -248,7 +248,7 @@ void format_string(const char template[], const char str[], int width, int offse
 
 void replace_wrap_string(const char str[], const char first[], const char second[], char dest[]) {
     int count = 0;
-    const char *p = str;
+    const char* p = str;
     while ((p = strstr(p, "%s")) != NULL) count++, p += 2;
 
     if (count == 2)
@@ -259,7 +259,7 @@ void replace_wrap_string(const char str[], const char first[], const char second
 
 // -
 
-static void get_box_dimensions(BoxContent *box, int *width, int *height) {
+static void get_box_dimensions(BoxContent* box, int* width, int* height) {
     int maxWidth = 0;
     int lineCount = 0;
 
@@ -267,14 +267,14 @@ static void get_box_dimensions(BoxContent *box, int *width, int *height) {
     if (titleLen > maxWidth) maxWidth = titleLen;
 
     for (int i = 0; i < LINE_COUNT; i++) {
-        Line *line = &box->content[i];
+        Line* line = &box->content[i];
         if (line->text[0] == '\0') break;
 
         int len = utf8_strlen(line->text);
         if (line->type == TEXT) len = len - 2;  // + line->data.options.maxLen;
         if (line->type == DIALOGUE) {
             int count = 0;
-            char *p = line->text;
+            char* p = line->text;
             while ((p = strstr(p, "%s")) != NULL) count++, p += 2;
             len = len - 2 * count;
         }
@@ -291,7 +291,7 @@ static void get_box_dimensions(BoxContent *box, int *width, int *height) {
     *height = lineCount;
 }
 
-void display_draw_box(DrawnBox *box) {
+void display_draw_box(DrawnBox* box) {
     setvbuf(stdout, NULL, _IOFBF, 0);
     printf(CLEAR);
 
@@ -343,7 +343,7 @@ void display_draw_box(DrawnBox *box) {
     fflush(stdout);
 }
 
-PromptInputs display_box_prompt(BoxContent *box, int initialSelected) {
+PromptInputs display_box_prompt(BoxContent* box, int initialSelected) {
     int boxWidth, boxHeight;
     get_box_dimensions(box, &boxWidth, &boxHeight);
 
@@ -357,7 +357,7 @@ PromptInputs display_box_prompt(BoxContent *box, int initialSelected) {
     int textInputCount = 0;
     int selectableCount = 0;
     for (int i = 0; i < LINE_COUNT; i++) {
-        Line *line = &box->content[i];
+        Line* line = &box->content[i];
         if (line->text[0] == '\0') break;
         strcpy(resultBox.content[i], line->text);
         if (line->type == TEXT) {
@@ -375,7 +375,7 @@ PromptInputs display_box_prompt(BoxContent *box, int initialSelected) {
         display_draw_box(&resultBox);
         while (1) {
             ch = _getch();
-            if (ch == K_ESC){
+            if (ch == K_ESC) {
                 // exit(1); // remove before prod
             } else if (ch == K_ENTER)
                 return (PromptInputs){0};
@@ -383,12 +383,12 @@ PromptInputs display_box_prompt(BoxContent *box, int initialSelected) {
     }
 
     // initialize arrays
-    Line **selectableLines = malloc(selectableCount * sizeof(Line *));
-    int *resultIndexMap = malloc(selectableCount * sizeof(int));
-    int *textIndexMap = malloc(selectableCount * sizeof(int));
+    Line** selectableLines = malloc(selectableCount * sizeof(Line*));
+    int* resultIndexMap = malloc(selectableCount * sizeof(int));
+    int* textIndexMap = malloc(selectableCount * sizeof(int));
     int n = 0, t = 0;
     for (int i = 0; i < LINE_COUNT; i++) {
-        Line *line = &box->content[i];
+        Line* line = &box->content[i];
         if (line->text[0] == '\0') break;
         if (line->type == TEXT) textIndexMap[n] = t, t++;
         if (line->type != DEFAULT) {
@@ -398,11 +398,11 @@ PromptInputs display_box_prompt(BoxContent *box, int initialSelected) {
         }
     }
 
-    int *textOffsets = calloc(textInputCount, sizeof(int));
-    char **textInputs = malloc(textInputCount * sizeof(char *));
+    int* textOffsets = calloc(textInputCount, sizeof(int));
+    char** textInputs = malloc(textInputCount * sizeof(char*));
     t = 0;
     for (int i = 0; i < LINE_COUNT; i++) {
-        Line *line = &box->content[i];
+        Line* line = &box->content[i];
         if (line->text[0] == '\0') break;
         if (line->type != TEXT) continue;
         textInputs[t] = calloc(LINE_LENGTH + 1, sizeof(char));
@@ -417,11 +417,11 @@ PromptInputs display_box_prompt(BoxContent *box, int initialSelected) {
     int prev = -1;
 
     int dialogueValue;
-    char *textInput;
+    char* textInput;
     char tempTextInput[LINE_LENGTH];
 
-    Line *currLine = selectableLines[curr];
-    char *currResLine = resultBox.content[resultIndexMap[curr]];
+    Line* currLine = selectableLines[curr];
+    char* currResLine = resultBox.content[resultIndexMap[curr]];
 
     if (currLine->type == TEXT) {
         textInput = textInputs[textIndexMap[curr]];

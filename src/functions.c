@@ -1,13 +1,13 @@
 // functions.c
 #include "functions.h"
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
-Status login(char *username, char *password) {
-    FILE *f = fopen("files/users.txt", "r");
+Status login(char* username, char* password) {
+    FILE* f = fopen("files/users.txt", "r");
     Status ret;
     if (f == NULL) {
         ret.status = ERROR;
@@ -30,11 +30,11 @@ Status login(char *username, char *password) {
 }
 
 Account accounts[N];
-int accountCnt,filesDeleteCnt;
+int accountCnt, filesDeleteCnt;
 char filesDelete[N][N];
 
 Status load() {
-    FILE *f = fopen("files/accounts.txt", "r");
+    FILE* f = fopen("files/accounts.txt", "r");
     Status ret;
     if (f == NULL) {
         f = fopen("files/accounts.txt", "w");
@@ -44,10 +44,10 @@ Status load() {
     char line[7 * N], ufid[N], ufname[N], ufemail[N], ufbalance[N], ufmobile[N], ufdate[N], ufstatus[N];
     int i;
     accountCnt = 0;
-    for(i=0;i<filesDeleteCnt;i++){
-        strcpy(filesDelete[i],"");
+    for (i = 0; i < filesDeleteCnt; i++) {
+        strcpy(filesDelete[i], "");
     }
-    filesDeleteCnt=0;
+    filesDeleteCnt = 0;
     for (i = 0; fgets(line, sizeof(line), f); i++) {  // copy file data into array
         // splitting the line
         strcpy(ufid, strtok(line, ","));
@@ -71,9 +71,9 @@ Status load() {
         accounts[i].date.month = atoi(strtok(ufdate, "-"));
         accounts[i].date.year = atoi(strtok(NULL, "-"));
         // check if account transaction file exists, if not creates it
-        FILE *accountFile = fopen(fileName, "r");
+        FILE* accountFile = fopen(fileName, "r");
         if (accountFile == NULL) {
-            FILE *createAccountFile = fopen(fileName, "w");
+            FILE* createAccountFile = fopen(fileName, "w");
             fclose(createAccountFile);
         }
         fclose(accountFile);
@@ -82,13 +82,13 @@ Status load() {
     ret.status = SUCCESS;
     strcpy(ret.message, "Accounts loaded successfully!");
     fclose(f);
-    account_merge_sort(accounts,0,accountCnt-1,ID);
+    account_merge_sort(accounts, 0, accountCnt - 1, ID);
     return ret;
 }
 
-AccountResult query(char *id) {
+AccountResult query(char* id) {
     AccountResult ret;
-    int s = 0, e = accountCnt-1, mid;
+    int s = 0, e = accountCnt - 1, mid;
     // binary search for account
     while (s < e) {
         mid = (s + e) / 2;
@@ -104,7 +104,7 @@ AccountResult query(char *id) {
             e = mid - 1;
         }
     }
-    if(s==e){
+    if (s == e) {
         if (strcmp(accounts[s].id, id) == 0) {
             ret.status.status = SUCCESS;
             strcpy(ret.status.message, "Account found successfully!");
@@ -119,22 +119,22 @@ AccountResult query(char *id) {
     return ret;
 }
 
-AccountResult advanced_search(char *keyword) {
+AccountResult advanced_search(char* keyword) {
     AccountResult ret;
     ret.n = 0;
     int i;
     char key[N];
-    for(i=0;keyword[i];i++){
-        key[i]=tolower(keyword[i]);
+    for (i = 0; keyword[i]; i++) {
+        key[i] = tolower(keyword[i]);
     }
-    key[i]='\0';
+    key[i] = '\0';
     for (i = 0; i < accountCnt; i++) {
         char name[N];
         int j;
-        for(j=0;accounts[i].name[j];j++){
-            name[j]=tolower(accounts[i].name[j]);
+        for (j = 0; accounts[i].name[j]; j++) {
+            name[j] = tolower(accounts[i].name[j]);
         }
-        name[j]='\0';
+        name[j] = '\0';
         if (strstr(name, key) != NULL) {
             ret.status.status = SUCCESS;
             strcpy(ret.status.message, "Account(s) with keyword found successfully!");
@@ -164,7 +164,7 @@ Status add(Account acc) {
         strcpy(ret.message, "Invalid email format!");
         return ret;
     }
-    FILE *f = fopen("files/accounts.txt", "r");
+    FILE* f = fopen("files/accounts.txt", "r");
     if (f == NULL) {
         f = fopen("files/accounts.txt", "w");
         fclose(f);
@@ -175,17 +175,17 @@ Status add(Account acc) {
     acc.date = get_month();
     accounts[accountCnt] = acc;
     accountCnt++;
-    account_merge_sort(accounts,0,accountCnt-1,ID);
+    account_merge_sort(accounts, 0, accountCnt - 1, ID);
     // save();
     ret.status = SUCCESS;
     strcpy(ret.message, "Account added successfully!");
     return ret;
 }
 
-Status delete(char *id) {
+Status delete(char* id) {
     int i, found = 0;
     Status ret;
-    FILE *f = fopen("files/accounts.txt", "r");
+    FILE* f = fopen("files/accounts.txt", "r");
     if (f == NULL) {
         f = fopen("files/accounts.txt", "w");
         fclose(f);
@@ -199,7 +199,7 @@ Status delete(char *id) {
             strcpy(fileName, "files/accounts/");
             strcat(fileName, id);
             strcat(fileName, ".txt");
-            strcpy(filesDelete[filesDeleteCnt],fileName);
+            strcpy(filesDelete[filesDeleteCnt], fileName);
             filesDeleteCnt++;
         }
     }
@@ -226,10 +226,10 @@ Status delete(char *id) {
     return ret;
 }
 
-Status modify(char *id, char *name, char *mobile, char *email) {
+Status modify(char* id, char* name, char* mobile, char* email) {
     int i, found = 0;
     Status ret;
-    FILE *f = fopen("files/accounts.txt", "r");
+    FILE* f = fopen("files/accounts.txt", "r");
     if (f == NULL) {
         f = fopen("files/accounts.txt", "w");
         fclose(f);
@@ -262,10 +262,10 @@ Status modify(char *id, char *name, char *mobile, char *email) {
     return ret;
 }
 
-Status change_status(char *id) {
+Status change_status(char* id) {
     int i, found = 0;
     Status ret;
-    FILE *f = fopen("files/accounts.txt", "r");
+    FILE* f = fopen("files/accounts.txt", "r");
     if (f == NULL) {
         f = fopen("files/accounts.txt", "w");
         fclose(f);
@@ -291,10 +291,10 @@ Status change_status(char *id) {
     return ret;
 }
 
-Status withdraw(char *id, double amount) {
+Status withdraw(char* id, double amount) {
     int i, found = 0;
     Status ret;
-    FILE *f = fopen("files/accounts.txt", "r");
+    FILE* f = fopen("files/accounts.txt", "r");
     if (f == NULL) {
         f = fopen("files/accounts.txt", "w");
         fclose(f);
@@ -347,23 +347,23 @@ Status withdraw(char *id, double amount) {
 }
 
 void save() {
-    FILE *f = fopen("files/accounts.txt", "w");
+    FILE* f = fopen("files/accounts.txt", "w");
     int i;
     for (i = 0; i < accountCnt; i++) {
         fprintf(f, "%s,%s,%s,%.2f,%s,%d-%d, %s\n", accounts[i].id, accounts[i].name, accounts[i].email, accounts[i].balance, accounts[i].mobile, accounts[i].date.month, accounts[i].date.year, (accounts[i].status ? "active" : "inactive"));
     }
     fclose(f);
-    for(i=0;i<filesDeleteCnt;i++){
+    for (i = 0; i < filesDeleteCnt; i++) {
         remove(filesDelete[i]);
-        strcpy(filesDelete[i],"");
+        strcpy(filesDelete[i], "");
     }
-    filesDeleteCnt=0;
+    filesDeleteCnt = 0;
 }
 
-Status deposit(char *id, double amount) {
+Status deposit(char* id, double amount) {
     int i, found = 0;
     Status ret;
-    FILE *f = fopen("files/accounts.txt", "r");
+    FILE* f = fopen("files/accounts.txt", "r");
     if (f == NULL) {
         f = fopen("files/accounts.txt", "w");
         fclose(f);
@@ -405,17 +405,17 @@ Status deposit(char *id, double amount) {
     return ret;
 }
 
-Status transfer(char *idFrom, char *idTo, double amount) {
+Status transfer(char* idFrom, char* idTo, double amount) {
     int i, foundFrom = 0, foundTo = 0, idxFrom, idxTo;
     Status ret;
-    FILE *f = fopen("files/accounts.txt", "r");
+    FILE* f = fopen("files/accounts.txt", "r");
     if (f == NULL) {
         f = fopen("files/accounts.txt", "w");
         fclose(f);
         f = fopen("files/accounts.txt", "r");
     }
     fclose(f);
-    if (!strcmp(idTo,idFrom)) {
+    if (!strcmp(idTo, idFrom)) {
         ret.status = ERROR;
         strcpy(ret.message, "Same account number entered in both fields!");
         return ret;
@@ -480,11 +480,11 @@ Status transfer(char *idFrom, char *idTo, double amount) {
     return ret;
 }
 
-ReportResult report(char *id) {
+ReportResult report(char* id) {
     ReportResult ret;
     ret.n = 0;
     int i, found = 0;
-    FILE *f = fopen("files/accounts.txt", "r");
+    FILE* f = fopen("files/accounts.txt", "r");
     if (f == NULL) {
         ret.status.status = ERROR;
         strcpy(ret.status.message, "File accounts.txt not found!");
@@ -506,31 +506,31 @@ ReportResult report(char *id) {
     strcpy(fileName, "files/accounts/");
     strcat(fileName, id);
     strcat(fileName, ".txt");
-    FILE *accountFile = fopen(fileName, "r");
+    FILE* accountFile = fopen(fileName, "r");
     if (accountFile == NULL) {
-        FILE *createAccountFile = fopen(fileName, "w");
+        FILE* createAccountFile = fopen(fileName, "w");
         fclose(createAccountFile);
         accountFile = fopen(fileName, "r");
     }
     char line[5 * N], ufaccountId[N], ufpartyId[N], uftype[N], ufamount[N], ufdate[N], ufdur[N];
     Transaction transactions[N];
-    int transCnt=0;
+    int transCnt = 0;
     for (i = 0; fgets(line, sizeof(line), accountFile); i++) {
         strcpy(ufaccountId, strtok(line, ","));
         strcpy(uftype, strtok(NULL, ","));
         strcpy(ufamount, strtok(NULL, ","));
         strcpy(ufdate, strtok(NULL, ",\n"));
-        strcpy(ufpartyId,"");
-        if(!strcmp(uftype,"Send")||!strcmp(uftype,"Receive")){
+        strcpy(ufpartyId, "");
+        if (!strcmp(uftype, "Send") || !strcmp(uftype, "Receive")) {
             strcpy(ufpartyId, strtok(NULL, "\n"));
             strcpy(transactions[i].partyId, ufpartyId);
         }
         strcpy(transactions[i].accountId, ufaccountId);
         strcpy(transactions[i].type, uftype);
-        if(!strcmp(uftype,"Send")){
+        if (!strcmp(uftype, "Send")) {
             strcpy(transactions[i].type, "Transfer (Send)");
         }
-        if(!strcmp(uftype,"Receive")){
+        if (!strcmp(uftype, "Receive")) {
             strcpy(transactions[i].type, "Transfer (Receive)");
         }
         transactions[i].amount = strtod(ufamount, NULL);
@@ -541,17 +541,17 @@ ReportResult report(char *id) {
         transactions[i].date.minute = atoi(strtok(NULL, ":"));
         transactions[i].date.second = atoi(strtok(NULL, " "));
         strcpy(ufdur, strtok(NULL, " "));
-        transactions[i].date.hour += -12*((!strcmp(ufdur,"am")&&transactions[i].date.hour==12))+12*((!strcmp(ufdur,"pm")&&transactions[i].date.hour<12));
+        transactions[i].date.hour += -12 * ((!strcmp(ufdur, "am") && transactions[i].date.hour == 12)) + 12 * ((!strcmp(ufdur, "pm") && transactions[i].date.hour < 12));
         transCnt++;
     }
     fclose(accountFile);
     accountFile = fopen(fileName, "w");
-    transaction_merge_sort(transactions,0,i-1);
-    for (i = 0; i<transCnt; i++) {
-        DateDay now=transactions[i].date;
-        fprintf(accountFile,"%s,%s,%.2f,%d-%d-%d %d:%s%d:%s%d %s%s%s\n", id, (!strcmp(transactions[i].type,"Transfer (Send)")?"Send":(!strcmp(transactions[i].type,"Transfer (Receive)")?"Receive":transactions[i].type)), transactions[i].amount, now.day, now.month, now.year,now.hour-(12*(now.hour>12))+12*(now.hour==0),(now.minute<10?"0":""),now.minute,(now.second<10?"0":""),now.second,(now.hour>11?"pm":"am"),((!strcmp(transactions[i].type,"Transfer (Send)")||!strcmp(transactions[i].type,"Transfer (Receive)"))?",":""),transactions[i].partyId);
-        if (ret.n<5) {
-            ret.transactions[ret.n] = transactions[transCnt-i-1];
+    transaction_merge_sort(transactions, 0, i - 1);
+    for (i = 0; i < transCnt; i++) {
+        DateDay now = transactions[i].date;
+        fprintf(accountFile, "%s,%s,%.2f,%d-%d-%d %d:%s%d:%s%d %s%s%s\n", id, (!strcmp(transactions[i].type, "Transfer (Send)") ? "Send" : (!strcmp(transactions[i].type, "Transfer (Receive)") ? "Receive" : transactions[i].type)), transactions[i].amount, now.day, now.month, now.year, now.hour - (12 * (now.hour > 12)) + 12 * (now.hour == 0), (now.minute < 10 ? "0" : ""), now.minute, (now.second < 10 ? "0" : ""), now.second, (now.hour > 11 ? "pm" : "am"), ((!strcmp(transactions[i].type, "Transfer (Send)") || !strcmp(transactions[i].type, "Transfer (Receive)")) ? "," : ""), transactions[i].partyId);
+        if (ret.n < 5) {
+            ret.transactions[ret.n] = transactions[transCnt - i - 1];
             ret.n++;
         }
     }
@@ -578,7 +578,7 @@ AccountResult print(SortMethod method) {
     for (i = 0; i < accountCnt; i++) {
         ret.accounts[i] = accounts[i];
     }
-    account_merge_sort(ret.accounts, 0, accountCnt-1, method);
+    account_merge_sort(ret.accounts, 0, accountCnt - 1, method);
     ret.status.status = SUCCESS;
     strcpy(ret.status.message, "Obtained all sorted accounts successfully!");
     return ret;
@@ -587,7 +587,7 @@ AccountResult print(SortMethod method) {
 Status delete_multiple(DeleteMethod method, Date date) {
     int i, found = 0;
     Status ret;
-    FILE *f = fopen("files/accounts.txt", "r");
+    FILE* f = fopen("files/accounts.txt", "r");
     if (f == NULL) {
         f = fopen("files/accounts.txt", "w");
         fclose(f);
@@ -604,7 +604,7 @@ Status delete_multiple(DeleteMethod method, Date date) {
                 strcpy(fileName, "files/accounts/");
                 strcat(fileName, accounts[i].id);
                 strcat(fileName, ".txt");
-                strcpy(filesDelete[filesDeleteCnt],fileName);
+                strcpy(filesDelete[filesDeleteCnt], fileName);
                 filesDeleteCnt++;
             } else {
                 temp[idx] = accounts[i];
@@ -624,9 +624,9 @@ Status delete_multiple(DeleteMethod method, Date date) {
         ret.status = SUCCESS;
         char buf[20];
         snprintf(buf, sizeof(buf), "%d", found);
-        strcpy(ret.message,"Successfully deleted ");
-        strcat(ret.message,buf);
-        strcat(ret.message," account(s)!");
+        strcpy(ret.message, "Successfully deleted ");
+        strcat(ret.message, buf);
+        strcat(ret.message, " account(s)!");
         return ret;
     } else {
         for (i = 0; i < accountCnt; i++) {
@@ -635,7 +635,7 @@ Status delete_multiple(DeleteMethod method, Date date) {
                 strcpy(fileName, "files/accounts/");
                 strcat(fileName, accounts[i].id);
                 strcat(fileName, ".txt");
-                strcpy(filesDelete[filesDeleteCnt],fileName);
+                strcpy(filesDelete[filesDeleteCnt], fileName);
                 filesDeleteCnt++;
                 found++;
             } else {
@@ -656,9 +656,9 @@ Status delete_multiple(DeleteMethod method, Date date) {
         ret.status = SUCCESS;
         char buf[20];
         snprintf(buf, sizeof(buf), "%d", found);
-        strcpy(ret.message,"Successfully deleted ");
-        strcat(ret.message,buf);
-        strcat(ret.message," account(s)!");
+        strcpy(ret.message, "Successfully deleted ");
+        strcat(ret.message, buf);
+        strcat(ret.message, " account(s)!");
         return ret;
     }
 }

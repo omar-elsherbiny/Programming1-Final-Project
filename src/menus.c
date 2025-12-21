@@ -926,7 +926,7 @@ static MenuIndex acc_advancesearch_status() {
                     sprintf(status2, FG_CYAN "Status:      " FG_RESET "%s", acc2->status ? "active" : "inactive");
                 }
                 char footerMsg[LINE_LENGTH];
-                sprintf(footerMsg, "Page (%d/%d)", currIndex/2 + 1, searchResult.n/2 + 1);
+                sprintf(footerMsg, "Page (%d/%d)", currIndex / 2 + 1, searchResult.n / 2 + 1);
 
                 BoxContent advancedSearchResultsPage = {
                     .title = "Search Accounts",
@@ -1266,7 +1266,8 @@ static MenuIndex trans_deposit_func() {
 
         if (depositChoice.dialogueValue == DIALOG_DISCARD) {
             free_result(&depositChoice);
-            break;;
+            break;
+            ;
         }
 
         strcpy(accNum, depositChoice.textInputs[0]);
@@ -1443,7 +1444,7 @@ static MenuIndex trans_transfer_func() {
         if (searchResult.status.status == ERROR) {
             Status error = searchResult.status;
             free_result(&transferChoice);
-            
+
             strcpy(error.message, "Sender Account not found!");
 
             print_status(error);
@@ -1478,7 +1479,7 @@ static MenuIndex trans_transfer_func() {
             print_status(error);
             continue;
         }
-        
+
         char temp[LINE_LENGTH];
         // Check if 1st char in amount is a number
         if (!(transferChoice.textInputs[2][0] >= '0' &&
@@ -1685,7 +1686,7 @@ static MenuIndex other_print_func() {
     enum DialogOptions selectedOption = DIALOG_NAME;
 
     while (1) {
-            BoxContent printPage = {
+        BoxContent printPage = {
             .title = "Print Accounts",
             .content = {LINE_DEFAULT("Choose how you want the       "),
                         LINE_DEFAULT("printing be sorted by         "),
@@ -1773,7 +1774,7 @@ static MenuIndex other_print_func() {
             }
 
             char footerMsg[LINE_LENGTH];
-            sprintf(footerMsg, "Page (%d/%d)", currIndex/2 + 1, accountResult.n/2 + 1);
+            sprintf(footerMsg, "Page (%d/%d)", currIndex / 2 + 1, accountResult.n / 2 + 1);
 
             BoxContent reportPage = {
                 .title = "Report",
@@ -1798,7 +1799,7 @@ static MenuIndex other_print_func() {
                     currIndex + 2 < accountResult.n ? LINE_DIALOGUE("%s↓ ...%s                         ", DIALOG_DOWN) : LINE_DEFAULT(" "),
                     LINE_DEFAULT(" "),
                     LINE_DIALOGUE("Back", DIALOG_BACK)}};
-                
+
             strcpy(reportPage.footer, footerMsg);
 
             reportResults = display_box_prompt(&reportPage, lastScroll);

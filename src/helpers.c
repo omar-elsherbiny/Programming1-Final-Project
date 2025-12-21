@@ -106,14 +106,14 @@ void account_merge_sort(Account accounts[], int l, int r, SortMethod method) {
     }
 }
 
-double day_withdrawals(DateDay day, char *id) {
+double day_withdrawals(DateDay day, char* id) {
     char fileName[N];
     strcpy(fileName, "files/accounts/");
-    strcat(fileName,id);
-    strcat(fileName,".txt");
-    FILE *accountFile = fopen(fileName, "r");
+    strcat(fileName, id);
+    strcat(fileName, ".txt");
+    FILE* accountFile = fopen(fileName, "r");
     if (accountFile == NULL) {
-        FILE *createAccountFile = fopen(fileName, "w");
+        FILE* createAccountFile = fopen(fileName, "w");
         fclose(createAccountFile);
         accountFile = fopen(fileName, "r");
     }
@@ -139,7 +139,7 @@ double day_withdrawals(DateDay day, char *id) {
 
 DateDay get_today() {
     time_t t = time(NULL);
-    struct tm *tm_info = localtime(&t);
+    struct tm* tm_info = localtime(&t);
     DateDay ret;
     ret.day = tm_info->tm_mday;
     ret.month = tm_info->tm_mon + 1;
@@ -152,7 +152,7 @@ DateDay get_today() {
 
 Date get_month() {
     time_t t = time(NULL);
-    struct tm *tm_info = localtime(&t);
+    struct tm* tm_info = localtime(&t);
     Date ret;
     ret.month = tm_info->tm_mon + 1;
     ret.year = tm_info->tm_year + 1900;
@@ -200,94 +200,93 @@ int month_diff(Date a, Date b) {
     return sm;
 }
 
-void debug(char *str) {
-    FILE *f = fopen("files/debug.txt", "a");
+void debug(char* str) {
+    FILE* f = fopen("files/debug.txt", "a");
     fprintf(f, "%s\n", str);
     fclose(f);
     return;
 }
 
-int valid_email(char *str){
+int valid_email(char* str) {
     char s[N];
-    strcpy(s,str);
-    int at=0,i;
-    if(s[0]=='@'||s[strlen(s)-1]=='@'){
+    strcpy(s, str);
+    int at = 0, i;
+    if (s[0] == '@' || s[strlen(s) - 1] == '@') {
         return 0;
     }
-    for(i=0;s[i];i++){
-        at+=(s[i]=='@');
-        if(i){
-            if(s[i]==s[i-1]&&s[i]=='.'){
+    for (i = 0; s[i]; i++) {
+        at += (s[i] == '@');
+        if (i) {
+            if (s[i] == s[i - 1] && s[i] == '.') {
                 return 0;
             }
         }
     }
-    if(at!=1){
+    if (at != 1) {
         return 0;
     }
-    char *a=strtok(s,"@"),*b=strtok(NULL,"@");
-    if(strlen(b)<5){
+    char *a = strtok(s, "@"), *b = strtok(NULL, "@");
+    if (strlen(b) < 5) {
         return 0;
     }
-    int dot=0;
-    for(i=0;b[i];i++){
-        dot+=(b[i]=='.');
-        if(i>1){
-            if(b[i]=='.'&&(b[i-1]=='.'||b[i-2]=='.')){
+    int dot = 0;
+    for (i = 0; b[i]; i++) {
+        dot += (b[i] == '.');
+        if (i > 1) {
+            if (b[i] == '.' && (b[i - 1] == '.' || b[i - 2] == '.')) {
+                return 0;
+            }
+        } else {
+            if (b[i] == '.') {
                 return 0;
             }
         }
-        else{
-            if(b[i]=='.'){
-                return 0;
-            }
-        }
     }
-    if(b[strlen(b)-2]=='.'){
+    if (b[strlen(b) - 2] == '.') {
         return 0;
     }
-    if(strlen(a)==0||dot==0){
+    if (strlen(a) == 0 || dot == 0) {
         return 0;
     }
-    if(a[0]=='.'||a[strlen(a)-1]=='.'||b[0]=='.'||b[strlen(b)-1]=='.'){
+    if (a[0] == '.' || a[strlen(a) - 1] == '.' || b[0] == '.' || b[strlen(b) - 1] == '.') {
         return 0;
     }
     return 1;
 }
 
-void save_transaction(char *id,double amount,TransactionType type,char *t){
-    char fileName[N],to[N];
-    DateDay now=get_today();
-    strcpy(to,t);
+void save_transaction(char* id, double amount, TransactionType type, char* t) {
+    char fileName[N], to[N];
+    DateDay now = get_today();
+    strcpy(to, t);
     strcpy(fileName, "files/accounts/");
-    strcat(fileName,id);
-    strcat(fileName,".txt");
-    FILE *accountFile = fopen(fileName, "r");
+    strcat(fileName, id);
+    strcat(fileName, ".txt");
+    FILE* accountFile = fopen(fileName, "r");
     if (accountFile == NULL) {
-        FILE *createAccountFile = fopen(fileName, "w");
+        FILE* createAccountFile = fopen(fileName, "w");
         fclose(createAccountFile);
         accountFile = fopen(fileName, "r");
     }
     fclose(accountFile);
     accountFile = fopen(fileName, "a");
-    if(type==WITHDRAW||type==DEPOSIT){
-        strcpy(to,"");
+    if (type == WITHDRAW || type == DEPOSIT) {
+        strcpy(to, "");
     }
-    fprintf(accountFile, "%s,%s,%.2f,%d-%d-%d %d:%s%d:%s%d %s%s%s\n", id, (type==WITHDRAW?"Withdraw":(type==DEPOSIT?"Deposit":"Send")), amount, now.day, now.month, now.year,now.hour-(12*(now.hour>12))+12*(now.hour==0),(now.minute<10?"0":""),now.minute,(now.second<10?"0":""),now.second,(now.hour>11?"pm":"am"),(type==TRANSFER?",":""),to);
+    fprintf(accountFile, "%s,%s,%.2f,%d-%d-%d %d:%s%d:%s%d %s%s%s\n", id, (type == WITHDRAW ? "Withdraw" : (type == DEPOSIT ? "Deposit" : "Send")), amount, now.day, now.month, now.year, now.hour - (12 * (now.hour > 12)) + 12 * (now.hour == 0), (now.minute < 10 ? "0" : ""), now.minute, (now.second < 10 ? "0" : ""), now.second, (now.hour > 11 ? "pm" : "am"), (type == TRANSFER ? "," : ""), to);
     fclose(accountFile);
-    if(type==TRANSFER){
+    if (type == TRANSFER) {
         strcpy(fileName, "files/accounts/");
-        strcat(fileName,to);
-        strcat(fileName,".txt");
+        strcat(fileName, to);
+        strcat(fileName, ".txt");
         accountFile = fopen(fileName, "r");
         if (accountFile == NULL) {
-            FILE *createAccountFile = fopen(fileName, "w");
+            FILE* createAccountFile = fopen(fileName, "w");
             fclose(createAccountFile);
             accountFile = fopen(fileName, "r");
         }
         fclose(accountFile);
         accountFile = fopen(fileName, "a");
-        fprintf(accountFile, "%s,Receive,%.2f,%d-%d-%d %d:%s%d:%s%d %s,%s\n", to, amount, now.day, now.month, now.year,now.hour-(12*(now.hour>12))+12*(now.hour==0),(now.minute<10?"0":""),now.minute,(now.second<10?"0":""),now.second,(now.hour>11?"pm":"am"),id);
+        fprintf(accountFile, "%s,Receive,%.2f,%d-%d-%d %d:%s%d:%s%d %s,%s\n", to, amount, now.day, now.month, now.year, now.hour - (12 * (now.hour > 12)) + 12 * (now.hour == 0), (now.minute < 10 ? "0" : ""), now.minute, (now.second < 10 ? "0" : ""), now.second, (now.hour > 11 ? "pm" : "am"), id);
         fclose(accountFile);
     }
 }

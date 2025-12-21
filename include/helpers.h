@@ -67,13 +67,13 @@ typedef struct {
 
 int cmp_accounts(Account a, Account b, SortMethod method);
 void account_merge_sort(Account accounts[], int l, int r, SortMethod method);
-double day_withdrawals(DateDay day, char *id);
+double day_withdrawals(DateDay day, char* id);
 DateDay get_today();
 Date get_month();
 int cmp_transactions(Transaction a, Transaction b);
 void transaction_merge_sort(Transaction transactions[], int l, int r);
 int month_diff(Date a, Date b);
-void debug(char *str);
-int valid_email(char *s);
-void save_transaction(char *id,double amount,TransactionType type,char *partyId);
+void debug(char* str);
+int valid_email(char* s);
+void save_transaction(char* id, double amount, TransactionType type, char* partyId);
 #endif
