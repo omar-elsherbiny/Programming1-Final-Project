@@ -11,6 +11,7 @@
 typedef enum {
     RETURN = -1,
     ENTRY = 0,
+    WELCOME,
     LOGIN,
     QUIT,
     COMMANDS,
@@ -95,7 +96,25 @@ static int print_confirm(char title[], char message[]) {
 // -
 
 // Menu functions definitions
-static MenuIndex entry_func() { return LOGIN; }
+static MenuIndex entry_func() { return WELCOME; }
+
+static MenuIndex welcome_func() {
+    BoxContent welcomePage = {
+        .title = "",
+        .content = {
+            LINE_DEFAULT(" "),
+            LINE_DEFAULT(FG_CYAN " ██╗       ██╗███████╗██╗      █████╗  █████╗ ███╗   ███╗███████╗"),
+            LINE_DEFAULT(FG_CYAN " ██║  ██╗  ██║██╔════╝██║     ██╔══██╗██╔══██╗████╗ ████║██╔════╝"),
+            LINE_DEFAULT(FG_CYAN " ╚██╗████╗██╔╝█████╗  ██║     ██║  ╚═╝██║  ██║██╔████╔██║█████╗  "),
+            LINE_DEFAULT(FG_CYAN "  ████╔═████║ ██╔══╝  ██║     ██║  ██╗██║  ██║██║╚██╔╝██║██╔══╝  "),
+            LINE_DEFAULT(FG_CYAN "  ╚██╔╝ ╚██╔╝ ███████╗███████╗╚█████╔╝╚█████╔╝██║ ╚═╝ ██║███████╗"),
+            LINE_DEFAULT(FG_CYAN "   ╚═╝   ╚═╝  ╚══════╝╚══════╝ ╚════╝  ╚════╝ ╚═╝     ╚═╝╚══════╝"),
+            LINE_DEFAULT(" "),}};
+
+    display_box_prompt(&welcomePage, 0);
+
+    return LOGIN;
+}
 
 static MenuIndex login_func() {
     enum DialogOptions { DIALOG_LOGIN,
@@ -218,7 +237,7 @@ static MenuIndex acc_new_func() {
                         LINE_TEXT("│ %s │", 25, 0, "", account.name),
                         LINE_DEFAULT("└────────────────────────────┘"),
                         LINE_DEFAULT("┌" FG_CYAN " E-mail " FG_RESET "────────────────────┐"),
-                        LINE_TEXT("│ %s │", 25, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`@.\b ", account.email),
+                        LINE_TEXT("│ %s │", 50, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`@.\b", account.email),
                         LINE_DEFAULT("└────────────────────────────┘"),
                         LINE_DEFAULT("┌" FG_CYAN " Balance " FG_RESET "───────────────────┐"),
                         LINE_TEXT("│ %s " FG_GREEN "($)" FG_RESET " │", 20, 0, ",.0123456789\b", temp),
@@ -653,7 +672,7 @@ static MenuIndex acc_modify_func() {
                             LINE_TEXT("│ %s │", 25, 0, "", account.name),
                             LINE_DEFAULT("└────────────────────────────┘"),
                             LINE_DEFAULT("┌" FG_CYAN " E-mail " FG_RESET "────────────────────┐"),
-                            LINE_TEXT("│ %s │", 25, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`@.\b ", account.email),
+                            LINE_TEXT("│ %s │", 25, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`@.\b", account.email),
                             LINE_DEFAULT("└────────────────────────────┘"),
                             LINE_DEFAULT("┌" FG_CYAN " Mobile " FG_RESET "────────────────────┐"),
                             LINE_TEXT("│ +20 %s │", 10, 0, "0123456789\b", account.mobile + 1),
@@ -1825,6 +1844,7 @@ void mainloop() {
     menuFunctions[ENTRY] = entry_func;
     menuFunctions[LOGIN] = login_func;
     menuFunctions[QUIT] = quit_func;
+    menuFunctions[WELCOME] = welcome_func;
 
     // Manage Accounts
     menuFunctions[COMMANDS] = commands_func;
