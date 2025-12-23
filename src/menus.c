@@ -48,15 +48,6 @@ static void free_result(PromptInputs* results) {
     results->textInputCount = 0;
 }
 
-static void remove_all_chars(char* str, char c) {
-    char *pRead = str, *pWrite = str;
-    while (*pRead) {
-        *pWrite = *pRead++;
-        pWrite += (*pWrite != c);
-    }
-    *pWrite = '\0';
-}
-
 static void print_status(Status status) {
     int lineCount;
     Line* statusMsgLines = MULTI_LINE_DEFAULT(status.message, (status.status == ERROR ? FG_RED : (status.status == WARNING ? FG_YELLOW : FG_GREEN)), 30, &lineCount);
@@ -126,10 +117,10 @@ static MenuIndex login_func() {
         .title = "Login",
         .content = {
             LINE_DEFAULT("┌ " FG_CYAN "Username " FG_RESET "──────────────────┐"),
-            LINE_TEXT("│ %s │", 25, 0, "", ""),
+            LINE_TEXT("│ %s │", 70, 0, "", ""),
             LINE_DEFAULT("└────────────────────────────┘"),
             LINE_DEFAULT("┌" FG_CYAN " Password " FG_RESET "──────────────────┐"),
-            LINE_TEXT("│ %s │", 50, 1, "", ""),
+            LINE_TEXT("│ %s │", 70, 1, "", ""),
             LINE_DEFAULT("└────────────────────────────┘"),
             LINE_DEFAULT(" "),
             LINE_DIALOGUE("Login", DIALOG_LOGIN),
@@ -242,10 +233,10 @@ static MenuIndex acc_new_func() {
                 LINE_TEXT("│ %s │", 10, 0, "0123456789\b", account.id),
                 LINE_DEFAULT("└────────────────────────────┘"),
                 LINE_DEFAULT("┌" FG_CYAN " Name " FG_RESET "──────────────────────┐"),
-                LINE_TEXT("│ %s │", 25, 0, "", account.name),
+                LINE_TEXT("│ %s │", 70, 0, "", account.name),
                 LINE_DEFAULT("└────────────────────────────┘"),
                 LINE_DEFAULT("┌" FG_CYAN " E-mail " FG_RESET "────────────────────┐"),
-                LINE_TEXT("│ %s │", 50, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`@.\b", account.email),
+                LINE_TEXT("│ %s │", 70, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`@.\b", account.email),
                 LINE_DEFAULT("└────────────────────────────┘"),
                 LINE_DEFAULT("┌" FG_CYAN " Balance " FG_RESET "───────────────────┐"),
                 LINE_TEXT("│ %s " FG_GREEN "($)" FG_RESET " │", 20, 0, ",.0123456789\b", temp),
@@ -271,9 +262,6 @@ static MenuIndex acc_new_func() {
         strcpy(account.email, results.textInputs[2]);
         account.balance = strtod(results.textInputs[3], NULL);
         sprintf(account.mobile, "0%s", results.textInputs[4]);
-
-        // Removing all commas from balance input field
-        remove_all_chars(results.textInputs[3], ',');
 
         // Check if any field is empty
         if ((strlen(results.textInputs[0]) == 0) ||
@@ -688,10 +676,10 @@ static MenuIndex acc_modify_func() {
                 .title = "Modify Account",
                 .content = {
                     LINE_DEFAULT("┌" FG_CYAN " Name " FG_RESET "──────────────────────┐"),
-                    LINE_TEXT("│ %s │", 25, 0, "", account.name),
+                    LINE_TEXT("│ %s │", 70, 0, "", account.name),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT("┌" FG_CYAN " E-mail " FG_RESET "────────────────────┐"),
-                    LINE_TEXT("│ %s │", 25, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`@.\b", account.email),
+                    LINE_TEXT("│ %s │", 70, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`@.\b", account.email),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT("┌" FG_CYAN " Mobile " FG_RESET "────────────────────┐"),
                     LINE_TEXT("│ +20 %s │", 10, 0, "0123456789\b", account.mobile + 1),
@@ -898,7 +886,7 @@ static MenuIndex acc_advancesearch_status() {
             .title = "Search Accounts",
             .content = {
                 LINE_DEFAULT("┌" FG_CYAN " Keyword " FG_RESET "───────────────────┐"),
-                LINE_TEXT("│ %s │", 25, 0, "", keywordText),
+                LINE_TEXT("│ %s │", 70, 0, "", keywordText),
                 LINE_DEFAULT("└────────────────────────────┘"),
                 LINE_DEFAULT(" "),
                 LINE_DIALOGUE(FG_CYAN "Find", DIALOG_FIND),
