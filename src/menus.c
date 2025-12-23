@@ -109,7 +109,8 @@ static MenuIndex welcome_func() {
             LINE_DEFAULT(FG_CYAN "  ████╔═████║ ██╔══╝  ██║     ██║  ██╗██║  ██║██║╚██╔╝██║██╔══╝  "),
             LINE_DEFAULT(FG_CYAN "  ╚██╔╝ ╚██╔╝ ███████╗███████╗╚█████╔╝╚█████╔╝██║ ╚═╝ ██║███████╗"),
             LINE_DEFAULT(FG_CYAN "   ╚═╝   ╚═╝  ╚══════╝╚══════╝ ╚════╝  ╚════╝ ╚═╝     ╚═╝╚══════╝"),
-            LINE_DEFAULT(" "),}};
+            LINE_DEFAULT(" "),
+        }};
 
     display_box_prompt(&welcomePage, 0);
 
@@ -123,15 +124,17 @@ static MenuIndex login_func() {
 
     BoxContent loginPage = {
         .title = "Login",
-        .content = {LINE_DEFAULT("┌ " FG_CYAN "Username " FG_RESET "──────────────────┐"),
-                    LINE_TEXT("│ %s │", 25, 0, "", ""),
-                    LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT("┌" FG_CYAN " Password " FG_RESET "──────────────────┐"),
-                    LINE_TEXT("│ %s │", 50, 1, "", ""),
-                    LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT(" "),
-                    LINE_DIALOGUE("Login", DIALOG_LOGIN),
-                    LINE_DIALOGUE(FG_RED "Quit", DIALOG_QUIT)}};
+        .content = {
+            LINE_DEFAULT("┌ " FG_CYAN "Username " FG_RESET "──────────────────┐"),
+            LINE_TEXT("│ %s │", 25, 0, "", ""),
+            LINE_DEFAULT("└────────────────────────────┘"),
+            LINE_DEFAULT("┌" FG_CYAN " Password " FG_RESET "──────────────────┐"),
+            LINE_TEXT("│ %s │", 50, 1, "", ""),
+            LINE_DEFAULT("└────────────────────────────┘"),
+            LINE_DEFAULT(" "),
+            LINE_DIALOGUE("Login", DIALOG_LOGIN),
+            LINE_DIALOGUE(FG_RED "Quit", DIALOG_QUIT),
+        }};
 
     PromptInputs results = display_box_prompt(&loginPage, 0);
 
@@ -169,9 +172,12 @@ static MenuIndex quit_func() {
 
     BoxContent quitPage = {
         .title = "Quit",
-        .content = {LINE_DEFAULT("Are you sure you want to quit?"),
-                    LINE_DEFAULT(" "), LINE_DIALOGUE(FG_RED "Yes", DIALOG_YES),
-                    LINE_DIALOGUE("No", DIALOG_NO)}};
+        .content = {
+            LINE_DEFAULT("Are you sure you want to quit?"),
+            LINE_DEFAULT(" "),
+            LINE_DIALOGUE(FG_RED "Yes", DIALOG_YES),
+            LINE_DIALOGUE("No", DIALOG_NO),
+        }};
 
     PromptInputs results = display_box_prompt(&quitPage, 1);
 
@@ -203,7 +209,8 @@ static MenuIndex commands_func() {
             LINE_DIALOGUE("  %sReport last 5 transactions%s", OTHER_REPORT),
             LINE_DIALOGUE("  %sPrint all Accounts%s", OTHER_PRINT),
             LINE_DEFAULT(" "),
-            LINE_DIALOGUE(FG_RED "Logout", LOGIN)}};
+            LINE_DIALOGUE(FG_RED "Logout", LOGIN),
+        }};
 
     int dialogueIndex = (int)prevIndex - (int)(ACC_NEW);  // depends on menu order in MenuIndex enum;
     dialogueIndex = (dialogueIndex < 0 ? 0 : dialogueIndex);
@@ -230,24 +237,26 @@ static MenuIndex acc_new_func() {
 
         BoxContent addAccountPage = {
             .title = "Add Account",
-            .content = {LINE_DEFAULT("┌" FG_CYAN " Account Number " FG_RESET "────────────┐"),
-                        LINE_TEXT("│ %s │", 10, 0, "0123456789\b", account.id),
-                        LINE_DEFAULT("└────────────────────────────┘"),
-                        LINE_DEFAULT("┌" FG_CYAN " Name " FG_RESET "──────────────────────┐"),
-                        LINE_TEXT("│ %s │", 25, 0, "", account.name),
-                        LINE_DEFAULT("└────────────────────────────┘"),
-                        LINE_DEFAULT("┌" FG_CYAN " E-mail " FG_RESET "────────────────────┐"),
-                        LINE_TEXT("│ %s │", 50, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`@.\b", account.email),
-                        LINE_DEFAULT("└────────────────────────────┘"),
-                        LINE_DEFAULT("┌" FG_CYAN " Balance " FG_RESET "───────────────────┐"),
-                        LINE_TEXT("│ %s " FG_GREEN "($)" FG_RESET " │", 20, 0, ",.0123456789\b", temp),
-                        LINE_DEFAULT("└────────────────────────────┘"),
-                        LINE_DEFAULT("┌" FG_CYAN " Mobile " FG_RESET "────────────────────┐"),
-                        LINE_TEXT("│ + 20 %s │", 10, 0, "0123456789\b", account.mobile + 1),
-                        LINE_DEFAULT("└────────────────────────────┘"),
-                        LINE_DEFAULT(" "),
-                        LINE_DIALOGUE(FG_CYAN "Add", DIALOG_ADD),
-                        LINE_DIALOGUE("Discard", DIALOG_DISCARD)}};
+            .content = {
+                LINE_DEFAULT("┌" FG_CYAN " Account Number " FG_RESET "────────────┐"),
+                LINE_TEXT("│ %s │", 10, 0, "0123456789\b", account.id),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT("┌" FG_CYAN " Name " FG_RESET "──────────────────────┐"),
+                LINE_TEXT("│ %s │", 25, 0, "", account.name),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT("┌" FG_CYAN " E-mail " FG_RESET "────────────────────┐"),
+                LINE_TEXT("│ %s │", 50, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`@.\b", account.email),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT("┌" FG_CYAN " Balance " FG_RESET "───────────────────┐"),
+                LINE_TEXT("│ %s " FG_GREEN "($)" FG_RESET " │", 20, 0, ",.0123456789\b", temp),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT("┌" FG_CYAN " Mobile " FG_RESET "────────────────────┐"),
+                LINE_TEXT("│ + 20 %s │", 10, 0, "0123456789\b", account.mobile + 1),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT(" "),
+                LINE_DIALOGUE(FG_CYAN "Add", DIALOG_ADD),
+                LINE_DIALOGUE("Discard", DIALOG_DISCARD),
+            }};
 
         PromptInputs results = display_box_prompt(&addAccountPage, 0);
 
@@ -419,12 +428,14 @@ static MenuIndex acc_delete_func() {
 
     BoxContent deletePage = {
         .title = FG_RED "Delete Account",
-        .content = {LINE_DEFAULT("┌" FG_RED " Delete Option " FG_RESET "─────────────┐"),
-                    LINE_DIALOGUE("│ %sOne with an Account number%s │", DIALOG_DEL_ONE),
-                    LINE_DIALOGUE("│ %sMultiple with a criteria%s   │", DIALOG_DEL_MULTI),
-                    LINE_DEFAULT("└────────────────────────────┘"),
-                    LINE_DEFAULT(" "),
-                    LINE_DIALOGUE("Back", DIALOG_DISCARD)}};
+        .content = {
+            LINE_DEFAULT("┌" FG_RED " Delete Option " FG_RESET "─────────────┐"),
+            LINE_DIALOGUE("│ %sOne with an Account number%s │", DIALOG_DEL_ONE),
+            LINE_DIALOGUE("│ %sMultiple with a criteria%s   │", DIALOG_DEL_MULTI),
+            LINE_DEFAULT("└────────────────────────────┘"),
+            LINE_DEFAULT(" "),
+            LINE_DIALOGUE("Back", DIALOG_DISCARD),
+        }};
 
     PromptInputs results = display_box_prompt(&deletePage, 2);
 
@@ -438,12 +449,14 @@ static MenuIndex acc_delete_func() {
         while (1) {
             BoxContent deleteOnePage = {
                 .title = FG_RED "Delete Account",
-                .content = {LINE_DEFAULT("┌" FG_RED " Account Number " FG_RESET "────────────┐"),
-                            LINE_TEXT("│ %s │", 10, 0, "1234567890\b", accNum),
-                            LINE_DEFAULT("└────────────────────────────┘"),
-                            LINE_DEFAULT(" "),
-                            LINE_DIALOGUE(FG_RED "Delete", DIALOG_YES),
-                            LINE_DIALOGUE("Discard", DIALOG_NO)}};
+                .content = {
+                    LINE_DEFAULT("┌" FG_RED " Account Number " FG_RESET "────────────┐"),
+                    LINE_TEXT("│ %s │", 10, 0, "1234567890\b", accNum),
+                    LINE_DEFAULT("└────────────────────────────┘"),
+                    LINE_DEFAULT(" "),
+                    LINE_DIALOGUE(FG_RED "Delete", DIALOG_YES),
+                    LINE_DIALOGUE("Discard", DIALOG_NO),
+                }};
 
             PromptInputs delOneResults = display_box_prompt(&deleteOnePage, 2);
 
@@ -503,7 +516,8 @@ static MenuIndex acc_delete_func() {
                     LINE_DIALOGUE("│ %sAccounts inactive 90 days%s  │", DIALOG_LESSTHAN3MONTH),
                     LINE_DEFAULT("└────────────────────────────┘"),
                     LINE_DEFAULT(" "),
-                    LINE_DIALOGUE("Back", DIALOG_DISCARD)}};
+                    LINE_DIALOGUE("Back", DIALOG_DISCARD),
+                }};
 
             PromptInputs delMultiChoice = display_box_prompt(&deleteMultiPage, 2);
 
@@ -519,18 +533,20 @@ static MenuIndex acc_delete_func() {
                 while (1) {
                     BoxContent deleteGivenDate = {
                         .title = FG_RED "Delete Account",
-                        .content = {LINE_DEFAULT("Delete all accounts created on"),
-                                    LINE_DEFAULT("the given date below"),
-                                    LINE_DEFAULT(" "),
-                                    LINE_DEFAULT("          ┌" FG_RED " Month " FG_RESET "─┐          "),
-                                    LINE_TEXT("          │ %s │          ", 2, 0, "1234567890\b", monthField),
-                                    LINE_DEFAULT("          └────────┘          "),
-                                    LINE_DEFAULT("          ┌" FG_RED " Year " FG_RESET "──┐          "),
-                                    LINE_TEXT("          │ %s │          ", 4, 0, "1234567890\b", yearField),
-                                    LINE_DEFAULT("          └────────┘          "),
-                                    LINE_DEFAULT(" "),
-                                    LINE_DIALOGUE(FG_RED "Delete", DIALOG_YES),
-                                    LINE_DIALOGUE("Discard", DIALOG_DISCARD)}};
+                        .content = {
+                            LINE_DEFAULT("Delete all accounts created on"),
+                            LINE_DEFAULT("the given date below"),
+                            LINE_DEFAULT(" "),
+                            LINE_DEFAULT("          ┌" FG_RED " Month " FG_RESET "─┐          "),
+                            LINE_TEXT("          │ %s │          ", 2, 0, "1234567890\b", monthField),
+                            LINE_DEFAULT("          └────────┘          "),
+                            LINE_DEFAULT("          ┌" FG_RED " Year " FG_RESET "──┐          "),
+                            LINE_TEXT("          │ %s │          ", 4, 0, "1234567890\b", yearField),
+                            LINE_DEFAULT("          └────────┘          "),
+                            LINE_DEFAULT(" "),
+                            LINE_DIALOGUE(FG_RED "Delete", DIALOG_YES),
+                            LINE_DIALOGUE("Discard", DIALOG_DISCARD),
+                        }};
 
                     PromptInputs delDateResults = display_box_prompt(&deleteGivenDate, 3);
 
@@ -613,12 +629,14 @@ static MenuIndex acc_modify_func() {
     while (1) {
         BoxContent modifyPage = {
             .title = "Modify Account",
-            .content = {LINE_DEFAULT("┌" FG_CYAN " Account Number " FG_RESET "────────────┐"),
-                        LINE_TEXT("│ %s │", 10, 0, "0123456789\b", accNum),
-                        LINE_DEFAULT("└────────────────────────────┘"),
-                        LINE_DEFAULT(" "),
-                        LINE_DIALOGUE(FG_CYAN "Find", DIALOG_PROCEED),
-                        LINE_DIALOGUE("Back", DIALOG_DISCARD)}};
+            .content = {
+                LINE_DEFAULT("┌" FG_CYAN " Account Number " FG_RESET "────────────┐"),
+                LINE_TEXT("│ %s │", 10, 0, "0123456789\b", accNum),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT(" "),
+                LINE_DIALOGUE(FG_CYAN "Find", DIALOG_PROCEED),
+                LINE_DIALOGUE("Back", DIALOG_DISCARD),
+            }};
 
         PromptInputs results = display_box_prompt(&modifyPage, 0);
 
@@ -668,18 +686,20 @@ static MenuIndex acc_modify_func() {
         while (1) {
             BoxContent modifySubPage = {
                 .title = "Modify Account",
-                .content = {LINE_DEFAULT("┌" FG_CYAN " Name " FG_RESET "──────────────────────┐"),
-                            LINE_TEXT("│ %s │", 25, 0, "", account.name),
-                            LINE_DEFAULT("└────────────────────────────┘"),
-                            LINE_DEFAULT("┌" FG_CYAN " E-mail " FG_RESET "────────────────────┐"),
-                            LINE_TEXT("│ %s │", 25, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`@.\b", account.email),
-                            LINE_DEFAULT("└────────────────────────────┘"),
-                            LINE_DEFAULT("┌" FG_CYAN " Mobile " FG_RESET "────────────────────┐"),
-                            LINE_TEXT("│ +20 %s │", 10, 0, "0123456789\b", account.mobile + 1),
-                            LINE_DEFAULT("└────────────────────────────┘"),
-                            LINE_DEFAULT(" "),
-                            LINE_DIALOGUE(FG_CYAN "Modify", DIALOG_YES),
-                            LINE_DIALOGUE("Discard", DIALOG_DISCARD)}};
+                .content = {
+                    LINE_DEFAULT("┌" FG_CYAN " Name " FG_RESET "──────────────────────┐"),
+                    LINE_TEXT("│ %s │", 25, 0, "", account.name),
+                    LINE_DEFAULT("└────────────────────────────┘"),
+                    LINE_DEFAULT("┌" FG_CYAN " E-mail " FG_RESET "────────────────────┐"),
+                    LINE_TEXT("│ %s │", 25, 0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!#$%&'*+-/=?^_{|}~`@.\b", account.email),
+                    LINE_DEFAULT("└────────────────────────────┘"),
+                    LINE_DEFAULT("┌" FG_CYAN " Mobile " FG_RESET "────────────────────┐"),
+                    LINE_TEXT("│ +20 %s │", 10, 0, "0123456789\b", account.mobile + 1),
+                    LINE_DEFAULT("└────────────────────────────┘"),
+                    LINE_DEFAULT(" "),
+                    LINE_DIALOGUE(FG_CYAN "Modify", DIALOG_YES),
+                    LINE_DIALOGUE("Discard", DIALOG_DISCARD),
+                }};
 
             PromptInputs results = display_box_prompt(&modifySubPage, 0);
 
@@ -852,7 +872,8 @@ static MenuIndex acc_search_func() {
                 LINE_DEFAULT(date1),
                 LINE_DEFAULT(status1),
                 LINE_DEFAULT(" "),
-                LINE_DIALOGUE("Back", DIALOG_BACK)}};
+                LINE_DIALOGUE("Back", DIALOG_BACK),
+            }};
         display_box_prompt(&accountDetails, 0);
 
         continue;
@@ -968,7 +989,8 @@ static MenuIndex acc_advancesearch_status() {
                         isSecond ? LINE_DEFAULT(status2) : LINE_DEFAULT(" "),
                         currIndex + 2 < searchResult.n ? LINE_DIALOGUE("%s↓ ...%s                         ", DIALOG_DOWN) : LINE_DEFAULT(" "),
                         LINE_DEFAULT(" "),
-                        LINE_DIALOGUE("Back", DIALOG_BACK)}};
+                        LINE_DIALOGUE("Back", DIALOG_BACK),
+                    }};
 
                 strcpy(advancedSearchResultsPage.footer, footerMsg);
                 advancedSearchResults = display_box_prompt(&advancedSearchResultsPage, lastScroll);
@@ -1047,7 +1069,6 @@ static MenuIndex acc_status_func() {
 
             while (1) {
                 BoxContent changeStatusPage = {
-
                     .title = "Account Status",
                     .content = {
                         LINE_DEFAULT(FG_CYAN "Account is currently active   " FG_RESET),
@@ -1671,7 +1692,8 @@ static MenuIndex other_report_func() {
             .title = "Report",
             .content = {
                 LINE_DEFAULT(FG_CYAN "(Most recent transaction first)"),
-                LINE_DEFAULT(" ")}};
+                LINE_DEFAULT(" "),
+            }};
 
         int l = 2;
         for (int i = 0; i < reportResult.n; i++) {
@@ -1707,18 +1729,20 @@ static MenuIndex other_print_func() {
     while (1) {
         BoxContent printPage = {
             .title = "Print Accounts",
-            .content = {LINE_DEFAULT("Choose how you want the       "),
-                        LINE_DEFAULT("printing be sorted by         "),
-                        LINE_DEFAULT(" "),
-                        LINE_DEFAULT("┌" FG_CYAN " Sort by " FG_RESET "───────────────────┐"),
-                        LINE_DIALOGUE("│ %s(x) Name%s                   │", DIALOG_NAME),
-                        LINE_DIALOGUE("│ %s( ) Balance%s                │", DIALOG_BALANCE),
-                        LINE_DIALOGUE("│ %s( ) Date Opened%s            │", DIALOG_DATE),
-                        LINE_DIALOGUE("│ %s( ) Status%s                 │", DIALOG_STATUS),
-                        LINE_DEFAULT("└────────────────────────────┘"),
-                        LINE_DEFAULT(" "),
-                        LINE_DIALOGUE(FG_CYAN "Print", DIALOG_PRINT),
-                        LINE_DIALOGUE("Back", DIALOG_BACK)}};
+            .content = {
+                LINE_DEFAULT("Choose how you want the       "),
+                LINE_DEFAULT("printing be sorted by         "),
+                LINE_DEFAULT(" "),
+                LINE_DEFAULT("┌" FG_CYAN " Sort by " FG_RESET "───────────────────┐"),
+                LINE_DIALOGUE("│ %s(x) Name%s                   │", DIALOG_NAME),
+                LINE_DIALOGUE("│ %s( ) Balance%s                │", DIALOG_BALANCE),
+                LINE_DIALOGUE("│ %s( ) Date Opened%s            │", DIALOG_DATE),
+                LINE_DIALOGUE("│ %s( ) Status%s                 │", DIALOG_STATUS),
+                LINE_DEFAULT("└────────────────────────────┘"),
+                LINE_DEFAULT(" "),
+                LINE_DIALOGUE(FG_CYAN "Print", DIALOG_PRINT),
+                LINE_DIALOGUE("Back", DIALOG_BACK),
+            }};
 
         // selection loop
         PromptInputs results = {.dialogueValue = selectedOption};
@@ -1817,7 +1841,8 @@ static MenuIndex other_print_func() {
                     isSecond ? LINE_DEFAULT(status2) : LINE_DEFAULT(" "),
                     currIndex + 2 < accountResult.n ? LINE_DIALOGUE("%s↓ ...%s                         ", DIALOG_DOWN) : LINE_DEFAULT(" "),
                     LINE_DEFAULT(" "),
-                    LINE_DIALOGUE("Back", DIALOG_BACK)}};
+                    LINE_DIALOGUE("Back", DIALOG_BACK),
+                }};
 
             strcpy(reportPage.footer, footerMsg);
 
