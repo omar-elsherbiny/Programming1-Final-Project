@@ -604,7 +604,7 @@ Status delete_multiple(DeleteMethod method, Date date) {
     int idx = 0;
     if (method == MONTH) {
         for (i = 0; i < accountCnt; i++) {
-            if (accounts[i].date.month == date.month && accounts[i].date.year == date.year) {
+            if (accounts[i].date.month == date.month && accounts[i].date.year == date.year && accounts[i].balance == 0) {
                 found++;
                 char fileName[N];
                 strcpy(fileName, "files/accounts/");
