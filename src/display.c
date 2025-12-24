@@ -377,7 +377,7 @@ PromptInputs display_box_prompt(BoxContent* box, int initialSelected) {
         while (1) {
             ch = _getch();
             if (ch == K_ESC) {
-                // exit(1);
+                exit(1);
             } else if (ch == K_ENTER)
                 return (PromptInputs){0};
         }
@@ -446,7 +446,7 @@ PromptInputs display_box_prompt(BoxContent* box, int initialSelected) {
                            strchr(currLine->data.options.validChars, (char)ch));
 
         if (ch == K_ESC) {
-            // exit(1);
+            exit(1);
         } else if (goToNext || ch == 0 || ch == 224) {
             int s = (goToNext ? K_DOWN : _getch());
             if (s == K_UP || s == K_DOWN) {

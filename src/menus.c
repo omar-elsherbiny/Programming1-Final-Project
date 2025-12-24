@@ -1650,7 +1650,7 @@ static MenuIndex other_report_func() {
             print_status(error);
             continue;
         }
-        // Validated account exits
+        // Validated account exists
 
         ReportResult reportResult = report(accNum);
         if (reportResult.status.status == ERROR) {
