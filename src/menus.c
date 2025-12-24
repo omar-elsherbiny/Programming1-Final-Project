@@ -101,7 +101,9 @@ static MenuIndex welcome_func() {
             LINE_DEFAULT(FG_CYAN "  ╚██╔╝ ╚██╔╝ ███████╗███████╗╚█████╔╝╚█████╔╝██║ ╚═╝ ██║███████╗"),
             LINE_DEFAULT(FG_CYAN "   ╚═╝   ╚═╝  ╚══════╝╚══════╝ ╚════╝  ╚════╝ ╚═╝     ╚═╝╚══════╝"),
             LINE_DEFAULT(" "),
-        }};
+        },
+        .footer = BLINK "Press Enter to Start",
+    };
 
     display_box_prompt(&welcomePage, 0);
 
