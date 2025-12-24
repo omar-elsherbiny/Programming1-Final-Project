@@ -581,7 +581,9 @@ static MenuIndex acc_delete_func() {
                         date.month = month,
                         date.year = year};
 
-                    int confirmResults = print_confirm("Confirm Delete", "Are you sure you want to proceed in the deletion");
+                    char confirmMsg[LINE_LENGTH];
+                    sprintf(confirmMsg, "Are you sure you want to delete all accounts from %d/%d",date.month, date.year);
+                    int confirmResults = print_confirm("Confirm Delete", confirmMsg);
 
                     if (confirmResults == 0) {
                         continue;
@@ -597,7 +599,7 @@ static MenuIndex acc_delete_func() {
             } else if (delMultiChoice.dialogueValue == DIALOG_LESSTHAN3MONTH) {
                 Date date;
 
-                int confirmResults = print_confirm("Confirm Delete", "Are you sure you want to proceed in the deletion");
+                int confirmResults = print_confirm("Confirm Delete", "Are you sure you want to delete all  accounts that were inactive for 90 days with a balance of $0");
 
                 if (confirmResults == 0) {
                     continue;

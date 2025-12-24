@@ -205,7 +205,7 @@ Status delete(char* id) {
     }
     if(accounts[idx].balance>0){
         ret.status = ERROR;
-        strcpy(ret.message, "Account balance not zero!");
+        strcpy(ret.message, "Account balance not zero $!");
         return ret;
     }
     // account found and file exists
