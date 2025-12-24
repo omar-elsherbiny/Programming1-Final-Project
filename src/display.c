@@ -372,9 +372,9 @@ PromptInputs display_box_prompt(BoxContent* box, int initialSelected) {
     // handle no selectables
     int ch;
     if (selectableCount == 0) {
-        update_console_size();  // recenters
-        display_draw_box(&resultBox);
         while (1) {
+            update_console_size();  // recenters
+            display_draw_box(&resultBox);
             ch = _getch();
             if (ch == K_ESC) {
                 exit(1);
