@@ -1,0 +1,546 @@
+\documentclass{article}
+\usepackage{booktabs}
+\usepackage{graphicx} 
+\usepackage{float}
+\usepackage{geometry}
+\usepackage{fontspec}
+\usepackage{subcaption}
+\usepackage{fancyvrb}
+\usepackage{setspace}
+
+\title{\fontsize{40}{48} \selectfont \vspace*{5cm} \textbf{Programming-I-Project Documentation}\par}
+\author{Omar El-Sherbiny (omar-elsherbiny) \\\\Yasseen Kamel (YasseenKamel)\\\\Zied Refeat (ZiedDev)\\\\Hesham Ahmed (realhesh)}
+
+\setmonofont{DejaVu Sans Mono} 
+\geometry{
+ a4paper,
+ total={170mm,257mm},
+ left=20mm,
+ top=20mm,
+}
+
+\begin{document}
+
+
+\begin{titlepage}
+    \centering
+    \vspace*{3cm} 
+
+    {\fontsize{35}{42} \selectfont \textbf{Programming-I-Project} \par}
+    \vspace{0.5cm}
+    {\fontsize{35}{42} \selectfont \textbf{Documentation} \par}
+
+    \vspace{3cm} 
+
+    {\Large Omar El-Sherbiny (omar-elsherbiny) \par}
+    \vspace{0.8cm}
+    
+    {\Large Yasseen Kamel (YasseenKamel) \par}
+    \vspace{0.8cm}
+    
+    {\Large Zied Refeat (ZiedDev) \par}
+    \vspace{0.8cm}
+    
+    {\Large Hesham Ahmed (realhesh) \par}
+
+    \vfill 
+
+    {\Large December 24, 2025 \par}
+    \vspace*{1cm} 
+\end{titlepage}
+
+
+\tableofcontents 
+\thispagestyle{empty} 
+\newpage
+
+
+\addcontentsline{toc}{section}{User Manual} 
+\newpage
+\thispagestyle{empty} 
+\begingroup
+    \centering 
+    \vspace*{5cm} 
+    
+    {\Huge \textbf{Bank Management System} \par}
+    
+    \vspace{1cm} 
+
+    {\fontsize{40}{48} \selectfont \textbf{User Manual} \par}
+    
+    \vfill 
+    
+    {\Large \par} 
+    \newpage
+\endgroup
+
+\section{Introduction}
+    This Project was done for Programming 1 Subject at the Faculty of Engineering, Alexandria University. This project is implemented in the C programming language and aims to create a bank management system. In this project, we implemented a custom terminal-based UI and the basic functionalities of an account system.
+
+\section{Navigation Controls}
+The system uses a custom interactive interface. Use the following keys to navigate:
+\begin{description}
+    \item[\textbf{UP / DOWN Arrows}] Move selection between menu options or input fields.
+    \item[\textbf{LEFT / RIGHT Arrows}] Scroll through overflowing input fields.
+    \item[\textbf{ENTER}] Select an option or confirm an input.
+    \item[\textbf{TAB}] Move to the next input field (in forms).
+    \item[\textbf{BACKSPACE}] Delete characters in text fields.
+    \item[\textbf{ESC}] Terminate the app.
+    
+\end{description}
+
+\section{Getting Started}
+\subsection{Login}
+\begin{enumerate}
+    \item Launch the application.
+    \item You will be prompted to enter a \textbf{Username} and \textbf{Password}.
+    \item Enter credentials matching those found in \texttt{files/users.txt}.
+    \item Select \textbf{Login} and press \textbf{ENTER}.
+\end{enumerate}
+\textit{Note: If the login fails, an error message "Username or password are incorrect" will appear.}
+
+\section{Account Management}
+Once logged in, navigate to \textbf{Manage Accounts} from the main menu to access these features.
+
+\subsection{Add a New Account}
+\begin{enumerate}
+    \item Select \textbf{Add a new Account}.
+    \item Fill in the required details:
+    \begin{itemize}
+        \item \textbf{Account Number:} Must be exactly 10 digits and unique.
+        \item \textbf{Name:} The name of the account holder.
+        \item \textbf{E-mail:} Must be a valid format (e.g., \texttt{user@domain.com}).
+        \item \textbf{Balance:} Initial deposit.
+        \item \textbf{Mobile:} Enter the 10-digit number (The system automatically adds the \texttt{+20} country code).
+    \end{itemize}
+    \item Select \textbf{Add} to save.
+\end{enumerate}
+
+\subsection{Delete an Account}
+\begin{enumerate}
+    \item Select \textbf{Delete an Existing Account}.
+    \item Choose a deletion method:
+    \begin{itemize}
+        \item \textbf{One with an Account number:} Enter the specific 10-digit ID to delete a single user.
+        \item \textbf{Multiple with a criteria:} 
+        \begin{itemize}
+            \item \textit{Accounts created on a Date:} Deletes all accounts created in a specific Month/Year.
+            \item \textit{Accounts inactive 90 days:} Deletes accounts with 0 balance that haven't been active for over 3 months.
+        \end{itemize}
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Modify an Account}
+\begin{enumerate}
+    \item Select \textbf{Modify an Existing Account}.
+    \item Enter the \textbf{Account Number} to find the user.
+    \item Update the \textbf{Name}, \textbf{E-mail}, or \textbf{Mobile} number.
+\end{enumerate}
+\textit{Note: You cannot change the Account ID or Balance via this menu.}
+
+\subsection{Search \& Status}
+\begin{itemize}
+    \item \textbf{Search an Account:} Enter an ID to view full details (Name, Balance, Status, Date Opened).
+    \item \textbf{Advanced Searching:} Search by \textbf{Name} (or part of a name). The system lists all matching accounts and you can press the UP/DOWN buttons to scroll through the accounts.
+    \item \textbf{Change Status:} Enter an Account ID to toggle its status between \textbf{Active} and \textbf{Inactive}. \textit{Inactive accounts cannot perform transactions.}
+\end{itemize}
+
+\section{Financial Transactions}
+navigate to \textbf{Transactions} from the main menu. All transactions require the account to be \textbf{Active}.
+
+\subsection{Withdraw}
+\begin{enumerate}
+    \item Enter the \textbf{Account Number}.
+    \item Enter the \textbf{Amount} to withdraw.
+    \begin{itemize}
+        \item \textbf{Limit:} Max \$10,000 per transaction.
+        \item \textbf{Daily Limit:} Max \$50,000 total withdrawals per day.
+        \item You cannot withdraw more than your current balance.
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Deposit}
+\begin{enumerate}
+    \item Enter the \textbf{Account Number}.
+    \item Enter the \textbf{Amount} to deposit.
+    \begin{itemize}
+        \item \textbf{Limit:} Max \$10,000 per transaction.
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Transfer}
+\begin{enumerate}
+    \item Enter the \textbf{Sender Account Number}.
+    \item Enter the \textbf{Receiver Account Number}.
+    \item Enter the \textbf{Transfer Amount}.
+\end{enumerate}
+\textit{Note: Both accounts must be valid and active, and the sender must have sufficient funds.}
+
+\section{Reports and Printing}
+navigate to \textbf{Others} from the main menu.
+
+\subsection{Report (Transaction History)}
+\begin{enumerate}
+    \item Enter an \textbf{Account Number}.
+    \item The system displays the \textbf{last 5 transactions}, including:
+    \begin{itemize}
+        \item Transaction Type (Withdraw, Deposit, Transfer Send/Receive).
+        \item Amount (Green for positive, Red for negative).
+        \item Date and Time.
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Print all Accounts}
+\begin{enumerate}
+    \item Choose a sorting method for the list:
+    \begin{itemize}
+        \item \textbf{Name:} Alphabetical (A-Z).
+        \item \textbf{Balance:} Highest balance first.
+        \item \textbf{Date Opened:} Oldest accounts first.
+        \item \textbf{Status:} Active accounts first.
+    \end{itemize}
+    \item The system displays a paginated list of all accounts. Use \textbf{UP/DOWN} buttons to scroll through pages.
+\end{enumerate}
+
+\addcontentsline{toc}{section}{Technical Documentation}
+\newpage
+\thispagestyle{empty}
+\begingroup
+    \centering 
+    \vspace*{5cm} 
+    
+    {\Huge \textbf{Bank Management System} \par}
+    
+    \vspace{1cm} 
+    
+    {\fontsize{40}{48} \selectfont \textbf{Technical Documentation} \par}
+    
+    \vfill 
+    
+    {\Large \par} 
+    \newpage
+\endgroup
+
+\section{Functionalities}
+\subsection{Overview}
+Multiple functionalities have been implemented to process the tasks presented in this project, such as logging-in,deleting an account, etc.
+In some parts of our code we needed to sort, and for this we have used the Merge Sort algorithm, and when we needed to search for a certain account among multiple accounts we have used the Binary search algorithm and we made sure that we are searching on an already sorted list of accounts.
+\subsection{Data Storing}
+The program stores data in text files, to be able to retrieve it on request.
+\begin{itemize}
+    \item \textbf{User Credentials}: Stored in \texttt{files/users.txt} for authentication.
+    \item \textbf{Account Data}: Stored in  \texttt{files/accounts.txt}, which stores account details (ID, name, balance, etc.) in a certain format.
+    \item \textbf{Transactions}: Each account has a dedicated file \newline(e.g., \texttt{files/accounts/9700000008.txt}) that stores all transaction history (Withdrawals, Deposits, Transfers) to generate reports.
+\end{itemize}
+
+\subsection{Core Logic Functions}
+The logic layer handles the main operations of the banking system, including account manipulation, validation, and transaction processing. The table below details the primary functions implemented in \texttt{functions.c}.
+\newpage
+\begin{table}[H]
+    \centering
+    \caption{Account Management Functions}
+    \label{tab:func_logic}
+    \begin{tabular}{|c|p{5cm}|p{6cm}|}
+        \toprule
+        \textbf{Name} & \textbf{Input} & \textbf{Output/Effect} \\
+        \midrule
+        login & username, password & Validates credentials against the users file. Returns SUCCESS or ERROR. \\ \hline
+        save & None & saves the arrays being processed into a file (usually after the user confirms the action they are doing) \\ \hline
+        load & None & Reads all accounts from the file into memory and sorts them by ID using Merge Sort. \\ \hline
+        add & Account struct & Validates email format and ID uniqueness, then adds the account to the system. \\ \hline
+        query & Account ID & Uses Binary Search to efficiently locate an account by its unique ID. \\ \hline
+        advanced\_search & Keyword (string) & Performs a substring search to find accounts matching the name. \\ \hline
+        withdraw / deposit & ID, Amount & Validates limits (e.g., max \$10k per transaction, \$50k daily limit for withdrawals) and updates the balance. \\ \hline
+        transfer & Sender ID, Receiver ID, Amount & Transfers funds between two accounts after validating balances and account status. \\ \hline
+        report & Account ID & Reads the specific account's transaction file, sorts transactions by date, and returns the 5 most recent ones. \\ \hline
+        delete & Account ID & Removes the account from the array and saves the data with the account removed if the user confirms the command and the program calls the save command \\ \hline
+        delete\_multiple & Method (Date/Inactivity), Date & deletes all accounts created on a specific date or inactive for over 3 months with 0 balance and saves into the text file if the user confirms. \\ \hline
+        change\_status & Account ID & changes the status of an account depending on a choice made by the user, also prevents the user setting his status to something he already has \\ \hline
+        print & Sort Method & Outputs all content of the accounts file based on a certain sorting method \\ \hline
+        modify & ID, Name, Mobile, Email & Validates the new email and updates the specific account's personal information in the text file. \\ 
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Algorithms and Validation}
+To ensure efficiency and data correctness, we implemented multiple input validations as needed and used algorithms in searching and sorting.
+
+\subsubsection{Sorting and Searching}
+\begin{itemize}
+    \item \textbf{Merge Sort}: Used to keep the account array sorted by ID after loading or adding new accounts. It is also used to sort accounts by Name, Balance, or Date for the \texttt{print} function, and to sort transactions chronologically for reports.
+    \item \textbf{Binary Search}: Implemented in the \texttt{query} function to find accounts by ID.
+\end{itemize}
+
+\section{Display}
+\subsection{Overview}
+    This file and its header is responsible for the UI functionality of our program. It uses ANSI codes for colorful display functionalities and handles UTF-8 for some characters necessary for the UI.\newline
+    the following table gives a rundown for our used structures and enums. 
+\subsection{Structs and Enums}
+We used C structs and Enums to organize and increase the readability of our code, the following table gives a rundown of our used structures and enums.
+\begin{table}[H]
+    \centering
+    \caption{Display Structures and Enums}
+    \label{tab:structs}
+    \begin{tabular}{|c|p{12cm}|}  
+        \toprule
+        \textbf{Name} & \textbf{Purpose} \\
+        \midrule
+        LineType  & Defines the linetypes, which are DEFAULT (the output text type), TEXT (the input text type) and DIALOGUE (the choice input type)  \\ \hline
+        TextOptions & Holds the properties of some text input field, including whether it should be hidden for passwords, max length for the input and the valid characters allowed for the field \\ \hline
+        Line & holds the text, type, the input value of a user choice if present, and the properties of an outputted text if present \\ \hline
+        BoxContent & Holds the lines to be processed to be later put in a text box and the box's footer and header \\ \hline
+        DrawnBox & Holds the processed text to be drawn on the screen \\ \hline
+        PromptInputs & Serves the interactivity functionality by holding the multiple lines of text - due to the presence of multiple fields in some boxes - a user enters and the number of fields in TEXT fields, or the prompted dialogue option in DIALOGUE fields \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Functions}
+    We used functions to construct our structs, perform some string processing,
+    The following table gives a rundown of our used functions, their inputs, and their outputs/effects.
+    \begin{table}[H] 
+    \centering
+    \caption{Display Functions}
+    \label{tab:functions}
+    \begin{tabular}{|c|p{6cm}|p{4cm}|} % 
+     
+        \toprule
+        \textbf{Name} & \textbf{Input} & \textbf{Output/effect} \\
+        \midrule
+        LINE\_DEFAULT  & string & constructs an output line with a given text   \\ \midrule
+        LINE\_DIALOGUE  & string and value integer & constructs a dialogue input line and puts its result in the integer argument     \\    \midrule
+        LINE\_TEXT  & string, maxlen integer,boolean hidden, validchars array & constructs a text input field and specifies its maxlength, whether its hidden or not, and the allowed characters  \\   \midrule
+        MULTI\_LINE\_DEFAULT  & string, width integer, pointer to lineCnt integer & constructs multiple lines for large text   \\   \midrule
+        display\_init  & nothing & initializes the terminal to use ANSI codes and UTF-8   \\ \midrule
+        display\_draw\_box  & instance of DrawnBox & renders a box on screen   \\   \midrule
+        display\_box\_prompt  & instance of BoxContent & displays an interactable box that takes input from the user that's entered in DrawnBox   \\   \midrule
+        display\_cleanup  & nothing & resets the terminal to normal state   \\  
+        
+        \bottomrule
+          
+    \end{tabular}
+\end{table}
+
+
+\addcontentsline{toc}{section}{Sample Run}
+\newpage
+\thispagestyle{empty}
+\begingroup
+    \centering
+    \vspace*{5cm} 
+    
+    {\Huge \textbf{Bank Management System} \par}
+    
+    \vspace{1cm} 
+
+    {\fontsize{40}{48} \selectfont \textbf{Sample Run} \par}
+    
+    \vfill 
+    
+    {\Large \today \par} 
+    \newpage
+\endgroup
+
+\begin{figure}[h!]
+    \centering
+    
+    \begin{subfigure}[b]{0.4\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{samplerun/WelcomeScreen.png}
+        \caption{Welcome Screen}
+        \label{fig:login}
+    \end{subfigure}
+    \hfill 
+    \begin{subfigure}[b]{0.4\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{samplerun/LoginScreen.png}
+        \caption{Login Screen}
+        \label{fig:menu}
+    \end{subfigure}
+
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{samplerun/CommandsPage.png}
+        \caption{Commands Page}
+        \label{fig:commands}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{samplerun/addAccount.png}
+        \caption{Add Account Form}
+        \label{fig:addAccount}
+    \end{subfigure}
+    
+    \vspace{0.5cm} 
+    
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{samplerun/deleteAccount.png}
+        \caption{Delete Account Menu}
+        \label{fig:delAccount}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{samplerun/deleteMultipleCriteria.png}
+        \caption{Delete by Criteria}
+        \label{fig:delMulti}
+    \end{subfigure}
+
+    \vspace{0.5cm} 
+
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{samplerun/noneFoundWithCriteria.png}
+        \caption{No Accounts Found}
+        \label{fig:noneFound}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{samplerun/deleteWithNumber.png}
+        \caption{Delete by Number}
+        \label{fig:delNum}
+    \end{subfigure}
+
+    \vspace{0.5cm} 
+    
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{samplerun/accountDeleteSuccess.png}
+        \caption{Deletion Success}
+        \label{fig:delSuccess}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{samplerun/modifyAccount.png}
+        \caption{Modify Account Input}
+        \label{fig:modAccount}
+    \end{subfigure}
+    
+    \caption{Account Management Operations}
+    \end{figure}
+    \clearpage
+    \begin{figure}[h!]
+    \centering
+
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{samplerun/modifyAccountFound.png}
+        \caption{Account Found for Modify}
+        \label{fig:modFound}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{samplerun/searchAccount.png}
+        \caption{Search Account Input}
+        \label{fig:search}
+    \end{subfigure}
+
+    \vspace{0.5cm}
+
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{samplerun/searchAccountFound.png}
+        \caption{Search Result}
+        \label{fig:searchFound}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{samplerun/advancedSearching.png}
+        \caption{Advanced Searching}
+        \label{fig:advSearch}
+    \end{subfigure}
+
+    \vspace{0.5cm}
+
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{samplerun/advancedSearchingResult.png}
+        \caption{Advanced Search Result}
+        \label{fig:advResult}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{samplerun/changeStatus.png}
+        \caption{Change Status Menu}
+        \label{fig:status}
+    \end{subfigure}
+
+    \vspace{0.5cm}
+
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{samplerun/changingToActive.png}
+        \caption{Set to Inactive}
+        \label{fig:inactive}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{samplerun/afterChangeStatus.png}
+        \caption{Status Changed}
+        \label{fig:statusChanged}
+    \end{subfigure}
+
+    \caption{Searching and Status Operations}
+\end{figure}
+\clearpage
+\begin{figure}[h!]
+    \centering
+
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{samplerun/deposit.png}
+        \caption{Deposit Transaction}
+        \label{fig:deposit}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{samplerun/transfer.png}
+        \caption{Transfer Transaction}
+        \label{fig:transfer}
+    \end{subfigure}
+
+    \vspace{0.5cm}
+
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{samplerun/transactionReport1.png}
+        \caption{Transaction Report (Pg 1)}
+        \label{fig:report1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{samplerun/transactionReport2.png}
+        \caption{Transaction Report (Pg 2)}
+        \label{fig:report2}
+    \end{subfigure}
+
+    \vspace{0.5cm}
+
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{samplerun/printAccounts.png}
+        \caption{Print Accounts Menu}
+        \label{fig:print}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{samplerun/printAccountsResult.png}
+        \caption{Print Result List}
+        \label{fig:printResult}
+    \end{subfigure}
+
+    \caption{Financial Transactions and Reporting}
+\end{figure}
+
+\end{document}
