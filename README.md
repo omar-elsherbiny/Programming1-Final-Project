@@ -66,6 +66,6 @@ The program uses a keyboard-driven interface for the TUI:
 
 | [![zieddev](https://github.com/zieddev.png?size=70)](https://github.com/zieddev) | [![realhesh](https://github.com/realhesh.png?size=70)](https://github.com/realhesh) | [![omar-elsherbiny](https://github.com/omar-elsherbiny.png?size=70)](https://github.com/omar-elsherbiny) | [![YasseenKamel](https://github.com/YasseenKamel.png?size=70)](https://github.com/YasseenKamel) |
 |:---:|:---:|:---:|:---:|
-| [zieddev](https://github.com/zieddev) | [realhesh](https://github.com/realhesh) | [omar-elsherbiny]((https://github.com/omar-elsherbiny)) | [YasseenKamel](https://github.com/YasseenKamel) |
+| [zieddev](https://github.com/zieddev) | [realhesh](https://github.com/realhesh) | [omar-elsherbiny](https://github.com/omar-elsherbiny) | [YasseenKamel](https://github.com/YasseenKamel) |
 
 
