@@ -7,7 +7,7 @@
 \usepackage{subcaption}
 \usepackage{fancyvrb}
 \usepackage{setspace}
-
+\usepackage{listings}
 \title{\fontsize{40}{48} \selectfont \vspace*{5cm} \textbf{Programming-I-Project Documentation}\par}
 \author{Omar El-Sherbiny (omar-elsherbiny) \\\\Yasseen Kamel (YasseenKamel)\\\\Zied Refeat (ZiedDev)\\\\Hesham Ahmed (realhesh)}
 
@@ -264,12 +264,11 @@ The logic layer handles the main operations of the banking system, including acc
 
 \subsection{Algorithms and Validation}
 To ensure efficiency and data correctness, we implemented multiple input validations as needed and used algorithms in searching and sorting.
-
-\subsubsection{Sorting and Searching}
 \begin{itemize}
     \item \textbf{Merge Sort}: Used to keep the account array sorted by ID after loading or adding new accounts. It is also used to sort accounts by Name, Balance, or Date for the \texttt{print} function, and to sort transactions chronologically for reports.
     \item \textbf{Binary Search}: Implemented in the \texttt{query} function to find accounts by ID.
 \end{itemize}
+
 
 \section{Display}
 \subsection{Overview}
@@ -337,14 +336,44 @@ We used C structs and Enums to organize and increase the readability of our code
     
     \vfill 
     
-    {\Large \today \par} 
+    {\Large \par} 
     \newpage
 \endgroup
-
+\section{Sample Files and Login Screen}
 \begin{figure}[h!]
     \centering
-    
-    \begin{subfigure}[b]{0.4\linewidth}
+    \begin{subfigure}[b]{1\linewidth}
+        \centering
+        \begin{lstlisting}
+9700000000,Michael Jones,m.jones@gmail.com,1000,01009700000,12-2007, active
+9700000001,John Roberto,j.roberto@outlook.com,100,01009700001,12-2008, active
+9700000002,Timothy Korman,t.korman@gmail.com,200,01009700002,12-2015, active
+9700000003,Michael Robert,michael@yahoo.com,300,01009700003,11-2008, inactive
+9700000004,Roberto Thomas,rob.thomas@gmail.com,400.5,01009700004,11-2015, active
+9700000005,David Roberts,david123@gmail.com,400.5,01009700005,10-2015, active
+9700000006,Daniel Graves,dgrave@outlook.com,450,01009700006,1-2020, inactive
+9700000007,Philipe Brian,p.brian@outlook.com,460,01009700007,2-2020, active
+9700000008,Adam Mark,ad.mark@gmail.com,350,0100970008,10-2015, inactive
+9700000009,James Adams,j.adams@gmail.com,250,01009700009,5-2017, active
+\end{lstlisting}
+\caption{sample accounts.txt}
+    \end{subfigure}
+    %\hfill
+    \begin{subfigure}[b]{1\linewidth}
+        \centering
+        \begin{lstlisting}
+aaa 123a
+bbb 123b
+ccc 123c
+ddd 123d
+eee 123e
+\end{lstlisting}
+\caption{sample users.txt}
+    \end{subfigure}
+\raggedright
+\section{Sample Run}
+\centering
+\begin{subfigure}[b]{0.4\linewidth}
         \centering
         \includegraphics[width=\linewidth]{samplerun/WelcomeScreen.png}
         \caption{Welcome Screen}
@@ -357,6 +386,12 @@ We used C structs and Enums to organize and increase the readability of our code
         \caption{Login Screen}
         \label{fig:menu}
     \end{subfigure}
+\caption{Files and Login}
+\end{figure}
+\newpage
+\begin{figure}[h!]
+    \centering
+    
 
     \begin{subfigure}[b]{0.45\linewidth}
         \centering
