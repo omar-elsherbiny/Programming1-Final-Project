@@ -480,16 +480,25 @@ static MenuIndex acc_delete_func() {
             }
 
             char* toDel = delOneResults.textInputs[0];
+            
+            Status deletionStatus = delete(toDel);
+            if (deletionStatus.status == ERROR) {
+                print_status(deletionStatus);
+                load();
+
+                free_result(&results);
+                continue;
+            }
 
             int confirmResults = print_confirm("Confirm Delete", "Are you sure you want to proceed in the deletion");
 
             if (confirmResults == 0) {
+                free_result(&results);
+                load();
                 continue;
             }
 
-            Status deletionStatus = delete(toDel);
             save();
-
             print_status(deletionStatus);
 
             free_result(&delOneResults);
