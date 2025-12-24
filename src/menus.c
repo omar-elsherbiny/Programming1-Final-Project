@@ -956,7 +956,7 @@ static MenuIndex acc_advancesearch_status() {
                     sprintf(status2, FG_CYAN "Status:      " FG_RESET "%s", acc2->status ? "active" : "inactive");
                 }
                 char footerMsg[LINE_LENGTH];
-                sprintf(footerMsg, "Page (%d/%d)", currIndex / 2 + 1, searchResult.n / 2 + 1);
+                sprintf(footerMsg, "Page (%d/%d)", (currIndex + 1) / 2 + 1, (searchResult.n + 1) / 2 );
 
                 BoxContent advancedSearchResultsPage = {
                     .title = "Search Accounts",
@@ -1807,7 +1807,7 @@ static MenuIndex other_print_func() {
             }
 
             char footerMsg[LINE_LENGTH];
-            sprintf(footerMsg, "Page (%d/%d)", currIndex / 2 + 1, accountResult.n / 2 + 1);
+            sprintf(footerMsg, "Page (%d/%d)", (currIndex + 1) / 2 + 1, (accountResult.n + 1) / 2);
 
             BoxContent reportPage = {
                 .title = "Report",
