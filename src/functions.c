@@ -183,7 +183,7 @@ Status add(Account acc) {
 }
 
 Status delete(char* id) {
-    int i, found = 0;
+    int i, found = 0,idx=0;
     Status ret;
     FILE* f = fopen("files/accounts.txt", "r");
     if (f == NULL) {
@@ -195,17 +195,17 @@ Status delete(char* id) {
     for (i = 0; i < accountCnt; i++) {
         if (!strcmp(id, accounts[i].id)) {
             found = 1;
-            char fileName[N];
-            strcpy(fileName, "files/accounts/");
-            strcat(fileName, id);
-            strcat(fileName, ".txt");
-            strcpy(filesDelete[filesDeleteCnt], fileName);
-            filesDeleteCnt++;
+            idx=i;
         }
     }
     if (!found) {
         ret.status = ERROR;
         strcpy(ret.message, "Account not found!");
+        return ret;
+    }
+    if(accounts[idx].balance>0){
+        ret.status = ERROR;
+        strcpy(ret.message, "Account balance not zero!");
         return ret;
     }
     // account found and file exists
@@ -214,6 +214,12 @@ Status delete(char* id) {
         if (!found) {
             if (!strcmp(id, accounts[i].id)) {
                 found = 1;
+                char fileName[N];
+                strcpy(fileName, "files/accounts/");
+                strcat(fileName, id);
+                strcat(fileName, ".txt");
+                strcpy(filesDelete[filesDeleteCnt], fileName);
+                filesDeleteCnt++;
             }
         } else {
             accounts[i - 1] = accounts[i];
@@ -630,7 +636,7 @@ Status delete_multiple(DeleteMethod method, Date date) {
         return ret;
     } else {
         for (i = 0; i < accountCnt; i++) {
-            if (month_diff(get_month(), accounts[i].date) > 3 && accounts[i].balance == 0) {
+            if (month_diff(get_month(), accounts[i].date) > 3 && accounts[i].balance == 0 && accounts[i].status == 0) {
                 char fileName[N];
                 strcpy(fileName, "files/accounts/");
                 strcat(fileName, accounts[i].id);
