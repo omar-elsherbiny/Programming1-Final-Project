@@ -619,7 +619,7 @@ Status delete_multiple(DeleteMethod method, Date date) {
         }
         if (!found) {
             ret.status = ERROR;
-            strcpy(ret.message, "No accounts created on that date!");
+            strcpy(ret.message, "No accounts created on that date with 0 balance!");
             return ret;
         }
         accountCnt = idx;
